@@ -1,0 +1,19 @@
+{
+  "name": "react-native-flux-desktop",
+  "version": "0.1.0",
+  "description": "Self-contained desktop render stack (winit + softbuffer + napi, Skia via @napi-rs/canvas). Compiled distribution.",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.65",
+    "react": "18.3.1",
+    "react-reconciler": "0.29.2",
+    "yoga-layout": "^2.0.1"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "*.node",
+    "dist/src"
+  ]
+}
