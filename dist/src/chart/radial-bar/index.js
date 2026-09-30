@@ -1,1 +1,82 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.RadialBarChart=RadialBarChart;const react_1=__importDefault(require("react")),components_1=require("../../components"),icon_1=require("../../ui/icon"),common_1=require("../core/common"),geometry_1=require("../core/geometry"),theme_1=require("../core/theme"),clamp01=e=>Math.max(0,Math.min(1,e));function RadialBarChart(e){const t=(0,common_1.useChartTheme)(),{data:l,nameField:n="name",valueField:o="value",max:r,maxField:a,size:i=260,color:c,centerTitle:u,legend:m=!0,animation:s=!0,animateDuration:_=900,formatter:p,style:d}=e,f=(0,common_1.useEnter)(s,_),h=l.length,y=l.map(e=>{const t=Number(e[o])||0,n=a&&null!=e[a]?Number(e[a]):null!=r?r:Math.max(1,...l.map(e=>Number(e[o])||0));return clamp01(t/(n||1))}),b=i/2,g=i/2,E=.2*i,x=h>0?Math.max(4,(i/2-6-E-4*(h-1))/h):0,[w,C]=react_1.default.useState(()=>{const e="undefined"!=typeof process?process.env.FLUX_CHART_HOVER:void 0;if(null!=e&&""!==e&&Number.isFinite(Number(e))){const t=Number(e);return t>=0&&t<h?t:null}return null}),S=l.map((e,l)=>{const n=i/2-6-l*(x+4)-x/2,o=(0,theme_1.seriesColor)(l,c,t),r=(e=>clamp01((f-(h<=1?0:e/h*.4))/.6))(l),a=(0,geometry_1.arcPath)(b,g,n,0,359.99),u=(0,geometry_1.arcPath)(b,g,n,0,360*y[l]*r),m=null!=w&&w!==l;return react_1.default.createElement(components_1.View,{key:l,style:{position:"absolute",left:0,top:0,width:i,height:i,opacity:m?.4:1}},react_1.default.createElement(icon_1.Icon,{path:a,vb:i,size:i,color:t.fillTrack,strokeWidth:x}),u?react_1.default.createElement(components_1.View,{style:{position:"absolute",left:0,top:0}},react_1.default.createElement(icon_1.Icon,{path:u,vb:i,size:i,color:o,strokeWidth:x})):null)}),z=null!=w?String(l[w][n]??""):u,M=null!=w?`${Math.round(100*y[w])}%`:null,v=null!=w?(0,theme_1.seriesColor)(w,c,t):t.label,T=null!=w?(e=>p?p(e):String(Math.round(e)))(Number(l[w][o])||0):null;return react_1.default.createElement(components_1.View,{style:[{flexDirection:"row",alignItems:"center",gap:t.labelSize+10},d]},react_1.default.createElement(components_1.View,{style:{width:i,height:i,position:"relative"}},S,null!=z?react_1.default.createElement(components_1.View,{style:{position:"absolute",left:0,top:0,width:i,height:i,alignItems:"center",justifyContent:"center",gap:2}},react_1.default.createElement(components_1.Text,{style:{fontSize:.085*i,color:t.label,opacity:.8},numberOfLines:1},z),M?react_1.default.createElement(components_1.Text,{style:{fontSize:.16*i,fontWeight:"700",color:v}},M):null,T?react_1.default.createElement(components_1.Text,{style:{fontSize:.075*i,color:t.label,opacity:.55}},T):null):null),m&&h>0?react_1.default.createElement(components_1.View,{style:{gap:8,minWidth:120}},l.map((e,l)=>{const o=(0,theme_1.seriesColor)(l,c,t),r=null!=w&&w!==l;return react_1.default.createElement(components_1.Pressable,{key:l,onMouseEnter:()=>C(l),onMouseLeave:()=>C(e=>e===l?null:e),style:{flexDirection:"row",alignItems:"center",gap:8,opacity:r?.45:1}},react_1.default.createElement(components_1.View,{style:{width:10,height:10,borderRadius:5,backgroundColor:o}}),react_1.default.createElement(components_1.Text,{style:{flex:1,fontSize:t.labelSize+1,color:t.label},numberOfLines:1},String(e[n]??"")),react_1.default.createElement(components_1.Text,{style:{fontSize:t.labelSize+1,color:(0,theme_1.withAlpha)(t.label,"CC"),fontWeight:"600"}},Math.round(100*y[l]),"%"))})):null)}exports.default=RadialBarChart;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RadialBarChart = RadialBarChart;
+// RadialBar：径向条形图。多条同心环，每环一个指标，弧长 ∵ value/max（满圈 360°）。
+// 环为弧描边 → Icon raw path（arcPath，round cap），方形画布 vb=size。入场各环扫角 0→目标、错峰。
+// 环的矩形命中难，高亮改由右侧图例行驱动：悬停某行 → 对应环提亮、其余淡出 + 中心显示该项统计。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const icon_1 = require("../../ui/icon");
+const common_1 = require("../core/common");
+const geometry_1 = require("../core/geometry");
+const theme_1 = require("../core/theme");
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
+function RadialBarChart(props) {
+    const theme = (0, common_1.useChartTheme)();
+    const { data, nameField = 'name', valueField = 'value', max, maxField, size = 260, color, centerTitle, legend = true, animation = true, animateDuration = 900, formatter, style, } = props;
+    const p = (0, common_1.useEnter)(animation, animateDuration);
+    const n = data.length;
+    const fmt = (v) => (formatter ? formatter(v) : String(Math.round(v)));
+    const fracs = data.map((d) => {
+        const v = Number(d[valueField]) || 0;
+        const m = maxField && d[maxField] != null ? Number(d[maxField]) : max != null ? max : Math.max(1, ...data.map((x) => Number(x[valueField]) || 0));
+        return clamp01(v / (m || 1));
+    });
+    const cx = size / 2;
+    const cy = size / 2;
+    const ringGap = 4;
+    const outerPad = 6;
+    const centerHole = size * 0.2; // 预留中心空洞放统计，避免文字压环
+    const stroke = n > 0 ? Math.max(4, (size / 2 - outerPad - centerHole - (n - 1) * ringGap) / n) : 0;
+    const [hover, setHover] = react_1.default.useState(() => {
+        const env = typeof process !== 'undefined' ? process.env.FLUX_CHART_HOVER : undefined;
+        if (env != null && env !== '' && Number.isFinite(Number(env))) {
+            const k = Number(env);
+            return k >= 0 && k < n ? k : null;
+        }
+        return null;
+    });
+    const stagger = 0.4;
+    const seg = (i) => {
+        const start = n <= 1 ? 0 : (i / n) * stagger;
+        return clamp01((p - start) / (1 - stagger));
+    };
+    const rings = data.map((d, i) => {
+        const rOuter = size / 2 - outerPad - i * (stroke + ringGap);
+        const r = rOuter - stroke / 2;
+        const col = (0, theme_1.seriesColor)(i, color, theme);
+        const t = seg(i);
+        const trackD = (0, geometry_1.arcPath)(cx, cy, r, 0, 359.99);
+        const valueD = (0, geometry_1.arcPath)(cx, cy, r, 0, 360 * fracs[i] * t);
+        const dim = hover != null && hover !== i;
+        return (react_1.default.createElement(components_1.View, { key: i, style: { position: 'absolute', left: 0, top: 0, width: size, height: size, opacity: dim ? 0.4 : 1 } },
+            react_1.default.createElement(icon_1.Icon, { path: trackD, vb: size, size: size, color: theme.fillTrack, strokeWidth: stroke }),
+            valueD ? (react_1.default.createElement(components_1.View, { style: { position: 'absolute', left: 0, top: 0 } },
+                react_1.default.createElement(icon_1.Icon, { path: valueD, vb: size, size: size, color: col, strokeWidth: stroke }))) : null));
+    });
+    const activeName = hover != null ? String(data[hover][nameField] ?? '') : centerTitle;
+    const activePct = hover != null ? `${Math.round(fracs[hover] * 100)}%` : null;
+    const activeCol = hover != null ? (0, theme_1.seriesColor)(hover, color, theme) : theme.label;
+    const activeVal = hover != null ? fmt(Number(data[hover][valueField]) || 0) : null;
+    return (react_1.default.createElement(components_1.View, { style: [{ flexDirection: 'row', alignItems: 'center', gap: theme.labelSize + 10 }, style] },
+        react_1.default.createElement(components_1.View, { style: { width: size, height: size, position: 'relative' } },
+            rings,
+            activeName != null ? (react_1.default.createElement(components_1.View, { style: { position: 'absolute', left: 0, top: 0, width: size, height: size, alignItems: 'center', justifyContent: 'center', gap: 2 } },
+                react_1.default.createElement(components_1.Text, { style: { fontSize: size * 0.085, color: theme.label, opacity: 0.8 }, numberOfLines: 1 }, activeName),
+                activePct ? react_1.default.createElement(components_1.Text, { style: { fontSize: size * 0.16, fontWeight: '700', color: activeCol } }, activePct) : null,
+                activeVal ? react_1.default.createElement(components_1.Text, { style: { fontSize: size * 0.075, color: theme.label, opacity: 0.55 } }, activeVal) : null)) : null),
+        legend && n > 0 ? (react_1.default.createElement(components_1.View, { style: { gap: 8, minWidth: 120 } }, data.map((d, i) => {
+            const col = (0, theme_1.seriesColor)(i, color, theme);
+            const dim = hover != null && hover !== i;
+            return (react_1.default.createElement(components_1.Pressable, { key: i, onMouseEnter: () => setHover(i), onMouseLeave: () => setHover((h) => (h === i ? null : h)), style: { flexDirection: 'row', alignItems: 'center', gap: 8, opacity: dim ? 0.45 : 1 } },
+                react_1.default.createElement(components_1.View, { style: { width: 10, height: 10, borderRadius: 5, backgroundColor: col } }),
+                react_1.default.createElement(components_1.Text, { style: { flex: 1, fontSize: theme.labelSize + 1, color: theme.label }, numberOfLines: 1 }, String(d[nameField] ?? '')),
+                react_1.default.createElement(components_1.Text, { style: { fontSize: theme.labelSize + 1, color: (0, theme_1.withAlpha)(theme.label, 'CC'), fontWeight: '600' } },
+                    Math.round(fracs[i] * 100),
+                    "%")));
+        }))) : null));
+}
+exports.default = RadialBarChart;

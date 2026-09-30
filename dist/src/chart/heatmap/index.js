@@ -1,1 +1,110 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.HeatmapChart=HeatmapChart;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme"),common_1=require("../core/common"),scale_1=require("../core/scale"),theme_2=require("../core/theme"),clamp01=e=>Math.max(0,Math.min(1,e)),PAD_L=64,PAD_R=16,PAD_T=10,PAD_B=28;function HeatmapChart(e){const t=(0,common_1.useChartTheme)(),{token:o}=(0,theme_1.useToken)(),{data:l,xField:a="x",yField:n="y",valueField:r="value",width:i,height:c=300,color:s,showValue:m=!1,cellGap:u=2,tooltip:_=!0,animation:p=!0,animateDuration:h=1e3,valueFormatter:d=scale_1.compactNumber,style:f}=e,[b,x]=(0,common_1.useMeasuredWidth)(i??520),y=i??b,g=(0,common_1.useEnter)(p,h),w=s??t.primary,D=[],A=[],S=(e,t)=>{let o=e.indexOf(t);return o<0&&(o=e.length,e.push(t)),o},T=[];let E=0;for(const e of l){const t=S(D,String(e[a])),o=S(A,String(e[n])),l=Number(e[r])||0;T.push({xi:t,yi:o,v:l}),l>E&&(E=l)}E=E||1;const P=Math.max(D.length,1),z=Math.max(A.length,1),M=Math.max(0,y-PAD_L-PAD_R),v=Math.max(0,c-PAD_T-PAD_B),L=M/P,k=v/z,C=P+z-2,[V,R]=react_1.default.useState(()=>{const e="undefined"!=typeof process?process.env.FLUX_CHART_HOVER:void 0;if(null!=e&&""!==e&&Number.isFinite(Number(e))){const t=Number(e);return t>=0&&t<T.length?t:null}return null}),O=_?V:null,q=null!=O?T[O]:null,F=e=>{const t=.08+e/E*.92;return Math.round(255*clamp01(t)).toString(16).padStart(2,"0")};return react_1.default.createElement(components_1.View,{style:[{width:y,gap:t.labelSize},f],onLayout:x},react_1.default.createElement(components_1.View,{style:{width:y,height:c,position:"relative"}},A.map((e,o)=>react_1.default.createElement(components_1.Text,{key:`y${o}`,numberOfLines:1,style:{position:"absolute",right:y-PAD_L+8,top:PAD_T+o*k+k/2-t.labelSize,width:PAD_L-12,textAlign:"right",fontSize:t.labelSize,color:t.label}},e)),D.map((e,o)=>react_1.default.createElement(components_1.Text,{key:`x${o}`,numberOfLines:1,style:{position:"absolute",left:PAD_L+o*L-L/2,top:PAD_T+v+8,width:L,textAlign:"center",fontSize:t.labelSize,color:t.label}},e)),T.map((e,l)=>{const a=clamp01((g*(C+1)-(e.xi+e.yi))/1);if(a<=0)return null;const n=O===l;return react_1.default.createElement(components_1.View,{key:l,style:{position:"absolute",left:PAD_L+e.xi*L+u/2,top:PAD_T+e.yi*k+u/2,width:Math.max(0,L-u),height:Math.max(0,k-u),borderRadius:o.borderRadiusSM,opacity:null==O||n?a:.55*a,borderWidth:n?1.5:0,borderColor:t.ink,backgroundColor:(0,theme_2.withAlpha)(w,F(e.v)),alignItems:"center",justifyContent:"center"}},m?react_1.default.createElement(components_1.Text,{style:{fontSize:t.labelSize,color:e.v/E>.55?o.colorTextBase??"#000":t.label}},d(e.v)):null)}),q?react_1.default.createElement(components_1.View,{style:{position:"absolute",left:Math.max(4,Math.min(y-150-4,PAD_L+q.xi*L+L/2-75)),top:Math.max(4,PAD_T+q.yi*k-52),width:150,backgroundColor:t.tooltipBg,borderRadius:6,padding:8,gap:4}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.labelSize,color:t.tooltipText,opacity:.7},numberOfLines:1},`${A[q.yi]} · ${D[q.xi]}`),react_1.default.createElement(components_1.View,{style:{flexDirection:"row",alignItems:"center",gap:6}},react_1.default.createElement(components_1.View,{style:{width:8,height:8,borderRadius:4,backgroundColor:(0,theme_2.withAlpha)(w,F(q.v))}}),react_1.default.createElement(components_1.Text,{style:{flex:1,fontSize:t.labelSize,color:t.tooltipText},numberOfLines:1},"数值"),react_1.default.createElement(components_1.Text,{style:{fontSize:t.labelSize,color:t.tooltipText,fontWeight:"600"}},d(q.v)))):null,_?T.map((e,t)=>react_1.default.createElement(components_1.Pressable,{key:`hit${t}`,onMouseEnter:()=>R(t),onMouseLeave:()=>R(e=>e===t?null:e),style:{position:"absolute",left:PAD_L+e.xi*L,top:PAD_T+e.yi*k,width:L,height:k}})):null),react_1.default.createElement(components_1.View,{style:{flexDirection:"row",alignItems:"center",gap:o.marginXS}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.labelSize,color:t.label}},"低"),react_1.default.createElement(components_1.View,{style:{flexDirection:"row"}},[.1,.25,.4,.55,.7,.85,1].map((e,t)=>react_1.default.createElement(components_1.View,{key:t,style:{width:18,height:10,backgroundColor:(0,theme_2.withAlpha)(w,F(e*E))}}))),react_1.default.createElement(components_1.Text,{style:{fontSize:t.labelSize,color:t.label}},"高")))}exports.default=HeatmapChart;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.HeatmapChart = HeatmapChart;
+// Heatmap：热力图。x/y 两种类目构成网格，单元色块以「基准色 + alpha 强度」映射数值（本管线无逐像素渐变，用 alpha 阶梯）。
+// 入场：单元格按对角线 (xi+yi) 错峰淡入。附最低/最高色阶图例。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+const common_1 = require("../core/common");
+const scale_1 = require("../core/scale");
+const theme_2 = require("../core/theme");
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
+const PAD_L = 64;
+const PAD_R = 16;
+const PAD_T = 10;
+const PAD_B = 28;
+function HeatmapChart(props) {
+    const theme = (0, common_1.useChartTheme)();
+    const { token } = (0, theme_1.useToken)();
+    const { data, xField = 'x', yField = 'y', valueField = 'value', width, height = 300, color, showValue = false, cellGap = 2, tooltip = true, animation = true, animateDuration = 1000, valueFormatter = scale_1.compactNumber, style, } = props;
+    const [measured, onLayout] = (0, common_1.useMeasuredWidth)(width ?? 520);
+    const w = width ?? measured;
+    const p = (0, common_1.useEnter)(animation, animateDuration);
+    const base = color ?? theme.primary;
+    const xs = [];
+    const ys = [];
+    const idx = (arr, v) => {
+        let i = arr.indexOf(v);
+        if (i < 0) {
+            i = arr.length;
+            arr.push(v);
+        }
+        return i;
+    };
+    const cells = [];
+    let maxV = 0;
+    for (const row of data) {
+        const xi = idx(xs, String(row[xField]));
+        const yi = idx(ys, String(row[yField]));
+        const v = Number(row[valueField]) || 0;
+        cells.push({ xi, yi, v });
+        if (v > maxV)
+            maxV = v;
+    }
+    maxV = maxV || 1;
+    const nx = Math.max(xs.length, 1);
+    const ny = Math.max(ys.length, 1);
+    const gridW = Math.max(0, w - PAD_L - PAD_R);
+    const gridH = Math.max(0, height - PAD_T - PAD_B);
+    const cw = gridW / nx;
+    const ch = gridH / ny;
+    const diagMax = nx + ny - 2;
+    // 悬浮单元格（线性 index）：抓帧可由 FLUX_CHART_HOVER 预设。
+    const [hover, setHover] = react_1.default.useState(() => {
+        const env = typeof process !== 'undefined' ? process.env.FLUX_CHART_HOVER : undefined;
+        if (env != null && env !== '' && Number.isFinite(Number(env))) {
+            const k = Number(env);
+            return k >= 0 && k < cells.length ? k : null;
+        }
+        return null;
+    });
+    const activeIndex = tooltip ? hover : null;
+    const TIP_W = 150;
+    const active = activeIndex != null ? cells[activeIndex] : null;
+    const alphaHex = (v) => {
+        const a = 0.08 + 0.92 * (v / maxV);
+        return Math.round(clamp01(a) * 255).toString(16).padStart(2, '0');
+    };
+    return (react_1.default.createElement(components_1.View, { style: [{ width: w, gap: theme.labelSize }, style], onLayout: onLayout },
+        react_1.default.createElement(components_1.View, { style: { width: w, height, position: 'relative' } },
+            ys.map((c, yi) => (react_1.default.createElement(components_1.Text, { key: `y${yi}`, numberOfLines: 1, style: { position: 'absolute', right: w - PAD_L + 8, top: PAD_T + yi * ch + ch / 2 - theme.labelSize, width: PAD_L - 12, textAlign: 'right', fontSize: theme.labelSize, color: theme.label } }, c))),
+            xs.map((c, xi) => (react_1.default.createElement(components_1.Text, { key: `x${xi}`, numberOfLines: 1, style: { position: 'absolute', left: PAD_L + xi * cw - cw / 2, top: PAD_T + gridH + 8, width: cw, textAlign: 'center', fontSize: theme.labelSize, color: theme.label } }, c))),
+            cells.map((cell, i) => {
+                const t = clamp01((p * (diagMax + 1) - (cell.xi + cell.yi)) / 1);
+                if (t <= 0)
+                    return null;
+                const isActive = activeIndex === i;
+                return (react_1.default.createElement(components_1.View, { key: i, style: {
+                        position: 'absolute',
+                        left: PAD_L + cell.xi * cw + cellGap / 2,
+                        top: PAD_T + cell.yi * ch + cellGap / 2,
+                        width: Math.max(0, cw - cellGap),
+                        height: Math.max(0, ch - cellGap),
+                        borderRadius: token.borderRadiusSM,
+                        opacity: activeIndex == null || isActive ? t : t * 0.55,
+                        borderWidth: isActive ? 1.5 : 0,
+                        borderColor: theme.ink,
+                        backgroundColor: (0, theme_2.withAlpha)(base, alphaHex(cell.v)),
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    } }, showValue ? react_1.default.createElement(components_1.Text, { style: { fontSize: theme.labelSize, color: cell.v / maxV > 0.55 ? token.colorTextBase ?? '#000' : theme.label } }, valueFormatter(cell.v)) : null));
+            }),
+            active ? (react_1.default.createElement(components_1.View, { style: { position: 'absolute', left: Math.max(4, Math.min(w - TIP_W - 4, PAD_L + active.xi * cw + cw / 2 - TIP_W / 2)), top: Math.max(4, PAD_T + active.yi * ch - 52), width: TIP_W, backgroundColor: theme.tooltipBg, borderRadius: 6, padding: 8, gap: 4 } },
+                react_1.default.createElement(components_1.Text, { style: { fontSize: theme.labelSize, color: theme.tooltipText, opacity: 0.7 }, numberOfLines: 1 }, `${ys[active.yi]} · ${xs[active.xi]}`),
+                react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', alignItems: 'center', gap: 6 } },
+                    react_1.default.createElement(components_1.View, { style: { width: 8, height: 8, borderRadius: 4, backgroundColor: (0, theme_2.withAlpha)(base, alphaHex(active.v)) } }),
+                    react_1.default.createElement(components_1.Text, { style: { flex: 1, fontSize: theme.labelSize, color: theme.tooltipText }, numberOfLines: 1 }, "\u6570\u503C"),
+                    react_1.default.createElement(components_1.Text, { style: { fontSize: theme.labelSize, color: theme.tooltipText, fontWeight: '600' } }, valueFormatter(active.v))))) : null,
+            tooltip
+                ? cells.map((cell, i) => (react_1.default.createElement(components_1.Pressable, { key: `hit${i}`, onMouseEnter: () => setHover(i), onMouseLeave: () => setHover((h) => (h === i ? null : h)), style: { position: 'absolute', left: PAD_L + cell.xi * cw, top: PAD_T + cell.yi * ch, width: cw, height: ch } })))
+                : null),
+        react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', alignItems: 'center', gap: token.marginXS } },
+            react_1.default.createElement(components_1.Text, { style: { fontSize: theme.labelSize, color: theme.label } }, "\u4F4E"),
+            react_1.default.createElement(components_1.View, { style: { flexDirection: 'row' } }, [0.1, 0.25, 0.4, 0.55, 0.7, 0.85, 1].map((f, i) => (react_1.default.createElement(components_1.View, { key: i, style: { width: 18, height: 10, backgroundColor: (0, theme_2.withAlpha)(base, alphaHex(f * maxV)) } })))),
+            react_1.default.createElement(components_1.Text, { style: { fontSize: theme.labelSize, color: theme.label } }, "\u9AD8"))));
+}
+exports.default = HeatmapChart;

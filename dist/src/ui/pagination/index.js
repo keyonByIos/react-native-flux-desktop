@@ -1,1 +1,114 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.Pagination=Pagination;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme"),icon_1=require("../icon");function pageItems(e,t){if(t<=7)return Array.from({length:t},(e,t)=>t+1);const r=[1],n=Math.max(2,e-1),o=Math.min(t-1,e+1);n>2&&r.push("jump-prev");for(let e=n;e<=o;e++)r.push(e);return o<t-1&&r.push("jump-next"),r.push(t),r}function Cell(e){const{box:t,font:r,token:n,active:o,disabled:a,ellipsis:l,bordered:i=!0,onPress:c,render:s}=e,[u,d]=react_1.default.useState(!1),m={minWidth:t,height:t,borderRadius:n.borderRadius,borderWidth:i?n.lineWidth:0,borderColor:o?n.colorPrimary:n.colorBorderSecondary,alignItems:"center",justifyContent:"center",marginHorizontal:n.marginXXS/2,paddingHorizontal:n.paddingXXS,backgroundColor:n.colorBgContainer},f=s(l?n.colorTextTertiary:a?n.colorTextQuaternary:o||u?n.colorPrimary:n.colorText);return!c||a?react_1.default.createElement(components_1.View,{style:[m,{cursor:a?"not-allowed":"default"}]},f):react_1.default.createElement(components_1.Pressable,{onPress:c,onMouseEnter:()=>d(!0),onMouseLeave:()=>d(!1),style:m},f)}function Pagination(e){const{token:t}=(0,theme_1.useToken)(),{current:r,defaultCurrent:n=1,total:o=0,pageSize:a,defaultPageSize:l=10,onChange:i,simple:c,disabled:s,size:u="default",hideOnSinglePage:d,showTotal:m,itemRender:f,style:_}=e,[p,g]=react_1.default.useState(r??n),h=r??p,x=a??l,y=Math.max(1,Math.ceil(o/x));function S(e){if(s)return;const t=Math.min(Math.max(1,e),y);t!==h&&(void 0===r&&g(t),i&&i(t,x))}if(d&&y<=1)return react_1.default.createElement(components_1.View,null);const b="small"===u?t.controlHeightSM:t.controlHeight,E="small"===u?t.fontSizeSM:t.fontSize,P=m?react_1.default.createElement(components_1.Text,{style:{fontSize:E,color:t.colorTextSecondary,marginHorizontal:t.marginXS}},m(o,[Math.max(0,(h-1)*x+1),Math.min(h*x,o)])):null,z=(e,r,n,o)=>{if(!f)return n;const a=f(e,r,n);return react_1.default.createElement(components_1.Pressable,{key:r+e,disabled:s,onPress:o,style:{marginHorizontal:t.marginXXS/2}},react_1.default.createElement(react_1.default.Fragment,null,a))},v=e=>{const r="prev"===e?h-1:h+1,n=s||("prev"===e?h<=1:h>=y),o=react_1.default.createElement(Cell,{key:e,box:b,font:E,token:t,disabled:s,onPress:n?void 0:()=>S(r),render:r=>react_1.default.createElement(icon_1.Icon,{name:"prev"===e?"left":"right",size:E,color:n?t.colorTextQuaternary:r,strokeWidth:2.5})});return z(r,e,o,n?void 0:()=>S(r))};return c?react_1.default.createElement(components_1.View,{style:[{flexDirection:"row",alignItems:"center"},_]},P,v("prev"),react_1.default.createElement(components_1.Text,{style:{fontSize:E,color:t.colorText,marginHorizontal:t.marginXS}},h," / ",y),v("next")):react_1.default.createElement(components_1.View,{style:[{flexDirection:"row",alignItems:"center",flexWrap:"wrap"},_]},P,v("prev"),pageItems(h,y).map((e,r)=>"number"==typeof e?react_1.default.createElement(react_1.default.Fragment,{key:"p"+e},z(e,"page",react_1.default.createElement(Cell,{box:b,font:E,token:t,active:e===h,disabled:s,onPress:()=>S(e),render:t=>react_1.default.createElement(components_1.Text,{style:{fontSize:E,fontWeight:e===h?"600":"400",color:t}},e)}),()=>S(e))):react_1.default.createElement(react_1.default.Fragment,{key:"e"+r},z(0,e,react_1.default.createElement(Cell,{box:b,font:E,token:t,ellipsis:!0,bordered:!1,render:e=>react_1.default.createElement(components_1.Text,{style:{fontSize:E,color:e,letterSpacing:1}},"•••")})))),v("next"))}exports.default=Pagination;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Pagination = Pagination;
+// Pagination：页码导航。对齐 antd v5 —— showTotal / size / disabled / itemRender / onChange(page, pageSize)。
+// 省略号用 jump-prev/jump-next 标记，供 itemRender 定制；当前页主色描边 + 主色字，悬停页码变主色。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+const icon_1 = require("../icon");
+/** 生成页码序列：1 … 4 5 [6] 7 8 … N（当前页居中，两端固定，中间省略） */
+function pageItems(current, pages) {
+    if (pages <= 7)
+        return Array.from({ length: pages }, (_, i) => i + 1);
+    const out = [1];
+    const left = Math.max(2, current - 1);
+    const right = Math.min(pages - 1, current + 1);
+    if (left > 2)
+        out.push('jump-prev');
+    for (let i = left; i <= right; i++)
+        out.push(i);
+    if (right < pages - 1)
+        out.push('jump-next');
+    out.push(pages);
+    return out;
+}
+/** 单个可悬停单元：数字 / 箭头 / 省略号共用。悬停仅对可点（非禁用）单元生效。 */
+function Cell(props) {
+    const { box, font, token, active, disabled, ellipsis, bordered = true, onPress, render } = props;
+    const [hover, setHover] = react_1.default.useState(false);
+    const style = {
+        minWidth: box,
+        height: box,
+        borderRadius: token.borderRadius,
+        borderWidth: bordered ? token.lineWidth : 0,
+        borderColor: active ? token.colorPrimary : token.colorBorderSecondary,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginHorizontal: token.marginXXS / 2,
+        paddingHorizontal: token.paddingXXS,
+        backgroundColor: token.colorBgContainer,
+    };
+    const color = ellipsis
+        ? token.colorTextTertiary
+        : disabled
+            ? token.colorTextQuaternary
+            : active
+                ? token.colorPrimary
+                : hover
+                    ? token.colorPrimary
+                    : token.colorText;
+    const content = render(color);
+    if (!onPress || disabled) {
+        // 禁用单元（如首尾页的prev/next）以普通 View 渲染无 press 处理，findCursor 会落到 default；
+        // 显式补 not-allowed，与「禁用即不可点」的其余控件一致。省略号（无 onPress 且非禁用）保持 default。
+        return react_1.default.createElement(components_1.View, { style: [style, { cursor: disabled ? 'not-allowed' : 'default' }] }, content);
+    }
+    return (react_1.default.createElement(components_1.Pressable, { onPress: onPress, onMouseEnter: () => setHover(true), onMouseLeave: () => setHover(false), style: style }, content));
+}
+function Pagination(props) {
+    const { token } = (0, theme_1.useToken)();
+    const { current, defaultCurrent = 1, total = 0, pageSize, defaultPageSize = 10, onChange, simple, disabled, size = 'default', hideOnSinglePage, showTotal, itemRender, style, } = props;
+    const [inner, setInner] = react_1.default.useState(current ?? defaultCurrent);
+    const active = current ?? inner;
+    const ps = pageSize ?? defaultPageSize;
+    const pages = Math.max(1, Math.ceil(total / ps));
+    function go(p) {
+        if (disabled)
+            return;
+        const np = Math.min(Math.max(1, p), pages);
+        if (np === active)
+            return;
+        if (current === undefined)
+            setInner(np);
+        onChange && onChange(np, ps);
+    }
+    if (hideOnSinglePage && pages <= 1)
+        return react_1.default.createElement(components_1.View, null);
+    const box = size === 'small' ? token.controlHeightSM : token.controlHeight;
+    const font = size === 'small' ? token.fontSizeSM : token.fontSize;
+    const totalNode = showTotal ? (react_1.default.createElement(components_1.Text, { style: { fontSize: font, color: token.colorTextSecondary, marginHorizontal: token.marginXS } }, showTotal(total, [Math.max(0, (active - 1) * ps + 1), Math.min(active * ps, total)]))) : null;
+    // itemRender 存在时，用其产出的自定义节点替换默认单元，外层再包一层可点容器
+    const wrap = (page, type, defaultNode, onPress) => {
+        if (!itemRender)
+            return defaultNode;
+        const custom = itemRender(page, type, defaultNode);
+        return (react_1.default.createElement(components_1.Pressable, { key: type + page, disabled: disabled, onPress: onPress, style: { marginHorizontal: token.marginXXS / 2 } },
+            react_1.default.createElement(react_1.default.Fragment, null, custom)));
+    };
+    const arrow = (dir) => {
+        const p = dir === 'prev' ? active - 1 : active + 1;
+        const dis = disabled || (dir === 'prev' ? active <= 1 : active >= pages);
+        const node = (react_1.default.createElement(Cell, { key: dir, box: box, font: font, token: token, disabled: disabled, onPress: dis ? undefined : () => go(p), render: (c) => (react_1.default.createElement(icon_1.Icon, { name: dir === 'prev' ? 'left' : 'right', size: font, color: dis ? token.colorTextQuaternary : c, strokeWidth: 2.5 })) }));
+        return wrap(p, dir, node, dis ? undefined : () => go(p));
+    };
+    if (simple) {
+        return (react_1.default.createElement(components_1.View, { style: [{ flexDirection: 'row', alignItems: 'center' }, style] },
+            totalNode,
+            arrow('prev'),
+            react_1.default.createElement(components_1.Text, { style: { fontSize: font, color: token.colorText, marginHorizontal: token.marginXS } },
+                active,
+                " / ",
+                pages),
+            arrow('next')));
+    }
+    return (react_1.default.createElement(components_1.View, { style: [{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }, style] },
+        totalNode,
+        arrow('prev'),
+        pageItems(active, pages).map((p, i) => typeof p === 'number' ? (react_1.default.createElement(react_1.default.Fragment, { key: 'p' + p }, wrap(p, 'page', react_1.default.createElement(Cell, { box: box, font: font, token: token, active: p === active, disabled: disabled, onPress: () => go(p), render: (c) => (react_1.default.createElement(components_1.Text, { style: { fontSize: font, fontWeight: p === active ? '600' : '400', color: c } }, p)) }), () => go(p)))) : (react_1.default.createElement(react_1.default.Fragment, { key: 'e' + i }, wrap(0, p, react_1.default.createElement(Cell, { box: box, font: font, token: token, ellipsis: true, bordered: false, render: (c) => react_1.default.createElement(components_1.Text, { style: { fontSize: font, color: c, letterSpacing: 1 } }, "\u2022\u2022\u2022") }))))),
+        arrow('next')));
+}
+exports.default = Pagination;

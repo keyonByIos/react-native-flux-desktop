@@ -1,1 +1,118 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.CommandPalette=CommandPalette;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme"),input_1=require("../../ui/input"),icon_1=require("../../ui/icon"),fuzzy_1=require("./fuzzy");function rank(e,t){const r=[];for(const o of t){const t=(0,fuzzy_1.fuzzyMatch)(e,o.label),n=o.keywords?(0,fuzzy_1.fuzzyMatch)(e,o.keywords):null,a=t?t.score:Number.NEGATIVE_INFINITY,l=n?n.score-2:Number.NEGATIVE_INFINITY;t&&a>=l?r.push({item:o,indices:t.indices,score:a}):n&&l>a&&r.push({item:o,indices:[],score:l})}return r.sort((e,t)=>t.score-e.score),r}function Highlighted(e){const t=Array.from(e.label),r=new Set(e.indices),o=[];return t.forEach((e,t)=>{const n=r.has(t),a=o[o.length-1];a&&a.on===n?a.text+=e:o.push({text:e,on:n})}),react_1.default.createElement(components_1.View,{style:{flexDirection:"row",flexWrap:"wrap",flex:1}},o.map((t,r)=>react_1.default.createElement(components_1.Text,{key:r,style:{fontSize:13,color:t.on?e.hit:e.base,fontWeight:t.on?"600":"normal"}},t.text)))}function CommandPalette(e){const{token:t}=(0,theme_1.useToken)(),{items:r,placeholder:o="输入命令…",maxResults:n=8,emptyText:a="无匹配命令",autoFocus:l,onSelect:c,style:i}=e,[s,u]=react_1.default.useState(""),[m,d]=react_1.default.useState(0),p=react_1.default.useMemo(()=>rank(s,r).slice(0,n),[s,r,n]);react_1.default.useEffect(()=>{d(0)},[s]);const f=e=>{const t=p[e];t&&(c&&c(t.item),u(""))};let _;return react_1.default.createElement(components_1.View,{style:[{borderRadius:t.borderRadiusLG,borderWidth:1,borderColor:t.colorBorderSecondary,backgroundColor:t.colorBgContainer,padding:t.paddingXS,gap:t.marginXXS},i]},react_1.default.createElement(input_1.Input,{value:s,onChange:u,onPressEnter:()=>f(m),onKeyDown:(e,t)=>0!==p.length&&("ArrowUp"===e?(d(e=>(e-1+p.length)%p.length),!0):"ArrowDown"===e?(d(e=>(e+1)%p.length),!0):"Escape"===e&&(u(""),!0)),autoFocus:l,placeholder:o,prefix:react_1.default.createElement(icon_1.Icon,{name:"search",size:14,color:t.colorTextTertiary}),allowClear:!0}),0===p.length?s?react_1.default.createElement(components_1.Text,{style:{fontSize:12,color:t.colorTextTertiary,padding:t.paddingXS}},a):null:react_1.default.createElement(components_1.View,{style:{gap:1}},p.map((e,r)=>{const o=e.item.group&&e.item.group!==_?e.item.group:null;_=e.item.group;const n=r===m;return react_1.default.createElement(components_1.View,{key:e.item.id},o?react_1.default.createElement(components_1.Text,{style:{fontSize:11,color:t.colorTextQuaternary,marginTop:t.marginXS,marginBottom:2,paddingHorizontal:8,textTransform:"uppercase"}},o):null,react_1.default.createElement(components_1.Pressable,{onPress:()=>f(r),onMouseEnter:()=>d(r),style:{flexDirection:"row",alignItems:"center",gap:t.marginSM,paddingHorizontal:8,paddingVertical:6,borderRadius:t.borderRadiusSM,backgroundColor:n?t.colorFillSecondary:"transparent"}},react_1.default.createElement(Highlighted,{label:e.item.label,indices:e.indices,base:t.colorText,hit:t.colorPrimary}),e.item.hint?react_1.default.createElement(components_1.Text,{style:{fontSize:11,color:t.colorTextTertiary,flexShrink:0}},e.item.hint):null))}),react_1.default.createElement(components_1.View,{style:{flexDirection:"row",gap:t.marginSM,paddingHorizontal:8,paddingTop:4}},react_1.default.createElement(components_1.Text,{style:{fontSize:10,color:t.colorTextQuaternary}},"↑↓ 选择"),react_1.default.createElement(components_1.Text,{style:{fontSize:10,color:t.colorTextQuaternary}},"Enter 执行"),react_1.default.createElement(components_1.Text,{style:{fontSize:10,color:t.colorTextQuaternary}},"Esc 清空"))))}exports.default=CommandPalette;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CommandPalette = CommandPalette;
+// CommandPalette：命令面板（⌘K 式）。查询 Input + fzf 模糊排序 + ↑↓/Enter 键盘导航 + 命中高亮。
+// 键盘链路：Input 的 onKeyDown 逃生口抢 ↑↓（列表导航），Enter 走 onPressEnter 执行当前项；鼠标悬停/点击同步。
+// 分组：group 变化处插小标题；hint 右对齐（快捷键提示）；keywords 参与匹配但不显示。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+const input_1 = require("../../ui/input");
+const icon_1 = require("../../ui/icon");
+const fuzzy_1 = require("./fuzzy");
+/** label 与 keywords 各自模糊匹配取高分（keywords 轻罚，同等条件 label 优先）。 */
+function rank(query, items) {
+    const out = [];
+    for (const item of items) {
+        const rl = (0, fuzzy_1.fuzzyMatch)(query, item.label);
+        const rk = item.keywords ? (0, fuzzy_1.fuzzyMatch)(query, item.keywords) : null;
+        const sl = rl ? rl.score : Number.NEGATIVE_INFINITY;
+        const sk = rk ? rk.score - 2 : Number.NEGATIVE_INFINITY;
+        if (rl && sl >= sk)
+            out.push({ item, indices: rl.indices, score: sl });
+        else if (rk && sk > sl)
+            out.push({ item, indices: [], score: sk });
+    }
+    out.sort((a, b) => b.score - a.score);
+    return out;
+}
+/** 命中高亮：label 按码点拆段，命中段主色加粗（本栈 Text 不可嵌套 → View row 包兄弟 Text）。 */
+function Highlighted(props) {
+    const cps = Array.from(props.label);
+    const hitSet = new Set(props.indices);
+    const runs = [];
+    cps.forEach((c, i) => {
+        const on = hitSet.has(i);
+        const last = runs[runs.length - 1];
+        if (last && last.on === on)
+            last.text += c;
+        else
+            runs.push({ text: c, on });
+    });
+    return (react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', flexWrap: 'wrap', flex: 1 } }, runs.map((r, i) => (react_1.default.createElement(components_1.Text, { key: i, style: { fontSize: 13, color: r.on ? props.hit : props.base, fontWeight: r.on ? '600' : 'normal' } }, r.text)))));
+}
+function CommandPalette(props) {
+    const { token } = (0, theme_1.useToken)();
+    const { items, placeholder = '输入命令…', maxResults = 8, emptyText = '无匹配命令', autoFocus, onSelect, style } = props;
+    const [query, setQuery] = react_1.default.useState('');
+    const [active, setActive] = react_1.default.useState(0);
+    const ranked = react_1.default.useMemo(() => rank(query, items).slice(0, maxResults), [query, items, maxResults]);
+    // 结果集变化时把高亮夹回范围内（查询词每变一次都回顶更直觉）
+    react_1.default.useEffect(() => {
+        setActive(0);
+    }, [query]);
+    const fire = (i) => {
+        const r = ranked[i];
+        if (!r)
+            return;
+        onSelect && onSelect(r.item);
+        setQuery('');
+    };
+    const onKeyDown = (key, _mods) => {
+        if (ranked.length === 0)
+            return false;
+        if (key === 'ArrowUp') {
+            setActive((a) => (a - 1 + ranked.length) % ranked.length);
+            return true;
+        }
+        if (key === 'ArrowDown') {
+            setActive((a) => (a + 1) % ranked.length);
+            return true;
+        }
+        if (key === 'Escape') {
+            setQuery('');
+            return true;
+        }
+        return false; // 其余键（含 Enter/编辑键）交回 Input 默认行为
+    };
+    let lastGroup;
+    return (react_1.default.createElement(components_1.View, { style: [
+            {
+                borderRadius: token.borderRadiusLG,
+                borderWidth: 1,
+                borderColor: token.colorBorderSecondary,
+                backgroundColor: token.colorBgContainer,
+                padding: token.paddingXS,
+                gap: token.marginXXS,
+            },
+            style,
+        ] },
+        react_1.default.createElement(input_1.Input, { value: query, onChange: setQuery, onPressEnter: () => fire(active), onKeyDown: onKeyDown, autoFocus: autoFocus, placeholder: placeholder, prefix: react_1.default.createElement(icon_1.Icon, { name: "search", size: 14, color: token.colorTextTertiary }), allowClear: true }),
+        ranked.length === 0 ? (query ? (react_1.default.createElement(components_1.Text, { style: { fontSize: 12, color: token.colorTextTertiary, padding: token.paddingXS } }, emptyText)) : null) : (react_1.default.createElement(components_1.View, { style: { gap: 1 } },
+            ranked.map((r, i) => {
+                const header = r.item.group && r.item.group !== lastGroup ? r.item.group : null;
+                lastGroup = r.item.group;
+                const isActive = i === active;
+                return (react_1.default.createElement(components_1.View, { key: r.item.id },
+                    header ? (react_1.default.createElement(components_1.Text, { style: { fontSize: 11, color: token.colorTextQuaternary, marginTop: token.marginXS, marginBottom: 2, paddingHorizontal: 8, textTransform: 'uppercase' } }, header)) : null,
+                    react_1.default.createElement(components_1.Pressable, { onPress: () => fire(i), onMouseEnter: () => setActive(i), style: {
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            gap: token.marginSM,
+                            paddingHorizontal: 8,
+                            paddingVertical: 6,
+                            borderRadius: token.borderRadiusSM,
+                            backgroundColor: isActive ? token.colorFillSecondary : 'transparent',
+                        } },
+                        react_1.default.createElement(Highlighted, { label: r.item.label, indices: r.indices, base: token.colorText, hit: token.colorPrimary }),
+                        r.item.hint ? react_1.default.createElement(components_1.Text, { style: { fontSize: 11, color: token.colorTextTertiary, flexShrink: 0 } }, r.item.hint) : null)));
+            }),
+            react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', gap: token.marginSM, paddingHorizontal: 8, paddingTop: 4 } },
+                react_1.default.createElement(components_1.Text, { style: { fontSize: 10, color: token.colorTextQuaternary } }, "\u2191\u2193 \u9009\u62E9"),
+                react_1.default.createElement(components_1.Text, { style: { fontSize: 10, color: token.colorTextQuaternary } }, "Enter \u6267\u884C"),
+                react_1.default.createElement(components_1.Text, { style: { fontSize: 10, color: token.colorTextQuaternary } }, "Esc \u6E05\u7A7A"))))));
+}
+exports.default = CommandPalette;

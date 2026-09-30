@@ -1,1 +1,53 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.Cell=Cell;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme"),icon_1=require("../icon");function Cell(e){const{token:t,getComponentToken:n}=(0,theme_1.useToken)(),o=n("Cell"),{title:r,description:l,icon:a,extra:c,arrow:i,clickable:s,disabled:u,onClick:m,onPress:d,bordered:_=!0,children:f,style:p}=e,g=m??d,[y,S]=react_1.default.useState(!1),h=u?t.colorTextQuaternary:t.colorText,x={flexDirection:"row",alignItems:"center",paddingVertical:o.paddingBlock,paddingHorizontal:o.paddingInline,borderBottomWidth:_?t.lineWidth:0,borderBottomColor:t.colorBorderSecondary,backgroundColor:y&&!u?o.activeBg:"transparent"},z=null!=a?react_1.default.createElement(components_1.View,{style:{marginRight:t.marginSM}},"string"==typeof a?react_1.default.createElement(icon_1.Icon,{name:a,size:t.fontSizeLG,color:h}):a):null,E=react_1.default.createElement(components_1.View,{style:{flex:1,marginRight:t.marginSM}},null!=r?react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSize,color:h}},r):null,null!=l?react_1.default.createElement(components_1.Text,{style:{fontSize:o.fontSizeDesc,lineHeight:1.5*o.fontSizeDesc,color:o.descriptionColor,marginTop:t.marginXXS}},l):null,f),T=null!=c||i?react_1.default.createElement(components_1.View,{style:{flexDirection:"row",alignItems:"center"}},null!=c?"string"==typeof c?react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSize,color:t.colorTextTertiary}},c):c:null,i?react_1.default.createElement(components_1.View,{style:{marginLeft:t.marginXS}},react_1.default.createElement(icon_1.Icon,{name:"right",size:t.fontSize,color:t.colorTextQuaternary,strokeWidth:2.5})):null):null;return!g&&!s||u?react_1.default.createElement(components_1.View,{style:[x,u?{cursor:"not-allowed"}:null,p]},z,E,T):react_1.default.createElement(components_1.Pressable,{onPress:g,onPressIn:()=>S(!0),onPressOut:()=>S(!1),style:[x,p]},z,E,T)}
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Cell = Cell;
+// Cell：列表项。左图标+标题+描述、右 extra+箭头，几何取自 Cell 组件 token。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+const icon_1 = require("../icon");
+function Cell(props) {
+    const { token, getComponentToken } = (0, theme_1.useToken)();
+    const ct = getComponentToken('Cell');
+    const { title, description, icon, extra, arrow, clickable, disabled, onClick, onPress, bordered = true, children, style } = props;
+    const fire = onClick ?? onPress;
+    const [pressed, setPressed] = react_1.default.useState(false);
+    const titleColor = disabled ? token.colorTextQuaternary : token.colorText;
+    const shell = {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: ct.paddingBlock,
+        paddingHorizontal: ct.paddingInline,
+        borderBottomWidth: bordered ? token.lineWidth : 0,
+        borderBottomColor: token.colorBorderSecondary,
+        backgroundColor: pressed && !disabled ? ct.activeBg : 'transparent',
+    };
+    const lead = icon != null ? (react_1.default.createElement(components_1.View, { style: { marginRight: token.marginSM } }, typeof icon === 'string' ? react_1.default.createElement(icon_1.Icon, { name: icon, size: token.fontSizeLG, color: titleColor }) : icon)) : null;
+    const body = (react_1.default.createElement(components_1.View, { style: { flex: 1, marginRight: token.marginSM } },
+        title != null ? (react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSize, color: titleColor } }, title)) : null,
+        description != null ? (react_1.default.createElement(components_1.Text, { style: {
+                fontSize: ct.fontSizeDesc,
+                lineHeight: ct.fontSizeDesc * 1.5,
+                color: ct.descriptionColor,
+                marginTop: token.marginXXS,
+            } }, description)) : null,
+        children));
+    const tail = extra != null || arrow ? (react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', alignItems: 'center' } },
+        extra != null ? (typeof extra === 'string' ? (react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSize, color: token.colorTextTertiary } }, extra)) : (extra)) : null,
+        arrow ? (react_1.default.createElement(components_1.View, { style: { marginLeft: token.marginXS } },
+            react_1.default.createElement(icon_1.Icon, { name: "right", size: token.fontSize, color: token.colorTextQuaternary, strokeWidth: 2.5 }))) : null)) : null;
+    if ((!fire && !clickable) || disabled) {
+        // 禁用单元以普通 View 渲染无 press 处理，findCursor 落到 default；显式补 not-allowed。
+        return (react_1.default.createElement(components_1.View, { style: [shell, disabled ? { cursor: 'not-allowed' } : null, style] },
+            lead,
+            body,
+            tail));
+    }
+    return (react_1.default.createElement(components_1.Pressable, { onPress: fire, onPressIn: () => setPressed(true), onPressOut: () => setPressed(false), style: [shell, style] },
+        lead,
+        body,
+        tail));
+}

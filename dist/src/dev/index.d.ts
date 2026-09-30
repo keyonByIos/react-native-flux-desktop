@@ -25,5 +25,7 @@ export type { TimeConverterProps } from './time-conv';
 export { detectUnit, fromTimestamp, parseToMs, formatZoned, tzOffsetLabel, relativeTime, type StampInfo } from './time-conv/timeconv';
 export { MemMonitor } from './mem-monitor';
 export type { MemMonitorProps } from './mem-monitor';
+export { FpsMonitor, useWindowFps } from './fps-monitor';
+export type { FpsMonitorProps } from './fps-monitor';
 export { Markdown } from './markdown';
 export type { MarkdownProps } from './markdown';

@@ -24,6 +24,8 @@ export type { TrayEvent, TrayOptions, TrayRect } from './app/tray';
 export { scheduleFrame } from './frame/scheduler';
 export { registerFonts } from './paint/fonts';
 export { preloadImage, preloadImages, isImageReady, imageCacheStats } from './paint/painter';
+export { SystemStats, systemStats } from './system';
+export type { MemoryUsage, MemoryUsageMB, ImageCacheStat, WindowMemStat, SystemSnapshot } from './system';
 export { acquireSingleInstance, releaseSingleInstance, isSingleInstanceEnforced, onSecondInstance, } from './window/instance';
 export type { SingleInstanceOptions, SecondInstancePayload } from './window/instance';
 export { configureLogger, loggerConfig, logOverview, readLogTail, readLogEntries, logsDir, enableConsoleCapture } from './log';

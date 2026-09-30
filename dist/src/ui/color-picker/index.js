@@ -1,1 +1,132 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.PRESET_COLORS=void 0,exports.ColorPicker=ColorPicker;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme"),icon_1=require("../icon"),FadeIn_1=require("../../anim/FadeIn"),useOverlayGate_1=require("../../events/useOverlayGate");function ColorPicker(e){const{token:t}=(0,theme_1.useToken)(),{value:o,defaultValue:r="#1677ff",disabled:a,size:n="middle",showText:l=!0,presets:i,allowClear:d,placement:c="bottomLeft",open:f,onChange:s,style:u}=e,[m,_]=react_1.default.useState(r),g=void 0!==o?o:m,[p,b]=react_1.default.useState(!1),h=void 0!==f?f:p,{onTriggerAbs:S,onPanelAbs:y}=(0,useOverlayGate_1.useOverlayGate)(h&&void 0===f&&!a,()=>b(!1)),C=e=>{a||(void 0===o&&_(e),s&&s(e),void 0===f&&b(!1))},w="large"===n?t.controlHeightLG:"small"===n?t.controlHeightSM:t.controlHeight,E=w-t.marginXS,v=E+t.marginXXS,x=8*v+2*t.paddingSM,R="topLeft"===c||"topRight"===c,X="bottomRight"===c||"topRight"===c,k="function"==typeof l?l(g||void 0):l?g?g.toUpperCase():"空":null;return react_1.default.createElement(components_1.View,{style:[{position:"relative"},u],onLayoutAbs:S},react_1.default.createElement(components_1.Pressable,{disabled:a,onPress:()=>void 0===f?b(e=>!e):void 0,style:{flexDirection:"row",alignItems:"center",alignSelf:"flex-start",paddingHorizontal:t.paddingXS,height:w,gap:t.marginXS,borderWidth:t.lineWidth,borderStyle:"solid",borderColor:t.colorBorder,borderRadius:t.borderRadius,backgroundColor:t.colorBgContainer,opacity:a?.65:1}},react_1.default.createElement(components_1.View,{style:{width:E,height:E,borderRadius:t.borderRadiusSM,backgroundColor:g||t.colorFillQuaternary,borderWidth:t.lineWidth,borderColor:t.colorFillSecondary}}),null!=k?react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSize,color:g?t.colorText:t.colorTextQuaternary}},k):null),h?react_1.default.createElement(components_1.View,{onLayoutAbs:y,style:{position:"absolute",zIndex:1050,left:X?void 0:0,right:X?0:void 0,top:R?void 0:w+t.marginXXS,bottom:R?w+t.marginXXS:void 0,width:x,padding:t.paddingSM,gap:t.marginXXS,borderWidth:t.lineWidth,borderStyle:"solid",borderColor:t.colorBorderSecondary,borderRadius:t.borderRadiusLG,backgroundColor:t.colorBgElevated}},react_1.default.createElement(FadeIn_1.FadeIn,{duration:160},i?react_1.default.createElement(components_1.View,{style:{marginBottom:t.marginXS}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:t.colorTextSecondary,marginBottom:t.marginXXS}},"预设"),react_1.default.createElement(components_1.View,{style:{flexDirection:"row",flexWrap:"wrap",gap:t.marginXXS}},i.map(e=>react_1.default.createElement(components_1.Pressable,{key:`p-${e}`,onPress:()=>C(e),style:{width:v,height:v,alignItems:"center",justifyContent:"center"}},react_1.default.createElement(components_1.View,{style:{width:E,height:E,borderRadius:t.borderRadiusSM,backgroundColor:e,borderWidth:t.lineWidth,borderColor:t.colorFillSecondary,alignItems:"center",justifyContent:"center"}},e.toLowerCase()===(g??"").toLowerCase()?react_1.default.createElement(icon_1.Icon,{name:"check",size:.7*E,color:t.colorTextBase,strokeWidth:3}):null)))),react_1.default.createElement(components_1.View,{style:{height:t.lineWidth,backgroundColor:t.colorBorderSecondary,marginTop:t.marginXS}})):null,react_1.default.createElement(components_1.View,{style:{flexDirection:"row",flexWrap:"wrap",gap:t.marginXXS}},exports.PRESET_COLORS.map(e=>react_1.default.createElement(components_1.Pressable,{key:e,onPress:()=>C(e),style:{width:v,height:v,alignItems:"center",justifyContent:"center"}},react_1.default.createElement(components_1.View,{style:{width:E,height:E,borderRadius:t.borderRadiusSM,backgroundColor:e,borderWidth:t.lineWidth,borderColor:t.colorFillSecondary,alignItems:"center",justifyContent:"center"}},e.toLowerCase()===(g??"").toLowerCase()?react_1.default.createElement(icon_1.Icon,{name:"check",size:.7*E,color:t.colorTextBase,strokeWidth:3}):null)))),d?react_1.default.createElement(components_1.Pressable,{onPress:()=>C(""),style:{marginTop:t.marginXS,height:t.controlHeightSM,borderRadius:t.borderRadius,borderWidth:t.lineWidth,borderStyle:"solid",borderColor:t.colorBorder,alignItems:"center",justifyContent:"center"}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:t.colorTextSecondary}},"清除颜色")):null)):null)}exports.PRESET_COLORS=["#e6f4ff","#91caff","#4096ff","#1677ff","#e6fffb","#87e8de","#36cfc9","#13c2c2","#f6ffed","#b7eb8f","#73d13d","#52c41a","#feffe6","#fffb8f","#fadb14","#faad14","#fff7e6","#ffd591","#ffa940","#fa8c16","#fff1f0","#ffa39e","#ff7875","#f5222d","#fff0f6","#ffadd2","#f759ab","#eb2f96","#f9f0ff","#d3adf7","#9254de","#722ed1","#f0f5ff","#adc6ff","#597ef7","#2f54eb","#fafafa","#d9d9d9","#8c8c8c","#1f1f1f"];
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PRESET_COLORS = void 0;
+exports.ColorPicker = ColorPicker;
+// COLORPICKER：降级为「触发器 + 预设色板面板」。完整 HSV 拾色需要手势拖拽管线，
+// 待 pointer capture 落地后再升级；当前预设色覆盖 antd 官方 24 色。
+// 对齐 antd v5：size（触发器高度）/ showText（色值文本）/ presets（自定义预设行）/ allowClear（清除）/ placement（四向弹出）。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+const icon_1 = require("../icon");
+const FadeIn_1 = require("../../anim/FadeIn");
+const useOverlayGate_1 = require("../../events/useOverlayGate");
+/** antd 官方预设 24 色（每色系取 50/100 两档中偏浅的一档 + 主档） */
+exports.PRESET_COLORS = [
+    '#e6f4ff', '#91caff', '#4096ff', '#1677ff',
+    '#e6fffb', '#87e8de', '#36cfc9', '#13c2c2',
+    '#f6ffed', '#b7eb8f', '#73d13d', '#52c41a',
+    '#feffe6', '#fffb8f', '#fadb14', '#faad14',
+    '#fff7e6', '#ffd591', '#ffa940', '#fa8c16',
+    '#fff1f0', '#ffa39e', '#ff7875', '#f5222d',
+    '#fff0f6', '#ffadd2', '#f759ab', '#eb2f96',
+    '#f9f0ff', '#d3adf7', '#9254de', '#722ed1',
+    '#f0f5ff', '#adc6ff', '#597ef7', '#2f54eb',
+    '#fafafa', '#d9d9d9', '#8c8c8c', '#1f1f1f',
+];
+function ColorPicker(props) {
+    const { token } = (0, theme_1.useToken)();
+    const { value, defaultValue = '#1677ff', disabled, size = 'middle', showText = true, presets, allowClear, placement = 'bottomLeft', open, onChange, style, } = props;
+    const [inner, setInner] = react_1.default.useState(defaultValue);
+    const color = value !== undefined ? value : inner;
+    const [expanded, setExpanded] = react_1.default.useState(false);
+    const showPanel = open !== undefined ? open : expanded;
+    // 点击空白处关闭 + 同屏互斥（受控常驻展开 open / disabled 不参与）
+    const { onTriggerAbs, onPanelAbs } = (0, useOverlayGate_1.useOverlayGate)(showPanel && open === undefined && !disabled, () => setExpanded(false));
+    const commit = (c) => {
+        if (disabled)
+            return;
+        if (value === undefined)
+            setInner(c);
+        onChange && onChange(c);
+        if (open === undefined)
+            setExpanded(false);
+    };
+    const triggerH = size === 'large' ? token.controlHeightLG : size === 'small' ? token.controlHeightSM : token.controlHeight;
+    const swatch = triggerH - token.marginXS;
+    const cell = swatch + token.marginXXS;
+    const panelW = cell * 8 + token.paddingSM * 2;
+    const up = placement === 'topLeft' || placement === 'topRight';
+    const alignRight = placement === 'bottomRight' || placement === 'topRight';
+    const textNode = typeof showText === 'function' ? showText(color || undefined) : showText ? (color ? color.toUpperCase() : '空') : null;
+    return (react_1.default.createElement(components_1.View, { style: [{ position: 'relative' }, style], onLayoutAbs: onTriggerAbs },
+        react_1.default.createElement(components_1.Pressable, { disabled: disabled, onPress: () => (open === undefined ? setExpanded((v) => !v) : undefined), style: {
+                flexDirection: 'row',
+                alignItems: 'center',
+                alignSelf: 'flex-start',
+                paddingHorizontal: token.paddingXS,
+                height: triggerH,
+                gap: token.marginXS,
+                borderWidth: token.lineWidth,
+                borderStyle: 'solid',
+                borderColor: token.colorBorder,
+                borderRadius: token.borderRadius,
+                backgroundColor: token.colorBgContainer,
+                opacity: disabled ? 0.65 : 1,
+            } },
+            react_1.default.createElement(components_1.View, { style: {
+                    width: swatch,
+                    height: swatch,
+                    borderRadius: token.borderRadiusSM,
+                    backgroundColor: color || token.colorFillQuaternary,
+                    borderWidth: token.lineWidth,
+                    borderColor: token.colorFillSecondary,
+                } }),
+            textNode != null ? (react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSize, color: color ? token.colorText : token.colorTextQuaternary } }, textNode)) : null),
+        showPanel ? (react_1.default.createElement(components_1.View, { onLayoutAbs: onPanelAbs, style: {
+                position: 'absolute',
+                zIndex: 1050,
+                left: alignRight ? undefined : 0,
+                right: alignRight ? 0 : undefined,
+                top: up ? undefined : triggerH + token.marginXXS,
+                bottom: up ? triggerH + token.marginXXS : undefined,
+                width: panelW,
+                padding: token.paddingSM,
+                gap: token.marginXXS,
+                borderWidth: token.lineWidth,
+                borderStyle: 'solid',
+                borderColor: token.colorBorderSecondary,
+                borderRadius: token.borderRadiusLG,
+                backgroundColor: token.colorBgElevated,
+            } },
+            react_1.default.createElement(FadeIn_1.FadeIn, { duration: 160 },
+                presets ? (react_1.default.createElement(components_1.View, { style: { marginBottom: token.marginXS } },
+                    react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: token.colorTextSecondary, marginBottom: token.marginXXS } }, "\u9884\u8BBE"),
+                    react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', flexWrap: 'wrap', gap: token.marginXXS } }, presets.map((c) => (react_1.default.createElement(components_1.Pressable, { key: `p-${c}`, onPress: () => commit(c), style: { width: cell, height: cell, alignItems: 'center', justifyContent: 'center' } },
+                        react_1.default.createElement(components_1.View, { style: {
+                                width: swatch,
+                                height: swatch,
+                                borderRadius: token.borderRadiusSM,
+                                backgroundColor: c,
+                                borderWidth: token.lineWidth,
+                                borderColor: token.colorFillSecondary,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            } }, c.toLowerCase() === (color ?? '').toLowerCase() ? (react_1.default.createElement(icon_1.Icon, { name: "check", size: swatch * 0.7, color: token.colorTextBase, strokeWidth: 3 })) : null))))),
+                    react_1.default.createElement(components_1.View, { style: { height: token.lineWidth, backgroundColor: token.colorBorderSecondary, marginTop: token.marginXS } }))) : null,
+                react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', flexWrap: 'wrap', gap: token.marginXXS } }, exports.PRESET_COLORS.map((c) => (react_1.default.createElement(components_1.Pressable, { key: c, onPress: () => commit(c), style: { width: cell, height: cell, alignItems: 'center', justifyContent: 'center' } },
+                    react_1.default.createElement(components_1.View, { style: {
+                            width: swatch,
+                            height: swatch,
+                            borderRadius: token.borderRadiusSM,
+                            backgroundColor: c,
+                            borderWidth: token.lineWidth,
+                            borderColor: token.colorFillSecondary,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        } }, c.toLowerCase() === (color ?? '').toLowerCase() ? (react_1.default.createElement(icon_1.Icon, { name: "check", size: swatch * 0.7, color: token.colorTextBase, strokeWidth: 3 })) : null))))),
+                allowClear ? (react_1.default.createElement(components_1.Pressable, { onPress: () => commit(''), style: {
+                        marginTop: token.marginXS,
+                        height: token.controlHeightSM,
+                        borderRadius: token.borderRadius,
+                        borderWidth: token.lineWidth,
+                        borderStyle: 'solid',
+                        borderColor: token.colorBorder,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    } },
+                    react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: token.colorTextSecondary } }, "\u6E05\u9664\u989C\u8272"))) : null))) : null));
+}

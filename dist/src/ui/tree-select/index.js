@@ -1,1 +1,106 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.TreeSelect=TreeSelect;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme"),icon_1=require("../icon"),tree_1=require("../tree"),FadeIn_1=require("../../anim/FadeIn"),useOverlayGate_1=require("../../events/useOverlayGate");function findTitle(e,t){for(const o of e){if(o.key===t)return o.title;if(o.children){const e=findTitle(o.children,t);if(void 0!==e)return e}}}function TreeSelect(e){const{token:t}=(0,theme_1.useToken)(),{treeData:o,value:r,defaultValue:n,placeholder:a="请选择",disabled:l,allowClear:i,multiple:d,size:c="middle",status:s,placement:u="bottomLeft",open:m,onChange:f,style:_}=e,[p,g]=react_1.default.useState(n),h=void 0!==r?r:p,[y,S]=react_1.default.useState(!1),b=void 0!==m?m:y,{onTriggerAbs:v,onPanelAbs:x}=(0,useOverlayGate_1.useOverlayGate)(b&&void 0===m&&!l,()=>S(!1)),T=null==h?[]:Array.isArray(h)?h:[h],E=T.length>0,z=e=>{void 0===r&&g(e),f&&f(e)},X="large"===c?t.controlHeightLG:"small"===c?t.controlHeightSM:t.controlHeight,H="error"===s?t.colorError:"warning"===s?t.colorWarning:b?t.colorPrimary:t.colorBorder,k="topLeft"===u||"topRight"===u,w="bottomRight"===u||"topRight"===u,C=!d&&E?findTitle(o,T[0]):void 0;return react_1.default.createElement(components_1.View,{style:[{position:"relative"},_],onLayoutAbs:v},react_1.default.createElement(components_1.Pressable,{disabled:l,onPress:()=>void 0===m?S(e=>!e):void 0,style:{minHeight:X,paddingHorizontal:t.paddingSM,paddingVertical:d?t.paddingXXS:0,flexDirection:"row",alignItems:"center",flexWrap:"wrap",gap:t.marginXXS,borderWidth:t.lineWidth,borderStyle:"solid",borderColor:H,borderRadius:t.borderRadius,backgroundColor:t.colorBgContainer,opacity:l?.65:1}},E?d?T.map(e=>react_1.default.createElement(components_1.View,{key:e,style:{flexDirection:"row",alignItems:"center",paddingHorizontal:t.paddingXXS,height:t.controlHeightSM-t.marginXXS,borderRadius:t.borderRadiusSM,backgroundColor:t.colorFillSecondary}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:t.colorText}},findTitle(o,e)))):react_1.default.createElement(components_1.Text,{style:{flex:1,fontSize:t.fontSize,color:t.colorText},numberOfLines:1},C):react_1.default.createElement(components_1.Text,{style:{flex:1,fontSize:t.fontSize,color:t.colorTextQuaternary}},a),i&&E&&!l?react_1.default.createElement(components_1.Pressable,{onPress:()=>z(d?[]:void 0),style:{paddingHorizontal:t.paddingXXS}},react_1.default.createElement(icon_1.Icon,{name:"closeCircle",size:t.fontSize,color:t.colorTextQuaternary})):react_1.default.createElement(icon_1.Icon,{name:"down",size:t.fontSizeSM,color:t.colorTextQuaternary,rotate:b?180:0})),b?react_1.default.createElement(components_1.View,{onLayoutAbs:x,style:{position:"absolute",zIndex:1050,left:w?void 0:0,right:w?0:void 0,top:k?void 0:X+t.marginXXS,bottom:k?X+t.marginXXS:void 0,width:"100%",maxHeight:6*t.controlHeightLG,padding:t.paddingXS,borderWidth:t.lineWidth,borderStyle:"solid",borderColor:t.colorBorderSecondary,borderRadius:t.borderRadiusLG,backgroundColor:t.colorBgElevated}},react_1.default.createElement(FadeIn_1.FadeIn,{duration:160},react_1.default.createElement(components_1.ScrollView,{style:{maxHeight:6*t.controlHeightLG-t.padding}},react_1.default.createElement(tree_1.Tree,{treeData:o,checkable:d,defaultExpandedKeys:o.map(e=>e.key),selectedKeys:d?[]:T,checkedKeys:d?T:[],onSelect:d?void 0:e=>{const t=e[e.length-1];z(t),void 0===m&&S(!1)},onCheck:d?e=>{z(e)}:void 0})))):null)}exports.default=TreeSelect;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TreeSelect = TreeSelect;
+// TREESELECT：触发器 + 下拉树面板（复用 Tree）。面板绝对定位覆盖（同 Select），不依赖浮层 z 栈。
+// 对齐 antd v5：size / status / placement / multiple（checkable 树 + 标签）/ allowClear。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+const icon_1 = require("../icon");
+const tree_1 = require("../tree");
+const FadeIn_1 = require("../../anim/FadeIn");
+const useOverlayGate_1 = require("../../events/useOverlayGate");
+function findTitle(nodes, key) {
+    for (const n of nodes) {
+        if (n.key === key)
+            return n.title;
+        if (n.children) {
+            const t = findTitle(n.children, key);
+            if (t !== undefined)
+                return t;
+        }
+    }
+    return undefined;
+}
+function TreeSelect(props) {
+    const { token } = (0, theme_1.useToken)();
+    const { treeData, value, defaultValue, placeholder = '请选择', disabled, allowClear, multiple, size = 'middle', status, placement = 'bottomLeft', open, onChange, style, } = props;
+    const [inner, setInner] = react_1.default.useState(defaultValue);
+    const selected = value !== undefined ? value : inner;
+    const [expanded, setExpanded] = react_1.default.useState(false);
+    const showPanel = open !== undefined ? open : expanded;
+    // 点击空白处关闭 + 同屏互斥（受控常驻展开 open / disabled 不参与）
+    const { onTriggerAbs, onPanelAbs } = (0, useOverlayGate_1.useOverlayGate)(showPanel && open === undefined && !disabled, () => setExpanded(false));
+    const selectedArr = selected == null ? [] : Array.isArray(selected) ? selected : [selected];
+    const hasValue = selectedArr.length > 0;
+    const commit = (v) => {
+        if (value === undefined)
+            setInner(v);
+        onChange && onChange(v);
+    };
+    const handleSelect = (keys) => {
+        const k = keys[keys.length - 1];
+        commit(k);
+        if (open === undefined)
+            setExpanded(false);
+    };
+    const handleCheck = (keys) => {
+        commit(keys);
+    };
+    const clear = () => commit(multiple ? [] : undefined);
+    const h = size === 'large' ? token.controlHeightLG : size === 'small' ? token.controlHeightSM : token.controlHeight;
+    const borderColor = status === 'error' ? token.colorError : status === 'warning' ? token.colorWarning : showPanel ? token.colorPrimary : token.colorBorder;
+    const up = placement === 'topLeft' || placement === 'topRight';
+    const alignRight = placement === 'bottomRight' || placement === 'topRight';
+    const singleTitle = !multiple && hasValue ? findTitle(treeData, selectedArr[0]) : undefined;
+    return (react_1.default.createElement(components_1.View, { style: [{ position: 'relative' }, style], onLayoutAbs: onTriggerAbs },
+        react_1.default.createElement(components_1.Pressable, { disabled: disabled, onPress: () => (open === undefined ? setExpanded((v) => !v) : undefined), style: {
+                minHeight: h,
+                paddingHorizontal: token.paddingSM,
+                paddingVertical: multiple ? token.paddingXXS : 0,
+                flexDirection: 'row',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: token.marginXXS,
+                borderWidth: token.lineWidth,
+                borderStyle: 'solid',
+                borderColor,
+                borderRadius: token.borderRadius,
+                backgroundColor: token.colorBgContainer,
+                opacity: disabled ? 0.65 : 1,
+            } },
+            hasValue ? (multiple ? (selectedArr.map((v) => (react_1.default.createElement(components_1.View, { key: v, style: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingHorizontal: token.paddingXXS,
+                    height: token.controlHeightSM - token.marginXXS,
+                    borderRadius: token.borderRadiusSM,
+                    backgroundColor: token.colorFillSecondary,
+                } },
+                react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: token.colorText } }, findTitle(treeData, v)))))) : (react_1.default.createElement(components_1.Text, { style: { flex: 1, fontSize: token.fontSize, color: token.colorText }, numberOfLines: 1 }, singleTitle))) : (react_1.default.createElement(components_1.Text, { style: { flex: 1, fontSize: token.fontSize, color: token.colorTextQuaternary } }, placeholder)),
+            allowClear && hasValue && !disabled ? (react_1.default.createElement(components_1.Pressable, { onPress: clear, style: { paddingHorizontal: token.paddingXXS } },
+                react_1.default.createElement(icon_1.Icon, { name: "closeCircle", size: token.fontSize, color: token.colorTextQuaternary }))) : (react_1.default.createElement(icon_1.Icon, { name: "down", size: token.fontSizeSM, color: token.colorTextQuaternary, rotate: showPanel ? 180 : 0 }))),
+        showPanel ? (react_1.default.createElement(components_1.View, { onLayoutAbs: onPanelAbs, style: {
+                position: 'absolute',
+                zIndex: 1050,
+                left: alignRight ? undefined : 0,
+                right: alignRight ? 0 : undefined,
+                top: up ? undefined : h + token.marginXXS,
+                bottom: up ? h + token.marginXXS : undefined,
+                width: '100%',
+                maxHeight: token.controlHeightLG * 6,
+                padding: token.paddingXS,
+                borderWidth: token.lineWidth,
+                borderStyle: 'solid',
+                borderColor: token.colorBorderSecondary,
+                borderRadius: token.borderRadiusLG,
+                backgroundColor: token.colorBgElevated,
+            } },
+            react_1.default.createElement(FadeIn_1.FadeIn, { duration: 160 },
+                react_1.default.createElement(components_1.ScrollView, { style: { maxHeight: token.controlHeightLG * 6 - token.padding } },
+                    react_1.default.createElement(tree_1.Tree, { treeData: treeData, checkable: multiple, defaultExpandedKeys: treeData.map((n) => n.key), selectedKeys: multiple ? [] : selectedArr, checkedKeys: multiple ? selectedArr : [], onSelect: multiple ? undefined : handleSelect, onCheck: multiple ? handleCheck : undefined }))))) : null));
+}
+exports.default = TreeSelect;

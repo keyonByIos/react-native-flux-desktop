@@ -39,6 +39,12 @@ export declare class WindowHost {
     private prevScrolls;
     /** 图片解码到位等外部脏：下一帧必须整帧重绘 */
     private extDirty;
+    /** 空闲窗跳帧基线：上次贴屏时的滚动签名（滚动不经 __mutEpoch，用它兜住滚轮/受控/程序化滚动）；null=活动期已作废 */
+    private _scrollSig;
+    /** 空闲窗跳帧基线：上次贴屏时全局 imageGen。setImageReadyNotifier 是全局单例（后建窗覆盖），extDirty
+     *  只能抵一窗；本窗不是宿主时，新图就绪不会推 epoch 也不会设 extDirty，仅靠 counter 变化识别——
+     *  否则含图空闲窗会跳过那一帧，新图区域停在占位底图（横条元素呈一条横线残影）。-1 = 无效基线，下一帧强制重绘。*/
+    private lastImageGen;
     /** 【临时诊断】帧计数：每 120 帧 dump 一次场景树 kind 直方图 + 最胖父节点路径，定位节点泄漏 */
     private _dbgN;
     /** 【临时诊断】[mem] 每 2s 时间驱动采样（静置也采）：rss/heap/ext/ab + 节点数 + 该窗口期帧数，区分高水位 vs 真泄漏 */
@@ -154,6 +160,15 @@ export declare class WindowHost {
     private paintScrollBlit;
     /** 一帧：布局 → 绘制 → 贴图（present 到物理帧缓冲） */
     private _prevFrameEnd;
+    private _fps;
+    private _fpsSecFrames;
+    private _fpsSecStart;
+    /** 记一笔「本帧已上屏」：CPU 路径贴屏后、GPU 路径 flush 后各调一次。 */
+    private _notePresented;
+    /** 对外接口：本窗当前帧率（每秒实际上屏帧数，四舍五入）。空闲（>1s 无新帧）返回 0。 */
+    getFps(): number;
+    /** 计算本窗滚动签名：遍历滚动节点累加 scrollX/scrollY（滚动不经 epoch 的兜底）。仅静止候选帧调用。 */
+    private computeScrollSig;
     renderFrame(): void;
     /** 窗口销毁/关闭：摘帧任务。最后一个窗口关闭后无 setInterval，Node 自然退出。 */
     private onWindowClosed;

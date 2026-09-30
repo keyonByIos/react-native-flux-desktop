@@ -1,1 +1,82 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.StatCard=StatCard,exports.StatisticGroup=StatisticGroup;const react_1=__importDefault(require("react")),components_1=require("../../../components"),theme_1=require("../../../theme"),statistic_1=require("../../statistic");function StatCard(e){const{title:t,value:r,prefix:o,suffix:n,precision:a,animation:l=!0,tag:i,trend:c,spark:s,loading:u,onClick:d,onPress:m,style:f}=e,{token:p}=(0,theme_1.useToken)(),_=d??m,S=!c||"up"===c.direction!=!!c.invert,g=c?S?p.colorSuccess:p.colorError:p.colorText,y=react_1.default.createElement(components_1.View,{style:[{padding:p.paddingLG,gap:p.marginXS,borderRadius:p.borderRadiusLG,borderWidth:1,borderColor:p.colorBorderSecondary,backgroundColor:p.colorBgContainer,flexDirection:"row",alignItems:"flex-end",justifyContent:"space-between"},f]},react_1.default.createElement(components_1.View,{style:{gap:p.marginXXS}},react_1.default.createElement(components_1.View,{style:{flexDirection:"row",alignItems:"center",gap:p.marginXS}},react_1.default.createElement(components_1.Text,{style:{fontSize:p.fontSize,color:p.colorTextSecondary}},t),null!=i?react_1.default.createElement(components_1.View,{style:{paddingHorizontal:6,borderRadius:p.borderRadiusSM,backgroundColor:p.colorFillSecondary}},react_1.default.createElement(components_1.Text,{style:{fontSize:10,color:p.colorTextTertiary,lineHeight:16}},i)):null),react_1.default.createElement(statistic_1.Statistic,{value:r,prefix:o,suffix:n,precision:a,animation:l,loading:u,valueStyle:{fontSize:p.fontSizeXL+8,fontWeight:"600"}}),c?react_1.default.createElement(components_1.View,{style:{flexDirection:"row",alignItems:"center",gap:4}},react_1.default.createElement(components_1.Text,{style:{fontSize:p.fontSizeSM,color:g,fontWeight:"600"}},"up"===c.direction?"↑":"↓"," ",c.value),react_1.default.createElement(components_1.Text,{style:{fontSize:p.fontSizeSM,color:p.colorTextTertiary}},"较上期")):null),s&&s.length>0?react_1.default.createElement(Spark,{bars:s}):null);return _?react_1.default.createElement(PressableBox,{onPress:_,style:{flexShrink:0}},y):y}function Spark(e){const{token:t}=(0,theme_1.useToken)(),r=Math.max(...e.bars,1),o=Math.min(...e.bars,0),n=r-o||1;return react_1.default.createElement(components_1.View,{style:{flexDirection:"row",alignItems:"flex-end",gap:3,height:40}},e.bars.map((r,a)=>{const l=a===e.bars.length-1;return react_1.default.createElement(components_1.View,{key:a,style:{width:7,height:Math.max(3,(r-o)/n*34+6),borderRadius:2,backgroundColor:l?t.colorPrimary:t.colorFillSecondary}})}))}function PressableBox(e){const{onPress:t,children:r,style:o}=e,[n,a]=react_1.default.useState(!1);return react_1.default.createElement("pressable",{onPress:t,onPressIn:()=>a(!0),onPressOut:()=>a(!1),style:[o,{opacity:n?.85:1,cursor:"pointer"}]},r)}function StatisticGroup(e){const{items:t,itemWidth:r,style:o}=e,{token:n}=(0,theme_1.useToken)();return react_1.default.createElement(components_1.View,{style:[{flexDirection:"row",flexWrap:"wrap",gap:n.marginSM},o]},t.map((e,t)=>react_1.default.createElement(components_1.View,{key:t,style:{flex:null==r?1:void 0,minWidth:r??240}},react_1.default.createElement(StatCard,{...e}))))}exports.default=StatCard;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.StatCard = StatCard;
+exports.StatisticGroup = StatisticGroup;
+// StatCard：仪表盘指标卡（Pro 菜单组件）。标题 + count-up 大数值 + 前后缀 + 趋势角标 + 迷你柱条。
+// 组合既有 Statistic 的数值格式化思路，柱条用 flex 等高轨道 + 比例高度自绘，零图表依赖。
+// 一张卡 = 一个 StatCard；一排多卡 = StatisticGroup（等分宽 + 间隙）。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../../components");
+const theme_1 = require("../../../theme");
+const statistic_1 = require("../../statistic");
+function StatCard(props) {
+    const { title, value, prefix, suffix, precision, animation = true, tag, trend, spark, loading, onClick, onPress, style } = props;
+    const { token } = (0, theme_1.useToken)();
+    const fire = onClick ?? onPress;
+    const good = trend ? (trend.direction === 'up') !== !!trend.invert : true;
+    const trendColor = trend ? (good ? token.colorSuccess : token.colorError) : token.colorText;
+    const body = (react_1.default.createElement(components_1.View, { style: [
+            {
+                padding: token.paddingLG,
+                gap: token.marginXS,
+                borderRadius: token.borderRadiusLG,
+                borderWidth: 1,
+                borderColor: token.colorBorderSecondary,
+                backgroundColor: token.colorBgContainer,
+                flexDirection: 'row',
+                alignItems: 'flex-end',
+                justifyContent: 'space-between',
+            },
+            style,
+        ] },
+        react_1.default.createElement(components_1.View, { style: { gap: token.marginXXS } },
+            react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', alignItems: 'center', gap: token.marginXS } },
+                react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSize, color: token.colorTextSecondary } }, title),
+                tag != null ? (react_1.default.createElement(components_1.View, { style: { paddingHorizontal: 6, borderRadius: token.borderRadiusSM, backgroundColor: token.colorFillSecondary } },
+                    react_1.default.createElement(components_1.Text, { style: { fontSize: 10, color: token.colorTextTertiary, lineHeight: 16 } }, tag))) : null),
+            react_1.default.createElement(statistic_1.Statistic, { value: value, prefix: prefix, suffix: suffix, precision: precision, animation: animation, loading: loading, valueStyle: { fontSize: token.fontSizeXL + 8, fontWeight: '600' } }),
+            trend ? (react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', alignItems: 'center', gap: 4 } },
+                react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: trendColor, fontWeight: '600' } },
+                    trend.direction === 'up' ? '↑' : '↓',
+                    " ",
+                    trend.value),
+                react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: token.colorTextTertiary } }, "\u8F83\u4E0A\u671F"))) : null),
+        spark && spark.length > 0 ? react_1.default.createElement(Spark, { bars: spark }) : null));
+    if (!fire)
+        return body;
+    return (react_1.default.createElement(PressableBox, { onPress: fire, style: { flexShrink: 0 } }, body));
+}
+/** 迷你柱条：等高轨道内按比例起高，末条主色高亮当前值 */
+function Spark(props) {
+    const { token } = (0, theme_1.useToken)();
+    const H = 40;
+    const max = Math.max(...props.bars, 1);
+    const min = Math.min(...props.bars, 0);
+    const span = max - min || 1;
+    return (react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', alignItems: 'flex-end', gap: 3, height: H } }, props.bars.map((b, i) => {
+        const last = i === props.bars.length - 1;
+        return (react_1.default.createElement(components_1.View, { key: i, style: {
+                width: 7,
+                height: Math.max(3, ((b - min) / span) * (H - 6) + 6),
+                borderRadius: 2,
+                backgroundColor: last ? token.colorPrimary : token.colorFillSecondary,
+            } }));
+    })));
+}
+/** 可点外壳：有 onPress 时整卡可点（focus 态轻微压暗） */
+function PressableBox(props) {
+    const { onPress, children, style } = props;
+    const [pressed, setPressed] = react_1.default.useState(false);
+    return react_1.default.createElement('pressable', { onPress, onPressIn: () => setPressed(true), onPressOut: () => setPressed(false), style: [style, { opacity: pressed ? 0.85 : 1, cursor: 'pointer' }] }, children);
+}
+/** 一排指标卡：换行自适应，默认每卡 260 起 */
+function StatisticGroup(props) {
+    const { items, itemWidth, style } = props;
+    const { token } = (0, theme_1.useToken)();
+    return (react_1.default.createElement(components_1.View, { style: [{ flexDirection: 'row', flexWrap: 'wrap', gap: token.marginSM }, style] }, items.map((it, i) => (react_1.default.createElement(components_1.View, { key: i, style: { flex: itemWidth == null ? 1 : undefined, minWidth: itemWidth ?? 240 } },
+        react_1.default.createElement(StatCard, { ...it }))))));
+}
+exports.default = StatCard;

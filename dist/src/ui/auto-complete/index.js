@@ -1,1 +1,84 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.AutoComplete=AutoComplete;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme"),input_1=require("../input"),FadeIn_1=require("../../anim/FadeIn");function normalize(e){return"string"==typeof e?{value:e}:e}function AutoComplete(e){const{token:t}=(0,theme_1.useToken)(),{options:o,value:a,defaultValue:l="",placeholder:r,disabled:n,allowClear:u,autoFocus:i,size:c="middle",filterOption:s=!0,maxHeight:d=256,style:p,onChange:m,onSelect:_,onSearch:f}=e,[v,h]=react_1.default.useState(l),y=void 0!==a?a:v,[g,b]=react_1.default.useState(!!i),[E,w]=react_1.default.useState(-1),[S,C]=react_1.default.useState({w:0,h:0}),x=react_1.default.useRef(null),z=()=>{x.current&&(clearTimeout(x.current),x.current=null)},F=()=>{z(),x.current=setTimeout(()=>b(!1),150)};react_1.default.useEffect(()=>()=>z(),[]);const V=o.map(normalize),I=!1===s?V:V.filter(e=>"function"==typeof s?s(y,e.value):""===y||e.value.toLowerCase().includes(y.toLowerCase())),M=g&&!n&&I.length>0;return react_1.default.createElement(components_1.View,{style:[{position:"relative"},p],onLayout:e=>C({w:e.nativeEvent.layout.w,h:e.nativeEvent.layout.h})},react_1.default.createElement(input_1.Input,{value:y,placeholder:r,disabled:n,allowClear:u,autoFocus:i,size:c,style:{width:"100%"},onChange:e=>{void 0===a&&h(e),m&&m(e),f&&f(e)},onFocus:()=>b(!0),onBlur:F}),M?react_1.default.createElement(components_1.View,{style:{position:"absolute",zIndex:1050,left:0,top:S.h+t.marginXXS,width:S.w}},react_1.default.createElement(FadeIn_1.FadeIn,{duration:140},react_1.default.createElement(components_1.Pressable,{onPressIn:()=>{},onMouseEnter:z,onMouseLeave:F},react_1.default.createElement(components_1.View,{style:{backgroundColor:t.colorBgElevated,borderRadius:t.borderRadiusLG,borderWidth:t.lineWidth,borderColor:t.colorSplit,paddingVertical:t.paddingXXS}},react_1.default.createElement(components_1.ScrollView,{style:{maxHeight:d}},I.map((e,o)=>{const l=e.value===y,r=E===o?t.colorFillTertiary:l?t.colorPrimaryBg:"transparent";return react_1.default.createElement(components_1.Pressable,{key:`${e.value}-${o}`,onMouseEnter:()=>w(o),onMouseLeave:()=>w(e=>e===o?-1:e),onPress:()=>(e=>{void 0===a&&h(e),m&&m(e),_&&_(e),b(!1)})(e.value),style:{paddingHorizontal:t.paddingSM,paddingVertical:t.paddingXXS+2,backgroundColor:r}},"string"==typeof e.label||null==e.label?react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSize,color:l?t.colorPrimaryText:t.colorText}},e.label??e.value):react_1.default.createElement(components_1.View,null,e.label))})))))):null)}exports.default=AutoComplete;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AutoComplete = AutoComplete;
+// AUTOCOMPLETE：自动完成。Input + 过滤建议下拉。无 portal，面板绝对定位贴输入框下方。
+// 失焦与选项点击竞态：onBlur 延迟 150ms 关闭，鼠标移入面板即取消，保证选项点击先于关闭命中。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+const input_1 = require("../input");
+const FadeIn_1 = require("../../anim/FadeIn");
+function normalize(opt) {
+    return typeof opt === 'string' ? { value: opt } : opt;
+}
+function AutoComplete(props) {
+    const { token } = (0, theme_1.useToken)();
+    const { options, value, defaultValue = '', placeholder, disabled, allowClear, autoFocus, size = 'middle', filterOption = true, maxHeight = 256, style, onChange, onSelect, onSearch, } = props;
+    const [inner, setInner] = react_1.default.useState(defaultValue);
+    const text = value !== undefined ? value : inner;
+    const [open, setOpen] = react_1.default.useState(!!autoFocus);
+    const [hover, setHover] = react_1.default.useState(-1);
+    const [box, setBox] = react_1.default.useState({ w: 0, h: 0 });
+    const closeTimer = react_1.default.useRef(null);
+    const cancelClose = () => {
+        if (closeTimer.current) {
+            clearTimeout(closeTimer.current);
+            closeTimer.current = null;
+        }
+    };
+    const scheduleClose = () => {
+        cancelClose();
+        closeTimer.current = setTimeout(() => setOpen(false), 150);
+    };
+    react_1.default.useEffect(() => () => cancelClose(), []);
+    const norm = options.map(normalize);
+    const filtered = filterOption === false
+        ? norm
+        : norm.filter((o) => typeof filterOption === 'function'
+            ? filterOption(text, o.value)
+            : text === '' || o.value.toLowerCase().includes(text.toLowerCase()));
+    const showPanel = open && !disabled && filtered.length > 0;
+    const setText = (v) => {
+        if (value === undefined)
+            setInner(v);
+        onChange && onChange(v);
+        onSearch && onSearch(v);
+    };
+    const pick = (v) => {
+        if (value === undefined)
+            setInner(v);
+        onChange && onChange(v);
+        onSelect && onSelect(v);
+        setOpen(false);
+    };
+    return (react_1.default.createElement(components_1.View, { style: [{ position: 'relative' }, style], onLayout: (e) => setBox({ w: e.nativeEvent.layout.w, h: e.nativeEvent.layout.h }) },
+        react_1.default.createElement(input_1.Input, { value: text, placeholder: placeholder, disabled: disabled, allowClear: allowClear, autoFocus: autoFocus, size: size, style: { width: '100%' }, onChange: setText, onFocus: () => setOpen(true), onBlur: scheduleClose }),
+        showPanel ? (react_1.default.createElement(components_1.View, { style: {
+                position: 'absolute',
+                zIndex: 1050,
+                left: 0,
+                top: box.h + token.marginXXS,
+                width: box.w,
+            } },
+            react_1.default.createElement(FadeIn_1.FadeIn, { duration: 140 },
+                react_1.default.createElement(components_1.Pressable, { onPressIn: () => undefined, onMouseEnter: cancelClose, onMouseLeave: scheduleClose },
+                    react_1.default.createElement(components_1.View, { style: {
+                            backgroundColor: token.colorBgElevated,
+                            borderRadius: token.borderRadiusLG,
+                            borderWidth: token.lineWidth,
+                            borderColor: token.colorSplit,
+                            paddingVertical: token.paddingXXS,
+                        } },
+                        react_1.default.createElement(components_1.ScrollView, { style: { maxHeight } }, filtered.map((o, i) => {
+                            const activeItem = o.value === text;
+                            const bg = hover === i ? token.colorFillTertiary : activeItem ? token.colorPrimaryBg : 'transparent';
+                            return (react_1.default.createElement(components_1.Pressable, { key: `${o.value}-${i}`, onMouseEnter: () => setHover(i), onMouseLeave: () => setHover((h) => (h === i ? -1 : h)), onPress: () => pick(o.value), style: { paddingHorizontal: token.paddingSM, paddingVertical: token.paddingXXS + 2, backgroundColor: bg } }, typeof o.label === 'string' || o.label == null ? (react_1.default.createElement(components_1.Text, { style: {
+                                    fontSize: token.fontSize,
+                                    color: activeItem ? token.colorPrimaryText : token.colorText,
+                                } }, o.label ?? o.value)) : (react_1.default.createElement(components_1.View, null, o.label))));
+                        }))))))) : null));
+}
+exports.default = AutoComplete;

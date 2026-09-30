@@ -1,1 +1,133 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.QRCode=QRCode;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme"),icon_1=require("../icon"),spin_1=require("../spin");function hash(e){let t=2166136261;for(let o=0;o<e.length;o++)t^=e.charCodeAt(o),t=Math.imul(t,16777619)>>>0;return t>>>0}function prng(e){let t=e>>>0;return()=>{t|=0,t=t+1831565813|0;let e=Math.imul(t^t>>>15,1|t);return e=e+Math.imul(e^e>>>7,61|e)^e,((e^e>>>14)>>>0)/4294967296}}function buildMatrix(e,t){const o=Array.from({length:t},()=>Array(t).fill(!1)),r=(e,o)=>e<8&&o<8||e<8&&o>=t-8||e>=t-8&&o<8,n=(e,o)=>{const r=(e,t)=>0===e||6===e||0===t||6===t||e>=2&&e<=4&&t>=2&&t<=4;if(e<8&&o<8)return e<7&&o<7&&r(e,o);if(e<8&&o>=t-8){const n=o-(t-7);return e<7&&n>=0&&n<7&&r(e,n)}if(e>=t-8&&o<8){const n=e-(t-7);return n>=0&&n<7&&o<7&&r(n,o)}return!1},l=prng(hash(e||"flux"));for(let e=0;e<t;e++)for(let i=0;i<t;i++)r(e,i)?o[e][i]=n(e,i):o[e][i]=6!==e?6!==i?l()>.5:e%2==0:i%2==0;return o}function matrixToPath(e,t){let o="";for(let r=0;r<t;r++)for(let n=0;n<t;n++)e[r][n]&&(o+=`M${n} ${r}h1v1h-1z`);return o}function QRCode(e){const{token:t}=(0,theme_1.useToken)(),{value:o="",size:r=4*t.controlHeightLG,color:n,bgColor:l,bordered:i=!0,status:a="active",modules:c=25,icon:d,iconSize:s,onRefresh:u,statusRender:f,style:m}=e,p=n??t.colorText,_=l??t.colorBgContainer,b=react_1.default.useMemo(()=>matrixToPath(buildMatrix(o,c),c),[o,c]);return react_1.default.createElement(components_1.View,{style:[{width:r,height:r,padding:t.paddingXS,backgroundColor:_,borderRadius:t.borderRadiusLG,borderWidth:i?t.lineWidth:0,borderStyle:"solid",borderColor:t.colorBorderSecondary,alignItems:"center",justifyContent:"center"},m]},react_1.default.createElement(icon_1.Icon,{path:b,vb:c,mode:"fill",size:r-2*t.paddingXS,color:p}),null!=d&&"active"===a?react_1.default.createElement(components_1.View,{style:{position:"absolute",alignItems:"center",justifyContent:"center",width:s,height:s,padding:null==s?t.paddingXXS:0,backgroundColor:_,borderRadius:t.borderRadius}},d):null,f?react_1.default.createElement(components_1.View,{style:{position:"absolute",left:0,top:0,right:0,bottom:0,alignItems:"center",justifyContent:"center",backgroundColor:_,opacity:.92,borderRadius:t.borderRadiusLG}},f({status:a,onRefresh:u})):null,null==f&&"loading"===a?react_1.default.createElement(components_1.View,{style:{position:"absolute",left:0,top:0,right:0,bottom:0,alignItems:"center",justifyContent:"center",backgroundColor:_,opacity:.85,borderRadius:t.borderRadiusLG}},react_1.default.createElement(spin_1.Spin,null)):null,null==f&&"scanned"===a?react_1.default.createElement(components_1.View,{style:{position:"absolute",left:0,top:0,right:0,bottom:0,alignItems:"center",justifyContent:"center",backgroundColor:_,opacity:.92,borderRadius:t.borderRadiusLG}},react_1.default.createElement(icon_1.Icon,{name:"check",size:t.fontSizeXL,color:t.colorSuccess}),react_1.default.createElement(components_1.Text,{style:{marginTop:t.marginXS,fontSize:t.fontSizeSM,color:t.colorTextSecondary}},"已扫描")):null,null==f&&"expired"===a?react_1.default.createElement(components_1.Pressable,{onPress:u,style:{position:"absolute",left:0,top:0,right:0,bottom:0,alignItems:"center",justifyContent:"center",backgroundColor:_,opacity:.92,borderRadius:t.borderRadiusLG}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:t.colorTextSecondary}},"二维码已失效"),react_1.default.createElement(components_1.View,{style:{marginTop:t.marginXS,paddingHorizontal:t.paddingXS,paddingVertical:t.paddingXXS,borderRadius:t.borderRadius,borderWidth:t.lineWidth,borderStyle:"solid",borderColor:t.colorPrimary}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:t.colorPrimary}},"点击刷新"))):null)}exports.default=QRCode;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.QRCode = QRCode;
+// QRCODE：二维码展示。把 value 确定性映射成「类 QR 矩阵」（定位角 + 时序 + 数据模块），
+// 整张图编译成一条 fill path 交单个 Icon 节点绘制（节点数=1，性能友好）。
+// 说明：这是视觉忠实的占位实现（可辨识的 QR 外观 + 稳定 value→图案），未做可扫描的完整 QR 纠错编码（见 OPEN_QUESTIONS）。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+const icon_1 = require("../icon");
+const spin_1 = require("../spin");
+// FNV-1a 字符串哈希 → 32 位无符号
+function hash(str) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 16777619) >>> 0;
+    }
+    return h >>> 0;
+}
+// mulberry32：由 seed 产出确定性伪随机序列
+function prng(seed) {
+    let a = seed >>> 0;
+    return () => {
+        a |= 0;
+        a = (a + 0x6d2b79f5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+// 生成 N×N 布尔矩阵（true=黑）。finder 三定位角 + timing 时序 + 数据区按 value 哈希填充
+function buildMatrix(value, n) {
+    const m = Array.from({ length: n }, () => Array(n).fill(false));
+    const inFinder = (r, c) => (r < 8 && c < 8) || (r < 8 && c >= n - 8) || (r >= n - 8 && c < 8);
+    const finderAt = (r, c) => {
+        // 相对某定位角左上原点画 7×7 回字
+        const local = (lr, lc) => {
+            const ring = lr === 0 || lr === 6 || lc === 0 || lc === 6;
+            const core = lr >= 2 && lr <= 4 && lc >= 2 && lc <= 4;
+            return ring || core;
+        };
+        if (r < 8 && c < 8)
+            return r < 7 && c < 7 && local(r, c);
+        if (r < 8 && c >= n - 8) {
+            const lc = c - (n - 7);
+            return r < 7 && lc >= 0 && lc < 7 && local(r, lc);
+        }
+        if (r >= n - 8 && c < 8) {
+            const lr = r - (n - 7);
+            return lr >= 0 && lr < 7 && c < 7 && local(lr, c);
+        }
+        return false;
+    };
+    const rand = prng(hash(value || 'flux'));
+    for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+            if (inFinder(r, c)) {
+                m[r][c] = finderAt(r, c);
+                continue;
+            }
+            // 时序图案（第 6 行/列交替）
+            if (r === 6) {
+                m[r][c] = c % 2 === 0;
+                continue;
+            }
+            if (c === 6) {
+                m[r][c] = r % 2 === 0;
+                continue;
+            }
+            m[r][c] = rand() > 0.5;
+        }
+    }
+    return m;
+}
+// 矩阵 → 单条 fill path（每个黑格一个 1×1 矩形子路径）
+function matrixToPath(m, n) {
+    let d = '';
+    for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+            if (m[r][c])
+                d += `M${c} ${r}h1v1h-1z`;
+        }
+    }
+    return d;
+}
+function QRCode(props) {
+    const { token } = (0, theme_1.useToken)();
+    const { value = '', size = token.controlHeightLG * 4, color, bgColor, bordered = true, status = 'active', modules = 25, icon, iconSize, onRefresh, statusRender, style, } = props;
+    const fg = color ?? token.colorText;
+    const bg = bgColor ?? token.colorBgContainer;
+    const path = react_1.default.useMemo(() => matrixToPath(buildMatrix(value, modules), modules), [value, modules]);
+    return (react_1.default.createElement(components_1.View, { style: [
+            {
+                width: size,
+                height: size,
+                padding: token.paddingXS,
+                backgroundColor: bg,
+                borderRadius: token.borderRadiusLG,
+                borderWidth: bordered ? token.lineWidth : 0,
+                borderStyle: 'solid',
+                borderColor: token.colorBorderSecondary,
+                alignItems: 'center',
+                justifyContent: 'center',
+            },
+            style,
+        ] },
+        react_1.default.createElement(icon_1.Icon, { path: path, vb: modules, mode: "fill", size: size - token.paddingXS * 2, color: fg }),
+        icon != null && status === 'active' ? (react_1.default.createElement(components_1.View, { style: {
+                position: 'absolute',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: iconSize,
+                height: iconSize,
+                padding: iconSize == null ? token.paddingXXS : 0,
+                backgroundColor: bg,
+                borderRadius: token.borderRadius,
+            } }, icon)) : null,
+        statusRender ? (react_1.default.createElement(components_1.View, { style: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: bg, opacity: 0.92, borderRadius: token.borderRadiusLG } }, statusRender({ status, onRefresh }))) : null,
+        statusRender == null && status === 'loading' ? (react_1.default.createElement(components_1.View, { style: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: bg, opacity: 0.85, borderRadius: token.borderRadiusLG } },
+            react_1.default.createElement(spin_1.Spin, null))) : null,
+        statusRender == null && status === 'scanned' ? (react_1.default.createElement(components_1.View, { style: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: bg, opacity: 0.92, borderRadius: token.borderRadiusLG } },
+            react_1.default.createElement(icon_1.Icon, { name: "check", size: token.fontSizeXL, color: token.colorSuccess }),
+            react_1.default.createElement(components_1.Text, { style: { marginTop: token.marginXS, fontSize: token.fontSizeSM, color: token.colorTextSecondary } }, "\u5DF2\u626B\u63CF"))) : null,
+        statusRender == null && status === 'expired' ? (react_1.default.createElement(components_1.Pressable, { onPress: onRefresh, style: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: bg, opacity: 0.92, borderRadius: token.borderRadiusLG } },
+            react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: token.colorTextSecondary } }, "\u4E8C\u7EF4\u7801\u5DF2\u5931\u6548"),
+            react_1.default.createElement(components_1.View, { style: { marginTop: token.marginXS, paddingHorizontal: token.paddingXS, paddingVertical: token.paddingXXS, borderRadius: token.borderRadius, borderWidth: token.lineWidth, borderStyle: 'solid', borderColor: token.colorPrimary } },
+                react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: token.colorPrimary } }, "\u70B9\u51FB\u5237\u65B0")))) : null));
+}
+exports.default = QRCode;

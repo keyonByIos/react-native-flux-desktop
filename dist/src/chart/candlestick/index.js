@@ -1,1 +1,202 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.movingAverage=movingAverage,exports.CandlestickChart=CandlestickChart;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme"),common_1=require("../core/common"),scale_1=require("../core/scale"),theme_2=require("../core/theme"),grid_1=require("../core/grid"),mark_1=require("../core/mark"),clamp01=e=>Math.max(0,Math.min(1,e));function movingAverage(e,t){const o=[];let l=0;for(let a=0;a<e.length;a++)l+=e[a],a>=t&&(l-=e[a-t]),o.push(a>=t-1?l/t:null);return o}const PAD_L=54,PAD_R=14,PAD_T=12,PAD_B=22,VOL_H=52,VOL_GAP=10;function CandlestickChart(e){const t=(0,common_1.useChartTheme)(),{token:o}=(0,theme_1.useToken)(),{data:l,xField:a="date",openField:n="open",highField:i="high",lowField:r="low",closeField:c="close",volumeField:s,upColor:u,downColor:h,hollowUp:m=!1,showVolume:p,height:_=320,width:d,animation:f=!0,animateDuration:b=1e3,stagger:g=.6,yFormatter:w=e=>e.toFixed(2),overlays:y,grid:x,variant:A="candle",showXAxis:k=!0,tooltip:E=!0,style:D}=e,[P,v]=(0,common_1.useMeasuredWidth)(d??560),M=d??P,T=(0,common_1.useEnter)(f,b),C=u??o.colorError,L=h??o.colorSuccess,S=(p??!!s)&&!!s,V=l.map(e=>({label:String(e[a]),o:Number(e[n]),h:Number(e[i]),l:Number(e[r]),c:Number(e[c]),v:s&&Number(e[s])||0})).filter(e=>Number.isFinite(e.o)&&Number.isFinite(e.h)&&Number.isFinite(e.l)&&Number.isFinite(e.c)),F=V.length,N=Math.max(0,M-PAD_L-PAD_R),z=k?PAD_B:0,$=S?VOL_H+VOL_GAP:0,O=Math.max(0,_-PAD_T-z-$),q=PAD_T,R=PAD_T+O;let H=F?Math.min(...V.map(e=>e.l)):0,G=F?Math.max(...V.map(e=>e.h)):1;Number.isFinite(H)&&Number.isFinite(G)&&H!==G||(H=(G||1)-1,G=(G||1)+1);const W=.06*(G-H),B=(0,scale_1.linearTicks)(H-W,G+W,4),j=B[0],I=B[B.length-1],U=(0,scale_1.linearScale)([j,I],[R,q]),X=(0,scale_1.bandScale)(F,[PAD_L,PAD_L+N],{paddingInner:.62,paddingOuter:.24}),J=Math.max(2,Math.min(X.bandwidth,9)),K=e=>X.scale(e)+X.bandwidth/2,Q=Math.max(1,...V.map(e=>e.v)),Y=R+VOL_GAP,Z=Y+VOL_H,ee=(0,scale_1.linearScale)([0,Q],[Z,Y]),te=[];te.push(react_1.default.createElement(grid_1.GridLines,{key:"grid",area:{left:PAD_L,top:q,width:N,height:O},horizontal:B.map(e=>U(e)),vertical:x?.vertical?V.map((e,t)=>K(t)):[],config:x,fallbackColor:t.gridLine})),B.forEach((e,o)=>{const l=U(e);te.push(react_1.default.createElement(components_1.Text,{key:`yl${o}`,style:{position:"absolute",right:M-PAD_L+8,top:l-t.labelSize,width:PAD_L-10,textAlign:"right",fontSize:t.labelSize,color:t.label}},w(e)))}),V.forEach((e,t)=>{const o=(e=>clamp01((T-(F<=1?0:e/F*g))/(1-g)))(t);if(o<=0)return;const l=e.c>=e.o,a=l?C:L,n=K(t),i=U((e.o+e.c)/2),r=e=>i+(e-i)*o,c=r(U(e.h)),s=r(U(e.l)),u=r(U(e.o)),h=r(U(e.c)),p=Math.min(u,h),_=Math.max(1,Math.abs(h-u));if("ohlc"===A)te.push(react_1.default.createElement(components_1.View,{key:`ol${t}`,style:{position:"absolute",left:n-.75,top:c,width:1.5,height:Math.max(0,s-c),backgroundColor:a}})),te.push(react_1.default.createElement(components_1.View,{key:`oo${t}`,style:{position:"absolute",left:n-J/2,top:u-.75,width:J/2,height:1.5,backgroundColor:a}})),te.push(react_1.default.createElement(components_1.View,{key:`oc${t}`,style:{position:"absolute",left:n,top:h-.75,width:J/2,height:1.5,backgroundColor:a}}));else{te.push(react_1.default.createElement(components_1.View,{key:`wk${t}`,style:{position:"absolute",left:n-.75,top:c,width:1.5,height:Math.max(0,s-c),backgroundColor:a}}));const e=m&&l;te.push(react_1.default.createElement(components_1.View,{key:`bd${t}`,style:{position:"absolute",left:n-J/2,top:p,width:J,height:_,borderRadius:0,backgroundColor:e?"transparent":a,borderWidth:e?1:0,borderColor:a}}))}if(S){const l=Z-(Z-ee(e.v))*o;te.push(react_1.default.createElement(components_1.View,{key:`vb${t}`,style:{position:"absolute",left:n-J/2,top:l,width:J,height:Math.max(0,Z-l),backgroundColor:(0,theme_2.withAlpha)(a,"AA")}}))}});const oe=(y??[]).map((e,o)=>e.color??t.palette[(o+2)%t.palette.length]);(y??[]).forEach((e,t)=>{const o=[];V.forEach((t,l)=>{const a=e.values[l];null!=a&&Number.isFinite(a)&&o.push([K(l),U(a)])});const l=o.slice(0,Math.max(0,Math.ceil(o.length*T)));l.length>1&&te.push(react_1.default.createElement(mark_1.Segments,{key:`ov${t}`,pts:l,color:oe[t],width:e.width??1.5}))});const le=Math.max(1,Math.ceil(F/6));V.forEach((e,o)=>{k&&(o%le!==0&&o!==F-1||te.push(react_1.default.createElement(components_1.Text,{key:`xl${o}`,numberOfLines:1,style:{position:"absolute",left:K(o)-N/12,top:(S?Z:R)+6,width:N/6,textAlign:"center",fontSize:t.labelSize,color:t.label}},e.label)))}),S&&(te.push(react_1.default.createElement(components_1.View,{key:"vbase",style:{position:"absolute",left:PAD_L,top:Z,width:N,height:1,backgroundColor:t.axisLine}})),te.push(react_1.default.createElement(components_1.Text,{key:"vlbl",style:{position:"absolute",left:PAD_L+4,top:Y-2,fontSize:t.labelSize,color:t.label}},"成交量")));const ae=[{name:"阳线 (涨)",color:C},{name:"阴线 (跌)",color:L}];(y??[]).forEach((e,t)=>ae.push({name:e.name??`均线${t+1}`,color:oe[t]}));const[ne,ie]=react_1.default.useState(()=>{const e="undefined"!=typeof process?process.env.FLUX_CHART_HOVER:void 0,t=null!=e?Number(e):NaN;return Number.isInteger(t)&&t>=0&&t<F?t:null}),re=null!=ne?V[ne]:null,ce=!!re&&re.c>=re.o,se=re&&0!==re.o?(re.c-re.o)/re.o*100:0,ue=null!=ne?K(ne)+14+168>M?Math.max(4,K(ne)-14-168):K(ne)+14:0,he=E&&F>0?V.map((e,t)=>react_1.default.createElement(components_1.Pressable,{key:`hb${t}`,onMouseEnter:()=>ie(t),onMouseLeave:()=>ie(e=>e===t?null:e),style:{position:"absolute",left:Math.max(PAD_L,K(t)-X.step/2),top:PAD_T,width:X.step,height:(S?Z:R)-PAD_T}})):null,me=(e,o,l)=>react_1.default.createElement(components_1.View,{key:e,style:{flexDirection:"row",justifyContent:"space-between"}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.labelSize,color:t.tooltipText,opacity:.7}},e),react_1.default.createElement(components_1.Text,{style:{fontSize:t.labelSize,color:l,fontWeight:"600"}},o));return react_1.default.createElement(components_1.View,{style:[{gap:t.labelSize},D],onLayout:v},react_1.default.createElement(components_1.View,{style:{width:M,height:_,position:"relative"}},te,he,re?react_1.default.createElement(components_1.View,{style:{position:"absolute",left:K(ne),top:PAD_T,width:1,height:(S?Z:R)-PAD_T,backgroundColor:(0,theme_2.withAlpha)(t.tooltipText,"55")}}):null,re?react_1.default.createElement(components_1.View,{style:{position:"absolute",left:ue,top:PAD_T+6,width:168,backgroundColor:t.tooltipBg,borderRadius:6,padding:8,gap:4}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.labelSize,color:t.tooltipText,fontWeight:"600"}},re.label),me("开",w(re.o),t.tooltipText),me("收",w(re.c),ce?C:L),me("高",w(re.h),t.tooltipText),me("低",w(re.l),t.tooltipText),me("涨跌幅",`${se>=0?"+":""}${se.toFixed(2)}%`,ce?C:L),S?me("量",(0,scale_1.compactNumber)(re.v),t.tooltipText):null):null),react_1.default.createElement(common_1.ChartLegend,{items:ae}))}exports.default=CandlestickChart;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.movingAverage = movingAverage;
+exports.CandlestickChart = CandlestickChart;
+// Candlestick：K线图 / 蜡烛图（金融专属）。每根蜡烛 = 实体（开→收）+ 上下影线（高/低）。
+// 价轴为连续数值、不从 0 起（用 linearTicks 跨 [最低,最高] 定标），x 为时间类目（band 定位）。
+// 全为轴对齐矩形 + 竖线，无斜边 → View 拼装即可，天然无锯齿（区别于漏斗梯形的斜边 path 方案）。
+// 可选成交量副图：底部量柱，颜色随该根涨跌。入场：每根蜡烛自实体中心竖向生长、左右错峰。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+const common_1 = require("../core/common");
+const scale_1 = require("../core/scale");
+const theme_2 = require("../core/theme");
+const grid_1 = require("../core/grid");
+const mark_1 = require("../core/mark");
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
+/** 简单移动平均：对 close 序列取 window 均线，不足窗口的前项返回 null。 */
+function movingAverage(values, window) {
+    const out = [];
+    let sum = 0;
+    for (let i = 0; i < values.length; i++) {
+        sum += values[i];
+        if (i >= window)
+            sum -= values[i - window];
+        out.push(i >= window - 1 ? sum / window : null);
+    }
+    return out;
+}
+const PAD_L = 54;
+const PAD_R = 14;
+const PAD_T = 12;
+const PAD_B = 22;
+const VOL_H = 52;
+const VOL_GAP = 10;
+function CandlestickChart(props) {
+    const theme = (0, common_1.useChartTheme)();
+    const { token } = (0, theme_1.useToken)();
+    const { data, xField = 'date', openField = 'open', highField = 'high', lowField = 'low', closeField = 'close', volumeField, upColor, downColor, hollowUp = false, showVolume, height = 320, width, animation = true, animateDuration = 1000, stagger = 0.6, yFormatter = (v) => v.toFixed(2), overlays, grid, variant = 'candle', showXAxis = true, tooltip = true, style, } = props;
+    const [measured, onLayout] = (0, common_1.useMeasuredWidth)(width ?? 560);
+    const w = width ?? measured;
+    const p = (0, common_1.useEnter)(animation, animateDuration);
+    const up = upColor ?? token.colorError;
+    const down = downColor ?? token.colorSuccess;
+    const showVol = (showVolume ?? !!volumeField) && !!volumeField;
+    const rows = data
+        .map((r) => ({
+        label: String(r[xField]),
+        o: Number(r[openField]),
+        h: Number(r[highField]),
+        l: Number(r[lowField]),
+        c: Number(r[closeField]),
+        v: volumeField ? Number(r[volumeField]) || 0 : 0,
+    }))
+        .filter((r) => Number.isFinite(r.o) && Number.isFinite(r.h) && Number.isFinite(r.l) && Number.isFinite(r.c));
+    const n = rows.length;
+    const plotW = Math.max(0, w - PAD_L - PAD_R);
+    const bottomPad = showXAxis ? PAD_B : 0;
+    const volArea = showVol ? VOL_H + VOL_GAP : 0;
+    const priceH = Math.max(0, height - PAD_T - bottomPad - volArea);
+    const priceTop = PAD_T;
+    const priceBot = PAD_T + priceH;
+    let lo = n ? Math.min(...rows.map((r) => r.l)) : 0;
+    let hi = n ? Math.max(...rows.map((r) => r.h)) : 1;
+    if (!Number.isFinite(lo) || !Number.isFinite(hi) || lo === hi) {
+        lo = (hi || 1) - 1;
+        hi = (hi || 1) + 1;
+    }
+    const pad = (hi - lo) * 0.06;
+    const ticks = (0, scale_1.linearTicks)(lo - pad, hi + pad, 4);
+    const d0 = ticks[0];
+    const d1 = ticks[ticks.length - 1];
+    const sy = (0, scale_1.linearScale)([d0, d1], [priceBot, priceTop]);
+    const band = (0, scale_1.bandScale)(n, [PAD_L, PAD_L + plotW], { paddingInner: 0.62, paddingOuter: 0.24 });
+    const bw = Math.max(2, Math.min(band.bandwidth, 9));
+    const cx = (i) => band.scale(i) + band.bandwidth / 2;
+    const maxV = Math.max(1, ...rows.map((r) => r.v));
+    const volTop = priceBot + VOL_GAP;
+    const volBot = volTop + VOL_H;
+    const vy = (0, scale_1.linearScale)([0, maxV], [volBot, volTop]);
+    const seg = (i) => {
+        const start = n <= 1 ? 0 : (i / n) * stagger;
+        return clamp01((p - start) / (1 - stagger));
+    };
+    const nodes = [];
+    // 价格网格（横 / 可选纵）+ 价格刻度
+    nodes.push(react_1.default.createElement(grid_1.GridLines, { key: "grid", area: { left: PAD_L, top: priceTop, width: plotW, height: priceH }, horizontal: ticks.map((t) => sy(t)), vertical: grid?.vertical ? rows.map((_, i) => cx(i)) : [], config: grid, fallbackColor: theme.gridLine }));
+    ticks.forEach((t, i) => {
+        const y = sy(t);
+        nodes.push(react_1.default.createElement(components_1.Text, { key: `yl${i}`, style: { position: 'absolute', right: w - PAD_L + 8, top: y - theme.labelSize, width: PAD_L - 10, textAlign: 'right', fontSize: theme.labelSize, color: theme.label } }, yFormatter(t)));
+    });
+    // 蜡烛
+    rows.forEach((r, i) => {
+        const t = seg(i);
+        if (t <= 0)
+            return;
+        const isUp = r.c >= r.o;
+        const col = isUp ? up : down;
+        const center = cx(i);
+        const midY = sy((r.o + r.c) / 2);
+        const grow = (y) => midY + (y - midY) * t;
+        const yH = grow(sy(r.h));
+        const yL = grow(sy(r.l));
+        const yO = grow(sy(r.o));
+        const yC = grow(sy(r.c));
+        const bodyTop = Math.min(yO, yC);
+        const bodyH = Math.max(1, Math.abs(yC - yO));
+        if (variant === 'ohlc') {
+            // 竹线：高低价竖线 + 左开盘短划 + 右收盘短划（全轴对齐，无锯齿）
+            nodes.push(react_1.default.createElement(components_1.View, { key: `ol${i}`, style: { position: 'absolute', left: center - 0.75, top: yH, width: 1.5, height: Math.max(0, yL - yH), backgroundColor: col } }));
+            nodes.push(react_1.default.createElement(components_1.View, { key: `oo${i}`, style: { position: 'absolute', left: center - bw / 2, top: yO - 0.75, width: bw / 2, height: 1.5, backgroundColor: col } }));
+            nodes.push(react_1.default.createElement(components_1.View, { key: `oc${i}`, style: { position: 'absolute', left: center, top: yC - 0.75, width: bw / 2, height: 1.5, backgroundColor: col } }));
+        }
+        else {
+            // 影线
+            nodes.push(react_1.default.createElement(components_1.View, { key: `wk${i}`, style: { position: 'absolute', left: center - 0.75, top: yH, width: 1.5, height: Math.max(0, yL - yH), backgroundColor: col } }));
+            // 实体
+            const hollow = hollowUp && isUp;
+            nodes.push(react_1.default.createElement(components_1.View, { key: `bd${i}`, style: {
+                    position: 'absolute',
+                    left: center - bw / 2,
+                    top: bodyTop,
+                    width: bw,
+                    height: bodyH,
+                    borderRadius: 0,
+                    backgroundColor: hollow ? 'transparent' : col,
+                    borderWidth: hollow ? 1 : 0,
+                    borderColor: col,
+                } }));
+        }
+        // 量柱
+        if (showVol) {
+            const vTop = volBot - (volBot - vy(r.v)) * t;
+            nodes.push(react_1.default.createElement(components_1.View, { key: `vb${i}`, style: { position: 'absolute', left: center - bw / 2, top: vTop, width: bw, height: Math.max(0, volBot - vTop), backgroundColor: (0, theme_2.withAlpha)(col, 'AA') } }));
+        }
+    });
+    // 叠加折线（均线等）：与蜡烛共享价格轴，按入场进度 p 沿 x 逐步揭示（K 线与折线重叠）
+    const ovColors = (overlays ?? []).map((ov, oi) => ov.color ?? theme.palette[(oi + 2) % theme.palette.length]);
+    (overlays ?? []).forEach((ov, oi) => {
+        const pts = [];
+        rows.forEach((_, i) => {
+            const v = ov.values[i];
+            if (v == null || !Number.isFinite(v))
+                return;
+            pts.push([cx(i), sy(v)]);
+        });
+        const shown = pts.slice(0, Math.max(0, Math.ceil(pts.length * p)));
+        if (shown.length > 1)
+            nodes.push(react_1.default.createElement(mark_1.Segments, { key: `ov${oi}`, pts: shown, color: ovColors[oi], width: ov.width ?? 1.5 }));
+    });
+    // 时间标签（抽稀）
+    const lstep = Math.max(1, Math.ceil(n / 6));
+    rows.forEach((r, i) => {
+        if (!showXAxis)
+            return;
+        if (i % lstep !== 0 && i !== n - 1)
+            return;
+        nodes.push(react_1.default.createElement(components_1.Text, { key: `xl${i}`, numberOfLines: 1, style: { position: 'absolute', left: cx(i) - plotW / 12, top: (showVol ? volBot : priceBot) + 6, width: plotW / 6, textAlign: 'center', fontSize: theme.labelSize, color: theme.label } }, r.label));
+    });
+    if (showVol) {
+        nodes.push(react_1.default.createElement(components_1.View, { key: "vbase", style: { position: 'absolute', left: PAD_L, top: volBot, width: plotW, height: 1, backgroundColor: theme.axisLine } }));
+        nodes.push(react_1.default.createElement(components_1.Text, { key: "vlbl", style: { position: 'absolute', left: PAD_L + 4, top: volTop - 2, fontSize: theme.labelSize, color: theme.label } }, "\u6210\u4EA4\u91CF"));
+    }
+    const legendItems = [
+        { name: '阳线 (涨)', color: up },
+        { name: '阴线 (跌)', color: down },
+    ];
+    (overlays ?? []).forEach((ov, oi) => legendItems.push({ name: ov.name ?? `均线${oi + 1}`, color: ovColors[oi] }));
+    // 逐根悬浮：命中带按 band 步进铺满全宽（矩形命中，与 heatmap 同法）；抓帧可由 FLUX_CHART_HOVER 预设
+    const [hoverIdx, setHoverIdx] = react_1.default.useState(() => {
+        const env = typeof process !== 'undefined' ? process.env.FLUX_CHART_HOVER : undefined;
+        const k = env != null ? Number(env) : NaN;
+        return Number.isInteger(k) && k >= 0 && k < n ? k : null;
+    });
+    const TIP_W = 168;
+    const hr = hoverIdx != null ? rows[hoverIdx] : null;
+    const hUp = hr ? hr.c >= hr.o : false;
+    const hPct = hr && hr.o !== 0 ? ((hr.c - hr.o) / hr.o) * 100 : 0;
+    const tipLeft = hoverIdx != null ? (cx(hoverIdx) + 14 + TIP_W > w ? Math.max(4, cx(hoverIdx) - 14 - TIP_W) : cx(hoverIdx) + 14) : 0;
+    const hoverBands = tooltip && n > 0 ? rows.map((_, i) => (react_1.default.createElement(components_1.Pressable, { key: `hb${i}`, onMouseEnter: () => setHoverIdx(i), onMouseLeave: () => setHoverIdx((cur) => (cur === i ? null : cur)), style: { position: 'absolute', left: Math.max(PAD_L, cx(i) - band.step / 2), top: PAD_T, width: band.step, height: (showVol ? volBot : priceBot) - PAD_T } }))) : null;
+    const tipRow = (k, v, col) => (react_1.default.createElement(components_1.View, { key: k, style: { flexDirection: 'row', justifyContent: 'space-between' } },
+        react_1.default.createElement(components_1.Text, { style: { fontSize: theme.labelSize, color: theme.tooltipText, opacity: 0.7 } }, k),
+        react_1.default.createElement(components_1.Text, { style: { fontSize: theme.labelSize, color: col, fontWeight: '600' } }, v)));
+    return (react_1.default.createElement(components_1.View, { style: [{ gap: theme.labelSize }, style], onLayout: onLayout },
+        react_1.default.createElement(components_1.View, { style: { width: w, height, position: 'relative' } },
+            nodes,
+            hoverBands,
+            hr ? (react_1.default.createElement(components_1.View, { style: { position: 'absolute', left: cx(hoverIdx), top: PAD_T, width: 1, height: (showVol ? volBot : priceBot) - PAD_T, backgroundColor: (0, theme_2.withAlpha)(theme.tooltipText, '55') } })) : null,
+            hr ? (react_1.default.createElement(components_1.View, { style: { position: 'absolute', left: tipLeft, top: PAD_T + 6, width: TIP_W, backgroundColor: theme.tooltipBg, borderRadius: 6, padding: 8, gap: 4 } },
+                react_1.default.createElement(components_1.Text, { style: { fontSize: theme.labelSize, color: theme.tooltipText, fontWeight: '600' } }, hr.label),
+                tipRow('开', yFormatter(hr.o), theme.tooltipText),
+                tipRow('收', yFormatter(hr.c), hUp ? up : down),
+                tipRow('高', yFormatter(hr.h), theme.tooltipText),
+                tipRow('低', yFormatter(hr.l), theme.tooltipText),
+                tipRow('涨跌幅', `${hPct >= 0 ? '+' : ''}${hPct.toFixed(2)}%`, hUp ? up : down),
+                showVol ? tipRow('量', (0, scale_1.compactNumber)(hr.v), theme.tooltipText) : null)) : null),
+        react_1.default.createElement(common_1.ChartLegend, { items: legendItems })));
+}
+exports.default = CandlestickChart;

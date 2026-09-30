@@ -1,1 +1,58 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.Address=Address;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme"),icon_1=require("../../ui/icon"),tag_1=require("../../ui/tag"),qr_code_1=require("../../ui/qr-code"),avatar_1=require("../avatar"),utils_1=require("../utils"),SIZE_MAP={small:"fontSizeSM",middle:"fontSize",large:"fontSizeLG"};function Address(e){const{token:t}=(0,theme_1.useToken)(),{address:r,name:a,chain:o,chainColor:n,truncated:l=!0,prefix:c,copyable:i=!0,scanCode:s=!0,openInExplorer:d=!1,size:u="middle",style:m}=e,[_,f]=react_1.default.useState(!1),[g,p]=react_1.default.useState(!1),y=a??(!1===l?r:(0,utils_1.truncateAddress)(r,"object"==typeof l?l.lead??6:6,"object"==typeof l?l.trail??4:4)),S=t[SIZE_MAP[u]],E="small"===u?t.controlHeightSM:"large"===u?t.controlHeight:t.fontSizeLG;return react_1.default.createElement(components_1.View,{style:[{flexDirection:"row",alignItems:"center",alignSelf:"flex-start"},m]},!1!==c?react_1.default.createElement(components_1.View,{style:{marginRight:t.marginXS}},c??react_1.default.createElement(avatar_1.Web3Avatar,{address:r,size:E,shape:"circle"})):null,react_1.default.createElement(components_1.Text,{selectable:!0,style:{fontSize:S,color:t.colorText}},y),o?react_1.default.createElement(components_1.View,{style:{marginLeft:t.marginXS}},react_1.default.createElement(tag_1.Tag,{color:n??"processing"},o)):null,i?react_1.default.createElement(components_1.Pressable,{onPress:()=>{f(!0),setTimeout(()=>f(!1),1600)},style:{marginLeft:t.marginXS,alignItems:"center",justifyContent:"center"}},react_1.default.createElement(icon_1.Icon,{name:_?"check":"copy",size:S,color:_?t.colorSuccess:t.colorTextTertiary,strokeWidth:2})):null,s?react_1.default.createElement(components_1.Pressable,{onPress:()=>p(e=>!e),style:{marginLeft:t.marginSM,alignItems:"center",justifyContent:"center"}},react_1.default.createElement(icon_1.Icon,{name:"camera",size:S,color:g?t.colorPrimary:t.colorTextTertiary,strokeWidth:2})):null,d?react_1.default.createElement(components_1.Pressable,{style:{marginLeft:t.marginSM,alignItems:"center",justifyContent:"center"}},react_1.default.createElement(icon_1.Icon,{name:"link",size:S,color:t.colorLink,strokeWidth:2})):null,g?react_1.default.createElement(components_1.View,{style:{position:"absolute",left:0,top:E+t.marginXS,padding:t.paddingSM,backgroundColor:t.colorBgElevated,borderRadius:t.borderRadiusLG,borderWidth:t.lineWidth,borderColor:t.colorBorderSecondary,zIndex:10}},react_1.default.createElement(qr_code_1.QRCode,{value:r,size:140,bordered:!1})):null)}exports.default=Address;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Address = Address;
+// Address：加密货币地址的展示组件（参照 @ant-design/web3 Address，仅展示）。
+// 一行内：地址身份头像（可关）/ ENS 或截断地址 / 链标签 / 复制（点击→勾选反馈，纯展示不落盘）/
+// 二维码（点图标→下方浮出 QRCode 卡片）/ 浏览器外链图标。轴对齐 + 复用现成原子件，无自绘斜边。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+const icon_1 = require("../../ui/icon");
+const tag_1 = require("../../ui/tag");
+const qr_code_1 = require("../../ui/qr-code");
+const avatar_1 = require("../avatar");
+const utils_1 = require("../utils");
+const SIZE_MAP = { small: 'fontSizeSM', middle: 'fontSize', large: 'fontSizeLG' };
+function Address(props) {
+    const { token } = (0, theme_1.useToken)();
+    const { address, name, chain, chainColor, truncated = true, prefix, copyable = true, scanCode = true, openInExplorer = false, size = 'middle', style, } = props;
+    const [copied, setCopied] = react_1.default.useState(false);
+    const [qr, setQr] = react_1.default.useState(false);
+    const shown = name ??
+        (truncated === false
+            ? address
+            : (0, utils_1.truncateAddress)(address, typeof truncated === 'object' ? truncated.lead ?? 6 : 6, typeof truncated === 'object' ? truncated.trail ?? 4 : 4));
+    const fs = token[SIZE_MAP[size]];
+    const avatarPx = size === 'small' ? token.controlHeightSM : size === 'large' ? token.controlHeight : token.fontSizeLG;
+    const doCopy = () => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1600);
+    };
+    return (react_1.default.createElement(components_1.View, { style: [{ flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start' }, style] },
+        prefix !== false ? (react_1.default.createElement(components_1.View, { style: { marginRight: token.marginXS } }, prefix ?? react_1.default.createElement(avatar_1.Web3Avatar, { address: address, size: avatarPx, shape: "circle" }))) : null,
+        react_1.default.createElement(components_1.Text, { selectable: true, style: { fontSize: fs, color: token.colorText } }, shown),
+        chain ? (react_1.default.createElement(components_1.View, { style: { marginLeft: token.marginXS } },
+            react_1.default.createElement(tag_1.Tag, { color: chainColor ?? 'processing' }, chain))) : null,
+        copyable ? (react_1.default.createElement(components_1.Pressable, { onPress: doCopy, style: { marginLeft: token.marginXS, alignItems: 'center', justifyContent: 'center' } },
+            react_1.default.createElement(icon_1.Icon, { name: copied ? 'check' : 'copy', size: fs, color: copied ? token.colorSuccess : token.colorTextTertiary, strokeWidth: 2 }))) : null,
+        scanCode ? (react_1.default.createElement(components_1.Pressable, { onPress: () => setQr((v) => !v), style: { marginLeft: token.marginSM, alignItems: 'center', justifyContent: 'center' } },
+            react_1.default.createElement(icon_1.Icon, { name: "camera", size: fs, color: qr ? token.colorPrimary : token.colorTextTertiary, strokeWidth: 2 }))) : null,
+        openInExplorer ? (react_1.default.createElement(components_1.Pressable, { style: { marginLeft: token.marginSM, alignItems: 'center', justifyContent: 'center' } },
+            react_1.default.createElement(icon_1.Icon, { name: "link", size: fs, color: token.colorLink, strokeWidth: 2 }))) : null,
+        qr ? (react_1.default.createElement(components_1.View, { style: {
+                position: 'absolute',
+                left: 0,
+                top: avatarPx + token.marginXS,
+                padding: token.paddingSM,
+                backgroundColor: token.colorBgElevated,
+                borderRadius: token.borderRadiusLG,
+                borderWidth: token.lineWidth,
+                borderColor: token.colorBorderSecondary,
+                zIndex: 10,
+            } },
+            react_1.default.createElement(qr_code_1.QRCode, { value: address, size: 140, bordered: false }))) : null));
+}
+exports.default = Address;

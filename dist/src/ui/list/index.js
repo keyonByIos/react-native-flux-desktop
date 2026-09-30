@@ -1,1 +1,70 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.List=void 0;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme"),spin_1=require("../spin"),ListContext=react_1.default.createContext({itemLayout:"vertical"});function ListItem(e){const{token:t}=(0,theme_1.useToken)(),{children:o,actions:r,extra:n,style:l}=e,{itemLayout:a}=react_1.default.useContext(ListContext),i="horizontal"===a,c=react_1.default.createElement(components_1.View,{style:{flex:1}},o,r&&r.length?react_1.default.createElement(components_1.View,{style:{flexDirection:"row",alignItems:"center",marginTop:t.marginXS}},r.map((e,o)=>react_1.default.createElement(react_1.default.Fragment,{key:o},o>0?react_1.default.createElement(components_1.View,{style:{width:t.lineWidth,height:t.fontSize,backgroundColor:t.colorSplit,marginHorizontal:t.marginSM}}):null,react_1.default.createElement(components_1.View,null,"string"==typeof e?react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSize,color:t.colorTextSecondary}},e):e)))):null);return i?react_1.default.createElement(components_1.View,{style:[{flexDirection:"row",alignItems:"flex-start"},l]},c,null!=n?react_1.default.createElement(components_1.View,{style:{marginLeft:t.margin}},n):null):react_1.default.createElement(components_1.View,{style:l},c,null!=n?react_1.default.createElement(components_1.View,{style:{marginTop:t.marginSM}},n):null)}function ListBase(e){const{token:t}=(0,theme_1.useToken)(),{dataSource:o=[],renderItem:r,header:n,footer:l,bordered:a=!1,split:i=!0,size:c="default",loading:d=!1,itemLayout:s="vertical",loadMore:u,style:m}=e,p="small"===c?t.paddingXS:"large"===c?t.padding:t.paddingSM;return react_1.default.createElement(components_1.View,{style:[{backgroundColor:t.colorBgContainer,borderRadius:t.borderRadiusLG,borderWidth:a?t.lineWidth:0,borderColor:t.colorBorderSecondary,overflow:"hidden"},m]},null!=n?react_1.default.createElement(components_1.View,{style:{paddingHorizontal:p,paddingVertical:t.paddingXS,borderBottomWidth:t.lineWidth,borderBottomColor:t.colorBorderSecondary}},"string"==typeof n?react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSize,fontWeight:"500",color:t.colorText}},n):n):null,react_1.default.createElement(spin_1.Spin,{spinning:d},react_1.default.createElement(ListContext.Provider,{value:{itemLayout:s}},o.map((e,n)=>react_1.default.createElement(components_1.View,{key:n,style:{paddingHorizontal:p,paddingVertical:p,borderBottomWidth:i&&n<o.length-1?t.lineWidth:0,borderBottomColor:t.colorSplit}},r?r(e,n):null)))),null!=u?react_1.default.createElement(components_1.View,{style:{padding:p}},u):null,null!=l?react_1.default.createElement(components_1.View,{style:{paddingHorizontal:p,paddingVertical:t.paddingXS,borderTopWidth:t.lineWidth,borderTopColor:t.colorBorderSecondary,backgroundColor:t.colorFillQuaternary}},l):null)}exports.List=Object.assign(ListBase,{Item:ListItem}),exports.default=exports.List;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.List = void 0;
+// List：数据列表。header / footer / 分隔线 / 斑马可选，loading 复用 Spin。
+// 参考 antd v5：dataSource + renderItem；List.Item 复合组件支持 actions / extra / itemLayout。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+const spin_1 = require("../spin");
+const ListContext = react_1.default.createContext({ itemLayout: 'vertical' });
+function ListItem(props) {
+    const { token } = (0, theme_1.useToken)();
+    const { children, actions, extra, style } = props;
+    const { itemLayout } = react_1.default.useContext(ListContext);
+    const horizontal = itemLayout === 'horizontal';
+    const content = (react_1.default.createElement(components_1.View, { style: { flex: 1 } },
+        children,
+        actions && actions.length ? (react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', alignItems: 'center', marginTop: token.marginXS } }, actions.map((a, i) => (react_1.default.createElement(react_1.default.Fragment, { key: i },
+            i > 0 ? (react_1.default.createElement(components_1.View, { style: { width: token.lineWidth, height: token.fontSize, backgroundColor: token.colorSplit, marginHorizontal: token.marginSM } })) : null,
+            react_1.default.createElement(components_1.View, null, typeof a === 'string' ? react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSize, color: token.colorTextSecondary } }, a) : a)))))) : null));
+    if (horizontal) {
+        return (react_1.default.createElement(components_1.View, { style: [{ flexDirection: 'row', alignItems: 'flex-start' }, style] },
+            content,
+            extra != null ? react_1.default.createElement(components_1.View, { style: { marginLeft: token.margin } }, extra) : null));
+    }
+    return (react_1.default.createElement(components_1.View, { style: style },
+        content,
+        extra != null ? react_1.default.createElement(components_1.View, { style: { marginTop: token.marginSM } }, extra) : null));
+}
+function ListBase(props) {
+    const { token } = (0, theme_1.useToken)();
+    const { dataSource = [], renderItem, header, footer, bordered = false, split = true, size = 'default', loading = false, itemLayout = 'vertical', loadMore, style, } = props;
+    const pad = size === 'small' ? token.paddingXS : size === 'large' ? token.padding : token.paddingSM;
+    return (react_1.default.createElement(components_1.View, { style: [
+            {
+                backgroundColor: token.colorBgContainer,
+                borderRadius: token.borderRadiusLG,
+                borderWidth: bordered ? token.lineWidth : 0,
+                borderColor: token.colorBorderSecondary,
+                overflow: 'hidden',
+            },
+            style,
+        ] },
+        header != null ? (react_1.default.createElement(components_1.View, { style: {
+                paddingHorizontal: pad,
+                paddingVertical: token.paddingXS,
+                borderBottomWidth: token.lineWidth,
+                borderBottomColor: token.colorBorderSecondary,
+            } }, typeof header === 'string' ? (react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSize, fontWeight: '500', color: token.colorText } }, header)) : (header))) : null,
+        react_1.default.createElement(spin_1.Spin, { spinning: loading },
+            react_1.default.createElement(ListContext.Provider, { value: { itemLayout } }, dataSource.map((item, i) => (react_1.default.createElement(components_1.View, { key: i, style: {
+                    paddingHorizontal: pad,
+                    paddingVertical: pad,
+                    borderBottomWidth: split && i < dataSource.length - 1 ? token.lineWidth : 0,
+                    borderBottomColor: token.colorSplit,
+                } }, renderItem ? renderItem(item, i) : null))))),
+        loadMore != null ? react_1.default.createElement(components_1.View, { style: { padding: pad } }, loadMore) : null,
+        footer != null ? (react_1.default.createElement(components_1.View, { style: {
+                paddingHorizontal: pad,
+                paddingVertical: token.paddingXS,
+                borderTopWidth: token.lineWidth,
+                borderTopColor: token.colorBorderSecondary,
+                backgroundColor: token.colorFillQuaternary,
+            } }, footer)) : null));
+}
+exports.List = Object.assign(ListBase, { Item: ListItem });
+exports.default = exports.List;

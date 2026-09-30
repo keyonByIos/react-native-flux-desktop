@@ -1,1 +1,126 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.Transfer=Transfer;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme"),checkbox_1=require("../checkbox"),icon_1=require("../icon");function Transfer(e){const{token:t}=(0,theme_1.useToken)(),{dataSource:r,targetKeys:o,defaultTargetKeys:n=[],titles:l,operations:a,showSelectAll:c=!0,oneWay:i,disabled:d,listStyle:s,onChange:m}=e,[u,f]=react_1.default.useState(n),_=void 0!==o?o:u,[y,g]=react_1.default.useState({}),S=r.filter(e=>!_.includes(e.key)),h=r.filter(e=>_.includes(e.key)),p=e=>{void 0===o&&f(e),m&&m(e)},k=(e,t)=>{if(d)return;const r=new Set(_);t?r.add(e):r.delete(e),p(Array.from(r))},b=(e,r,o)=>react_1.default.createElement(components_1.View,{style:[{flex:1,borderWidth:t.lineWidth,borderColor:t.colorBorderSecondary,borderRadius:t.borderRadius,backgroundColor:t.colorBgContainer,overflow:"hidden"},s]},((e,r)=>{const o=e.filter(e=>!e.disabled),n=o.length>0&&o.every(e=>y[e.key]),l=o.some(e=>y[e.key]);return react_1.default.createElement(components_1.View,{style:{flexDirection:"row",alignItems:"center",paddingHorizontal:t.paddingSM,height:t.controlHeightSM+t.paddingXS,borderBottomWidth:t.lineWidth,borderBottomColor:t.colorBorderSecondary,backgroundColor:t.colorFillQuaternary}},c&&!i?react_1.default.createElement(checkbox_1.Checkbox,{disabled:d||!o.length,checked:n,onChange:e=>{const t={...y};o.forEach(r=>t[r.key]=!(l&&!n)&&e),g(t)}}):null,react_1.default.createElement(components_1.Text,{style:{marginLeft:c&&!i?t.marginXS:0,fontSize:t.fontSizeSM,color:t.colorText,flex:1}},r),react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:t.colorTextTertiary}},e.filter(e=>y[e.key]).length,"/",e.length))})(e,r),react_1.default.createElement(components_1.ScrollView,{style:{height:4*t.controlHeightLG}},0===e.length?react_1.default.createElement(components_1.View,{style:{padding:t.paddingLG,alignItems:"center"}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:t.colorTextQuaternary}},"空")):e.map(e=>react_1.default.createElement(components_1.Pressable,{key:e.key,disabled:d||e.disabled,onPress:()=>{i?"left"===o&&k(e.key,!0):g(t=>({...t,[e.key]:!t[e.key]}))},style:{flexDirection:"row",alignItems:"center",paddingHorizontal:t.paddingSM,paddingVertical:t.paddingXS,opacity:e.disabled?.45:1}},i?"left"===o?react_1.default.createElement(icon_1.Icon,{name:"plus",size:t.fontSizeSM,color:t.colorPrimary,style:{marginRight:t.marginXS}}):react_1.default.createElement(icon_1.Icon,{name:"close",size:t.fontSizeSM,color:t.colorTextTertiary,style:{marginRight:t.marginXS}}):react_1.default.createElement(checkbox_1.Checkbox,{checked:!!y[e.key],disabled:!0}),react_1.default.createElement(components_1.View,{style:{marginLeft:t.marginXS,flex:1}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSize,color:t.colorText}},e.title),null!=e.description?react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:t.colorTextTertiary}},e.description):null),i&&"right"===o?react_1.default.createElement(components_1.Pressable,{onPress:()=>k(e.key,!1),disabled:d,style:{padding:t.paddingXXS}},react_1.default.createElement(icon_1.Icon,{name:"right",size:t.fontSizeSM,color:t.colorTextQuaternary,rotate:180})):null)))),x=e=>{const o=r.some(t=>y[t.key]&&!t.disabled&&(e?!_.includes(t.key):_.includes(t.key))),n=a?a[e?0:1]:null;return react_1.default.createElement(components_1.Pressable,{disabled:d||!o,onPress:()=>(e=>{if(d)return;const t=r.filter(e=>y[e.key]&&!e.disabled).map(e=>e.key);if(!t.length)return;const o=new Set(_);t.forEach(t=>e?o.add(t):o.delete(t)),p(Array.from(o)),g({})})(e),style:{minWidth:t.controlHeightSM,height:t.controlHeightSM,paddingHorizontal:null!=n?t.paddingXS:0,borderRadius:t.borderRadius,alignItems:"center",justifyContent:"center",backgroundColor:o&&!d?t.colorPrimary:t.colorFillTertiary}},null!=n?react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:o&&!d?t.colorTextOnPrimaryBackground:t.colorTextQuaternary}},n):react_1.default.createElement(icon_1.Icon,{name:e?"right":"left",size:t.fontSize,color:o&&!d?t.colorTextOnPrimaryBackground:t.colorTextQuaternary}))};return react_1.default.createElement(components_1.View,{style:{flexDirection:"row",alignItems:"center"}},b(S,l?l[0]:"源列表","left"),i?null:react_1.default.createElement(components_1.View,{style:{marginHorizontal:t.marginSM,gap:t.marginXS}},x(!0),x(!1)),b(h,l?l[1]:"目标列表","right"))}
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Transfer = Transfer;
+// TRANSFER：双栏穿梭选择。左源右目标，勾选后整体搬运；受控 targetKeys + 非受控兜底。
+// 对齐 antd v5：titles / operations / showSelectAll / oneWay / 单项 disabled / listStyle。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+const checkbox_1 = require("../checkbox");
+const icon_1 = require("../icon");
+function Transfer(props) {
+    const { token } = (0, theme_1.useToken)();
+    const { dataSource, targetKeys, defaultTargetKeys = [], titles, operations, showSelectAll = true, oneWay, disabled, listStyle, onChange } = props;
+    const [inner, setInner] = react_1.default.useState(defaultTargetKeys);
+    const tKeys = targetKeys !== undefined ? targetKeys : inner;
+    const [checked, setChecked] = react_1.default.useState({});
+    const left = dataSource.filter((d) => !tKeys.includes(d.key));
+    const right = dataSource.filter((d) => tKeys.includes(d.key));
+    const commit = (next) => {
+        if (targetKeys === undefined)
+            setInner(next);
+        onChange && onChange(next);
+    };
+    const move = (toRight) => {
+        if (disabled)
+            return;
+        const ids = dataSource.filter((d) => checked[d.key] && !d.disabled).map((d) => d.key);
+        if (!ids.length)
+            return;
+        const set = new Set(tKeys);
+        ids.forEach((k) => (toRight ? set.add(k) : set.delete(k)));
+        commit(Array.from(set));
+        setChecked({});
+    };
+    // 单向：直接切换某一项是否入右
+    const toggleOne = (key, on) => {
+        if (disabled)
+            return;
+        const set = new Set(tKeys);
+        if (on)
+            set.add(key);
+        else
+            set.delete(key);
+        commit(Array.from(set));
+    };
+    const header = (items, title) => {
+        const enabled = items.filter((i) => !i.disabled);
+        const allOn = enabled.length > 0 && enabled.every((i) => checked[i.key]);
+        const someOn = enabled.some((i) => checked[i.key]);
+        return (react_1.default.createElement(components_1.View, { style: {
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingHorizontal: token.paddingSM,
+                height: token.controlHeightSM + token.paddingXS,
+                borderBottomWidth: token.lineWidth,
+                borderBottomColor: token.colorBorderSecondary,
+                backgroundColor: token.colorFillQuaternary,
+            } },
+            showSelectAll && !oneWay ? (react_1.default.createElement(checkbox_1.Checkbox, { disabled: disabled || !enabled.length, checked: allOn, onChange: (on) => {
+                    const next = { ...checked };
+                    enabled.forEach((i) => (next[i.key] = someOn && !allOn ? false : on));
+                    setChecked(next);
+                } })) : null,
+            react_1.default.createElement(components_1.Text, { style: { marginLeft: showSelectAll && !oneWay ? token.marginXS : 0, fontSize: token.fontSizeSM, color: token.colorText, flex: 1 } }, title),
+            react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: token.colorTextTertiary } },
+                items.filter((i) => checked[i.key]).length,
+                "/",
+                items.length)));
+    };
+    const panel = (items, title, side) => (react_1.default.createElement(components_1.View, { style: [
+            {
+                flex: 1,
+                borderWidth: token.lineWidth,
+                borderColor: token.colorBorderSecondary,
+                borderRadius: token.borderRadius,
+                backgroundColor: token.colorBgContainer,
+                overflow: 'hidden',
+            },
+            listStyle,
+        ] },
+        header(items, title),
+        react_1.default.createElement(components_1.ScrollView, { style: { height: token.controlHeightLG * 4 } }, items.length === 0 ? (react_1.default.createElement(components_1.View, { style: { padding: token.paddingLG, alignItems: 'center' } },
+            react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: token.colorTextQuaternary } }, "\u7A7A"))) : (items.map((it) => (react_1.default.createElement(components_1.Pressable, { key: it.key, disabled: disabled || it.disabled, onPress: () => {
+                if (oneWay) {
+                    if (side === 'left')
+                        toggleOne(it.key, true);
+                }
+                else {
+                    setChecked((prev) => ({ ...prev, [it.key]: !prev[it.key] }));
+                }
+            }, style: {
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingHorizontal: token.paddingSM,
+                paddingVertical: token.paddingXS,
+                opacity: it.disabled ? 0.45 : 1,
+            } },
+            oneWay ? (side === 'left' ? (react_1.default.createElement(icon_1.Icon, { name: "plus", size: token.fontSizeSM, color: token.colorPrimary, style: { marginRight: token.marginXS } })) : (react_1.default.createElement(icon_1.Icon, { name: "close", size: token.fontSizeSM, color: token.colorTextTertiary, style: { marginRight: token.marginXS } }))) : (react_1.default.createElement(checkbox_1.Checkbox, { checked: !!checked[it.key], disabled: true })),
+            react_1.default.createElement(components_1.View, { style: { marginLeft: token.marginXS, flex: 1 } },
+                react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSize, color: token.colorText } }, it.title),
+                it.description != null ? (react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: token.colorTextTertiary } }, it.description)) : null),
+            oneWay && side === 'right' ? (react_1.default.createElement(components_1.Pressable, { onPress: () => toggleOne(it.key, false), disabled: disabled, style: { padding: token.paddingXXS } },
+                react_1.default.createElement(icon_1.Icon, { name: "right", size: token.fontSizeSM, color: token.colorTextQuaternary, rotate: 180 }))) : null)))))));
+    const arrowBtn = (toRight) => {
+        const hasSel = dataSource.some((d) => checked[d.key] && !d.disabled && (toRight ? !tKeys.includes(d.key) : tKeys.includes(d.key)));
+        const label = operations ? operations[toRight ? 0 : 1] : null;
+        return (react_1.default.createElement(components_1.Pressable, { disabled: disabled || !hasSel, onPress: () => move(toRight), style: {
+                minWidth: token.controlHeightSM,
+                height: token.controlHeightSM,
+                paddingHorizontal: label != null ? token.paddingXS : 0,
+                borderRadius: token.borderRadius,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: hasSel && !disabled ? token.colorPrimary : token.colorFillTertiary,
+            } }, label != null ? (react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: hasSel && !disabled ? token.colorTextOnPrimaryBackground : token.colorTextQuaternary } }, label)) : (react_1.default.createElement(icon_1.Icon, { name: toRight ? 'right' : 'left', size: token.fontSize, color: hasSel && !disabled ? token.colorTextOnPrimaryBackground : token.colorTextQuaternary }))));
+    };
+    return (react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', alignItems: 'center' } },
+        panel(left, titles ? titles[0] : '源列表', 'left'),
+        oneWay ? null : (react_1.default.createElement(components_1.View, { style: { marginHorizontal: token.marginSM, gap: token.marginXS } },
+            arrowBtn(true),
+            arrowBtn(false))),
+        panel(right, titles ? titles[1] : '目标列表', 'right')));
+}

@@ -1,1 +1,130 @@
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.sma=sma,exports.ema=ema,exports.macd=macd,exports.rsi=rsi,exports.kdj=kdj,exports.bollinger=bollinger;const N=null;function sma(t,e){const r=[];let n=0;for(let l=0;l<t.length;l++)n+=t[l],l>=e&&(n-=t[l-e]),r.push(l>=e-1?n/e:N);return r}function ema(t,e){const r=[],n=2/(e+1);let l=t.length?t[0]:0;for(let e=0;e<t.length;e++)l=0===e?t[0]:t[e]*n+l*(1-n),r.push(l);return r}function macd(t,e=12,r=26,n=9){const l=t.length,o=ema(t,e),s=ema(t,r),a=t.map((t,e)=>o[e]-s[e]),i=ema(a,n),c=Math.max(r,n),f=[],u=[],h=[];for(let t=0;t<l;t++){const e=t>=c-1;f.push(e?a[t]:N),u.push(e?i[t]:N),h.push(e?a[t]-i[t]:N)}return{dif:f,dea:u,hist:h}}function rsi(t,e=14){const r=t.length,n=new Array(r).fill(N);if(r<=e)return n;let l=0,o=0;for(let r=1;r<=e;r++){const e=t[r]-t[r-1];e>=0?l+=e:o-=e}let s=l/e,a=o/e;n[e]=0===a?100:100-100/(1+s/a);for(let l=e+1;l<r;l++){const r=t[l]-t[l-1];s=(s*(e-1)+(r>0?r:0))/e,a=(a*(e-1)+(r<0?-r:0))/e,n[l]=0===a?100:100-100/(1+s/a)}return n}function kdj(t,e=9,r=3,n=3){const l=t.length,o=new Array(l).fill(N),s=new Array(l).fill(N),a=new Array(l).fill(N);let i=50,c=50;for(let f=0;f<l;f++){if(f<e-1)continue;let l=-1/0,u=1/0;for(let r=f-e+1;r<=f;r++)l=Math.max(l,t[r].high),u=Math.min(u,t[r].low);const h=(r-1)/r*i+1/r*(l===u?50:(t[f].close-u)/(l-u)*100),m=(n-1)/n*c+1/n*h;o[f]=h,s[f]=m,a[f]=3*h-2*m,i=h,c=m}return{k:o,d:s,j:a}}function bollinger(t,e=20,r=2){const n=t.length,l=sma(t,e),o=new Array(n).fill(N),s=new Array(n).fill(N);for(let l=e-1;l<n;l++){let n=0;for(let r=l-e+1;r<=l;r++)n+=t[r];const a=n/e;let i=0;for(let r=l-e+1;r<=l;r++)i+=(t[r]-a)**2;const c=Math.sqrt(i/e);o[l]=a+r*c,s[l]=a-r*c}return{mid:l,upper:o,lower:s}}
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.sma = sma;
+exports.ema = ema;
+exports.macd = macd;
+exports.rsi = rsi;
+exports.kdj = kdj;
+exports.bollinger = bollinger;
+// indicators：技术指标纯函数（无渲染关切，输入与 K 线等长的数值序列，输出等长序列；暖机期返回 null）。
+// 供 IndicatorChart 副图与 CandlestickChart 的 overlays 复用。约定与业界主流一致：
+// - EMA 以首值为种子；MACD 默认 12/26/9，hist = dif - dea；RSI 用 Wilder 平滑；KDJ 默认 9/3/3。
+const N = null;
+/** 简单移动平均：不足窗口的前 window-1 项为 null。 */
+function sma(values, window) {
+    const out = [];
+    let sum = 0;
+    for (let i = 0; i < values.length; i++) {
+        sum += values[i];
+        if (i >= window)
+            sum -= values[i - window];
+        out.push(i >= window - 1 ? sum / window : N);
+    }
+    return out;
+}
+/** 指数移动平均：以首值种子，k = 2/(window+1)。返回等长 number[]。 */
+function ema(values, window) {
+    const out = [];
+    const k = 2 / (window + 1);
+    let prev = values.length ? values[0] : 0;
+    for (let i = 0; i < values.length; i++) {
+        prev = i === 0 ? values[0] : values[i] * k + prev * (1 - k);
+        out.push(prev);
+    }
+    return out;
+}
+/** MACD：dif = EMA(fast) - EMA(slow)；dea = EMA(dif, signal)；hist = dif - dea。 */
+function macd(closes, fast = 12, slow = 26, signal = 9) {
+    const n = closes.length;
+    const ef = ema(closes, fast);
+    const es = ema(closes, slow);
+    const difFull = closes.map((_, i) => ef[i] - es[i]);
+    const deaFull = ema(difFull, signal);
+    const warm = Math.max(slow, signal);
+    const dif = [];
+    const dea = [];
+    const hist = [];
+    for (let i = 0; i < n; i++) {
+        const ready = i >= warm - 1;
+        dif.push(ready ? difFull[i] : N);
+        dea.push(ready ? deaFull[i] : N);
+        hist.push(ready ? difFull[i] - deaFull[i] : N);
+    }
+    return { dif, dea, hist };
+}
+/** RSI（Wilder 平滑）：默认 period 14，输出 0..100；暖机期 null。 */
+function rsi(closes, period = 14) {
+    const n = closes.length;
+    const out = new Array(n).fill(N);
+    if (n <= period)
+        return out;
+    let gain = 0;
+    let loss = 0;
+    for (let i = 1; i <= period; i++) {
+        const d = closes[i] - closes[i - 1];
+        if (d >= 0)
+            gain += d;
+        else
+            loss -= d;
+    }
+    let ag = gain / period;
+    let al = loss / period;
+    out[period] = al === 0 ? 100 : 100 - 100 / (1 + ag / al);
+    for (let i = period + 1; i < n; i++) {
+        const d = closes[i] - closes[i - 1];
+        const g = d > 0 ? d : 0;
+        const l = d < 0 ? -d : 0;
+        ag = (ag * (period - 1) + g) / period;
+        al = (al * (period - 1) + l) / period;
+        out[i] = al === 0 ? 100 : 100 - 100 / (1 + ag / al);
+    }
+    return out;
+}
+/** KDJ：RSV 基于 n 周期最高/最低；K=2/3·prevK+1/3·RSV，D=2/3·prevD+1/3·K，J=3K-2D。默认 9/3/3。 */
+function kdj(rows, n = 9, m1 = 3, m2 = 3) {
+    const len = rows.length;
+    const k = new Array(len).fill(N);
+    const d = new Array(len).fill(N);
+    const j = new Array(len).fill(N);
+    let pk = 50;
+    let pd = 50;
+    for (let i = 0; i < len; i++) {
+        if (i < n - 1)
+            continue;
+        let hh = -Infinity;
+        let ll = Infinity;
+        for (let jj = i - n + 1; jj <= i; jj++) {
+            hh = Math.max(hh, rows[jj].high);
+            ll = Math.min(ll, rows[jj].low);
+        }
+        const rsv = hh === ll ? 50 : ((rows[i].close - ll) / (hh - ll)) * 100;
+        const ck = ((m1 - 1) / m1) * pk + (1 / m1) * rsv;
+        const cd = ((m2 - 1) / m2) * pd + (1 / m2) * ck;
+        k[i] = ck;
+        d[i] = cd;
+        j[i] = 3 * ck - 2 * cd;
+        pk = ck;
+        pd = cd;
+    }
+    return { k, d, j };
+}
+/** 布林带：mid = SMA(window)；上/下轨 = mid ± mult·标准差。默认 20/2。 */
+function bollinger(closes, window = 20, mult = 2) {
+    const n = closes.length;
+    const mid = sma(closes, window);
+    const upper = new Array(n).fill(N);
+    const lower = new Array(n).fill(N);
+    for (let i = window - 1; i < n; i++) {
+        let sum = 0;
+        for (let jj = i - window + 1; jj <= i; jj++)
+            sum += closes[jj];
+        const mean = sum / window;
+        let sq = 0;
+        for (let jj = i - window + 1; jj <= i; jj++)
+            sq += (closes[jj] - mean) ** 2;
+        const sd = Math.sqrt(sq / window);
+        upper[i] = mean + mult * sd;
+        lower[i] = mean - mult * sd;
+    }
+    return { mid, upper, lower };
+}

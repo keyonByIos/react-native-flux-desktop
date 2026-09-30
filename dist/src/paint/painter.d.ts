@@ -32,6 +32,10 @@ export declare function bitmapStats(): {
 };
 /** 图片是否仍在解码中（host 滚动条带缓存据此拒绝增量帧：新图到位必须整帧重画） */
 export declare function imagesPending(): boolean;
+/** 已就绪图片计数（每次解码完成 +1）：host 空闲跳帧门比对这个基线，识别「本窗不是 setImageReadyNotifier 单例的宿主、
+ *  但期间有别的窗触发了图片解码」的场景——否则空闲窗会跳过那一帧，新图所在区域停留在占位底图像素（横条元素呈一条横线残影）。
+ *  onImageReady 是全局单例（后建的窗覆盖先建的），只有最后一扇窗能吃到 extDirty=true，其余窗必须靠这个 counter 兜住。*/
+export declare function getImageGen(): number;
 /** 整树绘制。ctx 需已是逻辑像素坐标系（外部做过 dpr scale）；dpr 供离屏位图缓存按设备分辨率建 */
 export interface PaintTreeOpts {
     /** 跳过清屏：在已有底图上补画（滚动条带缓存的新露出条/滚动条列重绘趟） */

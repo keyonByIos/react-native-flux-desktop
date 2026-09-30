@@ -1,1 +1,170 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.MemMonitor=MemMonitor;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme"),icon_1=require("../../ui/icon"),button_1=require("../../ui/button"),sparkline_1=require("../../chart/sparkline"),painter_1=require("../../paint/painter"),app_1=require("../../app"),MB=1048576,f1=e=>e.toFixed(1);function fmtUp(e){const t=Math.floor(e/60),r=Math.floor(e%60);return t>=60?`${Math.floor(t/60)}h${String(t%60).padStart(2,"0")}m`:`${t}m${String(r).padStart(2,"0")}s`}function MetricRow(e){const{token:t}=(0,theme_1.useToken)(),r=e.data.length?e.data:[0],o=r[r.length-1],a=Math.max(...r);return react_1.default.createElement(components_1.View,{style:{marginBottom:t.marginXS}},react_1.default.createElement(components_1.View,{style:{flexDirection:"row",justifyContent:"space-between",alignItems:"center",gap:t.marginXS}},react_1.default.createElement(components_1.Text,{numberOfLines:1,style:{flex:1,fontSize:t.fontSizeSM,color:t.colorTextSecondary}},e.label),react_1.default.createElement(components_1.Text,{numberOfLines:1,style:{flexShrink:0,fontSize:t.fontSizeSM,color:t.colorTextTertiary}},f1(o),e.unit," · 峰 ",f1(a),e.unit)),react_1.default.createElement(sparkline_1.SparklineChart,{data:r.map(e=>({v:e})),yField:"v",type:"area",width:268,height:34,color:e.color,endDot:!0,animation:!1,tooltip:!1,style:{marginTop:2}}))}function MemMonitor(e){const{token:t}=(0,theme_1.useToken)(),{intervalMs:r=1e3,maxPoints:o=120,defaultOpen:a=!0,floating:n=!1,dropdown:l=!1,warnMB:c=300,style:i}=e,[s,m]=react_1.default.useState([]),[d,p]=react_1.default.useState({rss:0,heap:0,heapT:0,ext:0,ab:0,up:0,imgC:0}),[u,f]=react_1.default.useState([]),[_,S]=react_1.default.useState(a),g="function"==typeof globalThis.gc;react_1.default.useEffect(()=>{const e=()=>{const e=process.memoryUsage(),t=(0,painter_1.imageCacheStats)();m(r=>[...r,{rss:e.rss/MB,heap:e.heapUsed/MB,ext:e.external/MB,img:t.bytes/MB}].slice(-o)),p({rss:e.rss/MB,heap:e.heapUsed/MB,heapT:e.heapTotal/MB,ext:e.external/MB,ab:(e.arrayBuffers||0)/MB,up:process.uptime(),imgC:t.count});const r=e.heapUsed/MB,a=[];for(const e of app_1.Application.windows()){const t=e.host&&"function"==typeof e.host.getMemStats?e.host.getMemStats():null;t&&a.push({title:e.title||`窗 ${e.id}`,...t,heapShare:0})}const n=a.reduce((e,t)=>e+t.nodes,0)||1;for(const e of a)e.heapShare=r*e.nodes/n;f(a)};e();const t=setInterval(e,r);return()=>clearInterval(t)},[r,o]);const h=d.rss>=c,M=h?t.colorError:t.colorText,y={flexDirection:"row",alignItems:"center",paddingHorizontal:t.paddingSM,paddingVertical:t.paddingXXS,borderRadius:t.borderRadiusLG,borderWidth:t.lineWidth,borderStyle:"solid",borderColor:t.colorBorderSecondary,backgroundColor:t.colorBgElevated,cursor:"pointer"},x={width:300,padding:t.paddingSM,borderRadius:t.borderRadiusLG,borderWidth:t.lineWidth,borderStyle:"solid",borderColor:t.colorBorderSecondary,backgroundColor:t.colorBgElevated},b=n?{position:"absolute",right:t.margin,bottom:t.margin,zIndex:1080}:{},E=react_1.default.createElement(components_1.Pressable,{onPress:()=>S(e=>!e),style:y},react_1.default.createElement(components_1.View,{style:{marginRight:t.marginXXS}},react_1.default.createElement(icon_1.Icon,{name:"dashboard",size:t.fontSize,color:h?t.colorError:t.colorPrimary})),react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:M}},"MEM ",f1(d.rss),"MB")),T=(e,r)=>react_1.default.createElement(components_1.View,{style:{flexDirection:"row",justifyContent:"space-between",alignItems:"center",gap:t.marginXS}},react_1.default.createElement(components_1.Text,{numberOfLines:1,style:{flex:1,fontSize:t.fontSizeSM,color:t.colorTextTertiary}},e),react_1.default.createElement(components_1.Text,{numberOfLines:1,style:{flexShrink:0,fontSize:t.fontSizeSM,color:t.colorTextSecondary}},r)),w=react_1.default.createElement(react_1.default.Fragment,null,react_1.default.createElement(components_1.View,{style:{flexDirection:"row",justifyContent:"space-between",alignItems:"center",marginBottom:t.marginXS}},react_1.default.createElement(components_1.View,{style:{flexDirection:"row",alignItems:"center"}},react_1.default.createElement(components_1.View,{style:{marginRight:t.marginXXS}},react_1.default.createElement(icon_1.Icon,{name:"dashboard",size:t.fontSize,color:h?t.colorError:t.colorPrimary})),react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,fontWeight:"600",color:t.colorText}},"内存监控")),react_1.default.createElement(components_1.Pressable,{onPress:()=>S(!1),style:{cursor:"pointer",padding:2}},react_1.default.createElement(icon_1.Icon,{name:"minus",size:t.fontSizeSM,color:t.colorTextTertiary}))),react_1.default.createElement(MetricRow,{label:"RSS 常驻集",color:h?t.colorError:t.colorWarning,data:s.map(e=>e.rss),unit:"MB"}),react_1.default.createElement(MetricRow,{label:"Heap V8 堆",color:t.colorPrimary,data:s.map(e=>e.heap),unit:"MB"}),react_1.default.createElement(MetricRow,{label:"External 原生侧",color:t.colorSuccess,data:s.map(e=>e.ext),unit:"MB"}),react_1.default.createElement(MetricRow,{label:"Image 图片缓存",color:t.colorInfo,data:s.map(e=>e.img),unit:"MB"}),react_1.default.createElement(components_1.View,{style:{gap:2,marginTop:t.marginXXS,paddingTop:t.marginXXS,borderTopWidth:t.lineWidth,borderTopColor:t.colorSplit,borderStyle:"solid"}},T("heapTotal（V8 预留）",`${f1(d.heapT)} MB`),T("arrayBuffers",`${f1(d.ab)} MB`),T("uptime",fmtUp(d.up)),T("采样",`${s.length}/${o} @ ${(r/1e3).toFixed(1)}s`),T("图片缓存",`${d.imgC} 张 · 上限 ${((0,painter_1.imageCacheStats)().maxBytes/MB).toFixed(0)} MB`)),u.length>0&&react_1.default.createElement(components_1.View,{style:{gap:4,marginTop:t.marginXXS,paddingTop:t.marginXXS,borderTopWidth:t.lineWidth,borderTopColor:t.colorSplit,borderStyle:"solid"}},react_1.default.createElement(components_1.View,{style:{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:t.colorTextSecondary}},"窗口 ",u.length),react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:t.colorTextTertiary}},"面合计 ",f1(u.reduce((e,t)=>e+t.surfaceMB,0))," MB")),u.map((e,r)=>react_1.default.createElement(components_1.View,{key:r,style:{gap:1}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:t.colorText}},e.title),react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:t.colorTextTertiary}},Math.round(e.w),"×",Math.round(e.h),"@",e.dpr," · 面 ",f1(e.surfaceMB)," · 节点 ",e.nodes," · 堆≈ ",f1(e.heapShare)," MB")))),react_1.default.createElement(components_1.View,{style:{flexDirection:"row",marginTop:t.marginXS}},react_1.default.createElement(button_1.Button,{size:"small",onClick:()=>{g&&globalThis.gc()}},g?"GC":"GC（需 --expose-gc）"),react_1.default.createElement(components_1.View,{style:{marginLeft:t.marginXS}},react_1.default.createElement(button_1.Button,{size:"small",onClick:()=>m([])},"清空历史"))));return l?react_1.default.createElement(components_1.View,{style:[{position:"relative"},i]},E,_?react_1.default.createElement(components_1.View,{style:[x,{position:"absolute",top:"100%",right:0,marginTop:t.marginXS,zIndex:1100}]},w):null):_?react_1.default.createElement(components_1.View,{style:[x,b,i]},w):react_1.default.createElement(components_1.View,{style:[b,i]},E)}exports.default=MemMonitor;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MemMonitor = MemMonitor;
+// MemMonitor：进程内存实时监控面板（开发组件）。1s 采样 process.memoryUsage()，
+// RSS/Heap/External 三条迷你走势线 + 数值明细 + 峰值；另遍历 Application.windows() 逐窗展示
+// 各自渲染面（双缓冲 framebuffer）/尺寸/dpr/节点数 + 按节点占比摊算的堆估算；floating 模式悬浮父容器右下角（zIndex 浮层）。
+// GC 按钮需 `node --expose-gc` 启动，否则置灰。数据自采自绘，无外部依赖。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+const icon_1 = require("../../ui/icon");
+const button_1 = require("../../ui/button");
+const sparkline_1 = require("../../chart/sparkline");
+const system_1 = require("../../system");
+const MB = 1024 * 1024;
+const f1 = (n) => n.toFixed(1);
+function fmtUp(s) {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return m >= 60 ? `${Math.floor(m / 60)}h${String(m % 60).padStart(2, '0')}m` : `${m}m${String(sec).padStart(2, '0')}s`;
+}
+/** 一行指标：标签 + 当前值/峰值 + 走势线 */
+function MetricRow(p) {
+    const { token } = (0, theme_1.useToken)();
+    // SparklineChart 对空 data 无防御（Math.min()=Infinity 派生 NaN 崩），首个采样到达前补一个 0 点
+    const safe = p.data.length ? p.data : [0];
+    const cur = safe[safe.length - 1];
+    const peak = Math.max(...safe);
+    return (react_1.default.createElement(components_1.View, { style: { marginBottom: token.marginXS } },
+        react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: token.marginXS } },
+            react_1.default.createElement(components_1.Text, { numberOfLines: 1, style: { flex: 1, fontSize: token.fontSizeSM, color: token.colorTextSecondary } }, p.label),
+            react_1.default.createElement(components_1.Text, { numberOfLines: 1, style: { flexShrink: 0, fontSize: token.fontSizeSM, color: token.colorTextTertiary } },
+                f1(cur),
+                p.unit,
+                " \u00B7 \u5CF0 ",
+                f1(peak),
+                p.unit)),
+        react_1.default.createElement(sparkline_1.SparklineChart, { data: safe.map((v) => ({ v })), yField: "v", type: "area", width: 268, height: 34, color: p.color, endDot: true, animation: false, tooltip: false, style: { marginTop: 2 } })));
+}
+function MemMonitor(props) {
+    const { token } = (0, theme_1.useToken)();
+    const { intervalMs = 1000, maxPoints = 120, defaultOpen = true, floating = false, dropdown = false, warnMB = 300, style } = props;
+    const [samples, setSamples] = react_1.default.useState([]);
+    const [detail, setDetail] = react_1.default.useState({ rss: 0, heap: 0, heapT: 0, ext: 0, ab: 0, up: 0, imgC: 0 });
+    const [wins, setWins] = react_1.default.useState([]);
+    const [open, setOpen] = react_1.default.useState(defaultOpen);
+    const gcAvail = system_1.systemStats.gcAvailable();
+    react_1.default.useEffect(() => {
+        const tick = () => {
+            const snap = system_1.systemStats.snapshot();
+            const m = snap.memoryMB;
+            setSamples((s) => [...s, { rss: m.rss, heap: m.heapUsed, ext: m.external, img: snap.imageCache.bytes / MB }].slice(-maxPoints));
+            setDetail({
+                rss: m.rss,
+                heap: m.heapUsed,
+                heapT: m.heapTotal,
+                ext: m.external,
+                ab: m.arrayBuffers,
+                up: snap.uptimeSec,
+                imgC: snap.imageCache.count,
+            });
+            setWins(snap.windows);
+        };
+        tick();
+        const t = setInterval(tick, intervalMs);
+        return () => clearInterval(t);
+    }, [intervalMs, maxPoints]);
+    const warn = detail.rss >= warnMB;
+    const fg = warn ? token.colorError : token.colorText;
+    const pillStyle = {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: token.paddingSM,
+        paddingVertical: token.paddingXXS,
+        borderRadius: token.borderRadiusLG,
+        borderWidth: token.lineWidth,
+        borderStyle: 'solid',
+        borderColor: token.colorBorderSecondary,
+        backgroundColor: token.colorBgElevated,
+        cursor: 'pointer',
+    };
+    const panelStyle = {
+        width: 300,
+        padding: token.paddingSM,
+        borderRadius: token.borderRadiusLG,
+        borderWidth: token.lineWidth,
+        borderStyle: 'solid',
+        borderColor: token.colorBorderSecondary,
+        backgroundColor: token.colorBgElevated,
+    };
+    const floatStyle = floating
+        ? { position: 'absolute', right: token.margin, bottom: token.margin, zIndex: 1080 }
+        : {};
+    // 迷你胶囊触发器：图标 + RSS 数字，点击在展开/收起间切换
+    const pill = (react_1.default.createElement(components_1.Pressable, { onPress: () => setOpen((o) => !o), style: pillStyle },
+        react_1.default.createElement(components_1.View, { style: { marginRight: token.marginXXS } },
+            react_1.default.createElement(icon_1.Icon, { name: "dashboard", size: token.fontSize, color: warn ? token.colorError : token.colorPrimary })),
+        react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: fg } },
+            "MEM ",
+            f1(detail.rss),
+            "MB")));
+    const detailRow = (k, v) => (react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: token.marginXS } },
+        react_1.default.createElement(components_1.Text, { numberOfLines: 1, style: { flex: 1, fontSize: token.fontSizeSM, color: token.colorTextTertiary } }, k),
+        react_1.default.createElement(components_1.Text, { numberOfLines: 1, style: { flexShrink: 0, fontSize: token.fontSizeSM, color: token.colorTextSecondary } }, v)));
+    // 展开面板内容（走势 + 明细 + 操作），供就地/下拉两态复用
+    const panelBody = (react_1.default.createElement(react_1.default.Fragment, null,
+        react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: token.marginXS } },
+            react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', alignItems: 'center' } },
+                react_1.default.createElement(components_1.View, { style: { marginRight: token.marginXXS } },
+                    react_1.default.createElement(icon_1.Icon, { name: "dashboard", size: token.fontSize, color: warn ? token.colorError : token.colorPrimary })),
+                react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, fontWeight: '600', color: token.colorText } }, "\u5185\u5B58\u76D1\u63A7")),
+            react_1.default.createElement(components_1.Pressable, { onPress: () => setOpen(false), style: { cursor: 'pointer', padding: 2 } },
+                react_1.default.createElement(icon_1.Icon, { name: "minus", size: token.fontSizeSM, color: token.colorTextTertiary }))),
+        react_1.default.createElement(MetricRow, { label: "RSS \u5E38\u9A7B\u96C6", color: warn ? token.colorError : token.colorWarning, data: samples.map((s) => s.rss), unit: "MB" }),
+        react_1.default.createElement(MetricRow, { label: "Heap V8 \u5806", color: token.colorPrimary, data: samples.map((s) => s.heap), unit: "MB" }),
+        react_1.default.createElement(MetricRow, { label: "External \u539F\u751F\u4FA7", color: token.colorSuccess, data: samples.map((s) => s.ext), unit: "MB" }),
+        react_1.default.createElement(MetricRow, { label: "Image \u56FE\u7247\u7F13\u5B58", color: token.colorInfo, data: samples.map((s) => s.img), unit: "MB" }),
+        react_1.default.createElement(components_1.View, { style: { gap: 2, marginTop: token.marginXXS, paddingTop: token.marginXXS, borderTopWidth: token.lineWidth, borderTopColor: token.colorSplit, borderStyle: 'solid' } },
+            detailRow('heapTotal（V8 预留）', `${f1(detail.heapT)} MB`),
+            detailRow('arrayBuffers', `${f1(detail.ab)} MB`),
+            detailRow('uptime', fmtUp(detail.up)),
+            detailRow('采样', `${samples.length}/${maxPoints} @ ${(intervalMs / 1000).toFixed(1)}s`),
+            detailRow('图片缓存', `${detail.imgC} 张 · 上限 ${(system_1.systemStats.imageCache().maxBytes / MB).toFixed(0)} MB`)),
+        wins.length > 0 && (react_1.default.createElement(components_1.View, { style: { gap: 4, marginTop: token.marginXXS, paddingTop: token.marginXXS, borderTopWidth: token.lineWidth, borderTopColor: token.colorSplit, borderStyle: 'solid' } },
+            react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' } },
+                react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: token.colorTextSecondary } },
+                    "\u7A97\u53E3 ",
+                    wins.length),
+                react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: token.colorTextTertiary } },
+                    "\u9762\u5408\u8BA1 ",
+                    f1(wins.reduce((a, w) => a + w.surfaceMB, 0)),
+                    " MB")),
+            wins.map((w, i) => (react_1.default.createElement(components_1.View, { key: i, style: { gap: 1 } },
+                react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: token.colorText } }, w.title),
+                react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: token.colorTextTertiary } },
+                    Math.round(w.w),
+                    "\u00D7",
+                    Math.round(w.h),
+                    "@",
+                    w.dpr,
+                    " \u00B7 \u9762 ",
+                    f1(w.surfaceMB),
+                    " \u00B7 \u8282\u70B9 ",
+                    w.nodes,
+                    " \u00B7 \u5806\u2248 ",
+                    f1(w.heapShareMB),
+                    " MB")))))),
+        react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', marginTop: token.marginXS } },
+            react_1.default.createElement(button_1.Button, { size: "small", onClick: () => {
+                    system_1.systemStats.gc();
+                } }, gcAvail ? 'GC' : 'GC（需 --expose-gc）'),
+            react_1.default.createElement(components_1.View, { style: { marginLeft: token.marginXS } },
+                react_1.default.createElement(button_1.Button, { size: "small", onClick: () => setSamples([]) }, "\u6E05\u7A7A\u5386\u53F2")))));
+    // 下拉模式：胶囊留在文档流内做触发器，展开面板绝对浮于其正下方（顶栏等窄条用，展开不撑坏行高）
+    if (dropdown) {
+        return (react_1.default.createElement(components_1.View, { style: [{ position: 'relative' }, style] },
+            pill,
+            open ? (react_1.default.createElement(components_1.View, { style: [panelStyle, { position: 'absolute', top: '100%', right: 0, marginTop: token.marginXS, zIndex: 1100 }] }, panelBody)) : null));
+    }
+    // 收起态：仅小胶囊（floating 时锚父容器右下角）
+    if (!open) {
+        return react_1.default.createElement(components_1.View, { style: [floatStyle, style] }, pill);
+    }
+    // 展开态：面板就地/悬浮渲染
+    return (react_1.default.createElement(components_1.View, { style: [panelStyle, floatStyle, style] }, panelBody));
+}
+exports.default = MemMonitor;

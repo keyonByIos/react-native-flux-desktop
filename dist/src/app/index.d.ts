@@ -11,6 +11,10 @@ export interface AppThemeConfig {
     compact: boolean;
     primary: string;
     animation: boolean;
+    /** 基础字号覆盖（SeedToken.fontSize）；缺省 = 跟随密度算法（宽松 13 / 紧凑 12） */
+    fontSize?: number;
+    /** 控件高度覆盖（SeedToken.controlHeight）；缺省 = 跟随密度算法（宽松 30 / 紧凑 26） */
+    controlHeight?: number;
 }
 /**
  * 应用行为偏好（系统保留命名空间 App.prefs）：跨进程持久于 flux_app.kv。
@@ -73,6 +77,7 @@ declare class UserStore {
     private _meta;
     private _data;
     private _ee;
+    constructor();
     /** 声明用户键：名称 + 值类型 + 可选默认。幂等；持久库已有同类型值则沿用，否则落默认并写盘。 */
     init(key: string, type: ValueType, def?: unknown): void;
     /** 写值：键须已 init，且值类型匹配声明。落盘 + 广播。 */
@@ -177,6 +182,18 @@ declare class AppSingleton {
     findByTag(tag: string): WindowRecord | undefined;
     /** 最先打开的窗（通常 = 主窗） */
     main(): WindowRecord | undefined;
+    /**
+     * 对外接口：取某扇窗当前帧率（每秒实际上屏帧数）。
+     * 缺省 windowId = 主窗；传 id 取指定窗。拿不到窗/host 返 0。
+     * FPS 来自 host.getFps()：基于「实际上屏帧」的 ~0.5s 滚动窗口，空闲（>1s 无新帧）返 0。
+     */
+    getFps(windowId?: number): number;
+    /** 逐窗帧率快照（供监控面板）：按打开顺序返回 [{ id, title, fps }]。 */
+    fpsSnapshot(): {
+        id: number;
+        title: string;
+        fps: number;
+    }[];
     /**
      * 唤醒并前置主窗（从最小化恢复 + 抢前台焦点）。
      * 供单实例「打包后重复打开 → 唤起老 App」的次实例回调调用：

@@ -1,1 +1,94 @@
-"use strict";function linearScale(e,t){const[i,n]=e,[r,a]=t,c=n-i||1,o=a-r||1,s=e=>r+(e-i)/c*o;return s.invert=e=>i+(e-r)/o*c,s.domain=e,s.range=t,s}function niceTicks(e,t=4){if(!Number.isFinite(e)||e<=0)return{niceMax:1,ticks:[0,1]};const i=e/t,n=Math.pow(10,Math.floor(Math.log10(i))),r=i/n;let a;a=r<=1?1:r<=2?2:r<=5?5:10,a*=n;const c=Math.ceil(e/a)*a,o=[];for(let e=0;e<=c+a/1e6;e+=a)o.push(Number(e.toFixed(10)));return{niceMax:c,ticks:o}}function bandScale(e,t,i={}){const{paddingInner:n=.35,paddingOuter:r=.175}=i,[a,c]=t,o=Math.max(c-a,0)/(Math.max(e,1)-n+2*r),s=a+o*r;return{bandwidth:o*(1-n),step:o,scale:e=>s+e*o}}function compactNumber(e){const t=Math.abs(e);return t>=1e9?(e/1e9).toFixed(t>=1e10?0:1).replace(/\.0$/,"")+"B":t>=1e6?(e/1e6).toFixed(t>=1e7?0:1).replace(/\.0$/,"")+"M":t>=1e3?(e/1e3).toFixed(t>=1e4?0:1).replace(/\.0$/,"")+"k":Number.isInteger(e)?String(e):e.toFixed(1)}function linearTicks(e,t,i=5){if(!Number.isFinite(e)||!Number.isFinite(t)||e===t)return[Number.isFinite(e)?e:0];const n=(t-e)/i,r=Math.pow(10,Math.floor(Math.log10(Math.abs(n)||1))),a=n/r;let c;c=a<=1?1:a<=2?2:a<=5?5:10,c*=r;const o=Math.floor(e/c)*c,s=Math.ceil(t/c)*c,l=[];for(let e=o;e<=s+c/1e6;e+=c)l.push(Number(e.toFixed(10)));return l}Object.defineProperty(exports,"__esModule",{value:!0}),exports.linearScale=linearScale,exports.niceTicks=niceTicks,exports.bandScale=bandScale,exports.compactNumber=compactNumber,exports.linearTicks=linearTicks;
+"use strict";
+// 比例尺原语：把数据域线性映射到像素域，纯函数、无渲染关切。
+// 笛卡尔类图（line/area/column/bar）共用，保证刻度数学一致。
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.linearScale = linearScale;
+exports.niceTicks = niceTicks;
+exports.bandScale = bandScale;
+exports.compactNumber = compactNumber;
+exports.linearTicks = linearTicks;
+function linearScale(domain, range) {
+    const [d0, d1] = domain;
+    const [r0, r1] = range;
+    const span = d1 - d0 || 1;
+    const rspan = r1 - r0 || 1;
+    const scale = ((value) => r0 + ((value - d0) / span) * rspan);
+    scale.invert = (px) => d0 + ((px - r0) / rspan) * span;
+    scale.domain = domain;
+    scale.range = range;
+    return scale;
+}
+/**
+ * 把数据最大值向上取整到「漂亮」的轴界，并产出等距刻度（恒从 0 起）。
+ * 复刻 d3/ECharts 的 1/2/5 × 10ⁿ 步进启发式，保证轴刻度可读。
+ */
+function niceTicks(max, count = 4) {
+    if (!Number.isFinite(max) || max <= 0)
+        return { niceMax: 1, ticks: [0, 1] };
+    const rawStep = max / count;
+    const mag = Math.pow(10, Math.floor(Math.log10(rawStep)));
+    const norm = rawStep / mag;
+    let step;
+    if (norm <= 1)
+        step = 1;
+    else if (norm <= 2)
+        step = 2;
+    else if (norm <= 5)
+        step = 5;
+    else
+        step = 10;
+    step *= mag;
+    const niceMax = Math.ceil(max / step) * step;
+    const ticks = [];
+    for (let v = 0; v <= niceMax + step / 1e6; v += step)
+        ticks.push(Number(v.toFixed(10)));
+    return { niceMax, ticks };
+}
+function bandScale(count, range, opts = {}) {
+    const { paddingInner = 0.35, paddingOuter = 0.175 } = opts;
+    const [r0, r1] = range;
+    const width = Math.max(r1 - r0, 0);
+    const n = Math.max(count, 1);
+    const step = width / (n - paddingInner + paddingOuter * 2);
+    const bandwidth = step * (1 - paddingInner);
+    const start = r0 + step * paddingOuter;
+    return { bandwidth, step, scale: (i) => start + i * step };
+}
+/** 数值紧凑格式化：12345 -> 12.3k，供轴与标签复用。 */
+function compactNumber(v) {
+    const abs = Math.abs(v);
+    if (abs >= 1e9)
+        return (v / 1e9).toFixed(abs >= 1e10 ? 0 : 1).replace(/\.0$/, '') + 'B';
+    if (abs >= 1e6)
+        return (v / 1e6).toFixed(abs >= 1e7 ? 0 : 1).replace(/\.0$/, '') + 'M';
+    if (abs >= 1e3)
+        return (v / 1e3).toFixed(abs >= 1e4 ? 0 : 1).replace(/\.0$/, '') + 'k';
+    return Number.isInteger(v) ? String(v) : v.toFixed(1);
+}
+/**
+ * 线性轴刻度：给定 [min,max] 产出跨界的「漂亮」等距刻度（1/2/5 × 10ⁿ 步进）。
+ * 与 niceTicks 的区别：niceTicks 恒从 0 起，本函数支持任意（含负）下界，供散点 x 轴等用。
+ */
+function linearTicks(min, max, count = 5) {
+    if (!Number.isFinite(min) || !Number.isFinite(max) || min === max)
+        return [Number.isFinite(min) ? min : 0];
+    const rawStep = (max - min) / count;
+    const mag = Math.pow(10, Math.floor(Math.log10(Math.abs(rawStep) || 1)));
+    const norm = rawStep / mag;
+    let step;
+    if (norm <= 1)
+        step = 1;
+    else if (norm <= 2)
+        step = 2;
+    else if (norm <= 5)
+        step = 5;
+    else
+        step = 10;
+    step *= mag;
+    const start = Math.floor(min / step) * step;
+    const end = Math.ceil(max / step) * step;
+    const ticks = [];
+    for (let v = start; v <= end + step / 1e6; v += step)
+        ticks.push(Number(v.toFixed(10)));
+    return ticks;
+}

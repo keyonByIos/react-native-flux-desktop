@@ -1,1 +1,135 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.SankeyChart=SankeyChart;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme"),icon_1=require("../../ui/icon"),common_1=require("../core/common"),sankey_1=require("../core/sankey"),theme_2=require("../core/theme"),scale_1=require("../core/scale");function Ribbon(e){const{sx:t,sy:n,tx:o,ty:l,w:i}=e;if(i<=.2)return null;const a=i/2,r=t,c=o,s=Math.min(n,l)-a,u=c-r,d=Math.max(n,l)+a-s,m=Math.max(u,d);if(m<=0)return null;const f=r-(m-u)/2,p=s-(m-d)/2,_=(0,sankey_1.sankeyRibbon)(t-f,n-p,o-f,l-p,i);return react_1.default.createElement(components_1.View,{style:{position:"absolute",left:f,top:p,width:m,height:m,pointerEvents:"none"}},react_1.default.createElement(icon_1.Icon,{path:_,vb:m,size:m,color:e.color,mode:"fill"}))}function ribbonBox(e,t,n,o,l){const i=l/2;return{left:e,top:Math.min(t,o)-i,width:n-e,height:Math.max(t,o)+i-(Math.min(t,o)-i)}}function SankeyChart(e){const t=(0,common_1.useChartTheme)(),{token:n}=(0,theme_1.useToken)(),{nodes:o,links:l,width:i=640,height:a=360,nodeWidth:r=14,nodePadding:c=14,label:s=!0,tooltip:u=!0,color:d,animation:m=!0,animateDuration:f=900,valueFormatter:p=scale_1.compactNumber,style:_}=e,h=(0,common_1.useEnter)(m,f),y=o.map(e=>"string"==typeof e?e:e.name),x=e=>"number"==typeof e?e:y.indexOf(e),b=l.map(e=>({source:x(e.source),target:x(e.target),value:e.value})),g=react_1.default.useMemo(()=>(0,sankey_1.layoutSankey)(y,b,{width:i,height:a,nodeWidth:r,nodePadding:c}),[JSON.stringify(y),JSON.stringify(b),i,a,r,c]),k=e=>(0,theme_2.seriesColor)(e,d,t),[w,E]=react_1.default.useState(()=>{const e="undefined"!=typeof process?process.env.FLUX_CHART_HOVER:void 0;if(null!=e&&""!==e&&Number.isFinite(Number(e))){const t=Number(e);return t>=0&&t<g.nodes.length?{kind:"node",i:t}:null}return null}),S=e=>null!=w&&("link"===w.kind?w.i===e:g.links[e].source===w.i||g.links[e].target===w.i),T=null!=w,z=null!=w&&"node"===w.kind?g.nodes[w.i]:null,v=z?g.links.filter(e=>e.target===z.index).reduce((e,t)=>e+t.value,0):0,M=z?g.links.filter(e=>e.source===z.index).reduce((e,t)=>e+t.value,0):0,C=null!=w&&"link"===w.kind?g.links[w.i]:null;return react_1.default.createElement(components_1.View,{style:[{width:i,height:a,position:"relative",opacity:m?h:1},_]},g.links.map((e,t)=>react_1.default.createElement(Ribbon,{key:`l${t}`,sx:g.nodes[e.source].x1,sy:e.y0,tx:g.nodes[e.target].x0,ty:e.y1,w:e.width,color:(0,theme_2.withAlpha)(k(e.source),S(t)?"99":T?"1E":"55")})),g.nodes.map(e=>react_1.default.createElement(components_1.View,{key:`n${e.index}`,style:{position:"absolute",left:e.x0,top:e.y0,width:r,height:Math.max(1,e.y1-e.y0),backgroundColor:k(e.index),borderRadius:2,opacity:null!=w&&"node"===w.kind&&w.i===e.index?1:T?.4:1}})),s?g.nodes.map(e=>{const o=e.depth===g.columns-1,l=e.y1-e.y0;return l<6?null:react_1.default.createElement(components_1.Text,{key:`t${e.index}`,numberOfLines:1,style:{position:"absolute",left:o?void 0:e.x1+6,right:o?i-e.x0+6:void 0,top:e.y0+l/2-t.labelSize,fontSize:t.labelSize,color:n.colorText,maxWidth:120}},e.name," ",p(e.value))}):null,u?g.links.map((e,t)=>{const n=ribbonBox(g.nodes[e.source].x1,e.y0,g.nodes[e.target].x0,e.y1,e.width);return react_1.default.createElement(components_1.Pressable,{key:`lh${t}`,onMouseEnter:()=>E({kind:"link",i:t}),onMouseLeave:()=>E(e=>e&&"link"===e.kind&&e.i===t?null:e),style:{position:"absolute",left:n.left,top:n.top,width:Math.max(1,n.width),height:Math.max(1,n.height)}})}):null,u?g.nodes.map(e=>react_1.default.createElement(components_1.Pressable,{key:`nh${e.index}`,onMouseEnter:()=>E({kind:"node",i:e.index}),onMouseLeave:()=>E(t=>t&&"node"===t.kind&&t.i===e.index?null:t),style:{position:"absolute",left:e.x0-2,top:e.y0,width:r+4,height:Math.max(6,e.y1-e.y0)}})):null,u&&(z||C)?react_1.default.createElement(components_1.View,{pointerEvents:"none",style:{position:"absolute",right:6,top:6,width:170,backgroundColor:t.tooltipBg,borderRadius:6,padding:8,gap:4}},z?react_1.default.createElement(react_1.default.Fragment,null,react_1.default.createElement(components_1.View,{style:{flexDirection:"row",alignItems:"center",gap:6}},react_1.default.createElement(components_1.View,{style:{width:8,height:8,borderRadius:4,backgroundColor:k(z.index)}}),react_1.default.createElement(components_1.Text,{style:{flex:1,fontSize:t.labelSize,color:t.tooltipText,fontWeight:"600"},numberOfLines:1},z.name)),react_1.default.createElement(components_1.View,{style:{flexDirection:"row",justifyContent:"space-between"}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.labelSize,color:t.tooltipText,opacity:.7}},"流入"),react_1.default.createElement(components_1.Text,{style:{fontSize:t.labelSize,color:t.tooltipText,fontWeight:"600"}},p(v))),react_1.default.createElement(components_1.View,{style:{flexDirection:"row",justifyContent:"space-between"}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.labelSize,color:t.tooltipText,opacity:.7}},"流出"),react_1.default.createElement(components_1.Text,{style:{fontSize:t.labelSize,color:t.tooltipText,fontWeight:"600"}},p(M)))):C?react_1.default.createElement(react_1.default.Fragment,null,react_1.default.createElement(components_1.View,{style:{flexDirection:"row",alignItems:"center",gap:6}},react_1.default.createElement(components_1.View,{style:{width:8,height:8,borderRadius:4,backgroundColor:k(C.source)}}),react_1.default.createElement(components_1.Text,{style:{flex:1,fontSize:t.labelSize,color:t.tooltipText,fontWeight:"600"},numberOfLines:1},g.nodes[C.source].name," → ",g.nodes[C.target].name)),react_1.default.createElement(components_1.View,{style:{flexDirection:"row",justifyContent:"space-between"}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.labelSize,color:t.tooltipText,opacity:.7}},"流量"),react_1.default.createElement(components_1.Text,{style:{fontSize:t.labelSize,color:t.tooltipText,fontWeight:"600"}},p(C.value)))):null):null)}exports.default=SankeyChart;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SankeyChart = SankeyChart;
+// Sankey：桑基图（分层流量）。layoutSankey 纯函数算节点/流带几何；节点为轴对齐矩形用 View 画，
+// 流带为三次贝塞尔缎带——按 funnel 范式各自放进边长 S=max(带宽,带高) 的方形画布（vb=S，scale=1）交 Icon fill 光栅化。
+// 入场：整体 alpha 0→1 淡入。节点按序号取色板色，流带取源节点色 + 半透明。label 在节点侧标名称。
+// tooltip：悬浮节点→提亮其全部进出链路（压暗其余）+ 流入/流出气泡；悬浮链路（包围盒矩形命中）→自身提亮 + 流向气泡。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+const icon_1 = require("../../ui/icon");
+const common_1 = require("../core/common");
+const sankey_1 = require("../core/sankey");
+const theme_2 = require("../core/theme");
+const scale_1 = require("../core/scale");
+/** 单条流带：算全局包围盒 → 方形画布（S=max(bw,bh)）居中定位，path 用局部坐标（scale=1）。 */
+function Ribbon(props) {
+    const { sx, sy, tx, ty, w } = props;
+    if (w <= 0.2)
+        return null;
+    const half = w / 2;
+    const bx0 = sx;
+    const bx1 = tx;
+    const by0 = Math.min(sy, ty) - half;
+    const by1 = Math.max(sy, ty) + half;
+    const bw = bx1 - bx0;
+    const bh = by1 - by0;
+    const S = Math.max(bw, bh);
+    if (S <= 0)
+        return null;
+    // 方形画布左上角：内容在盒内居中
+    const left = bx0 - (S - bw) / 2;
+    const top = by0 - (S - bh) / 2;
+    const d = (0, sankey_1.sankeyRibbon)(sx - left, sy - top, tx - left, ty - top, w);
+    return (react_1.default.createElement(components_1.View, { style: { position: 'absolute', left, top, width: S, height: S, pointerEvents: 'none' } },
+        react_1.default.createElement(icon_1.Icon, { path: d, vb: S, size: S, color: props.color, mode: "fill" })));
+}
+/** 链路命中矩形包围盒（与 Ribbon 同数学，供透明 Pressable 抢 hover）。 */
+function ribbonBox(sx, sy, tx, ty, w) {
+    const half = w / 2;
+    return { left: sx, top: Math.min(sy, ty) - half, width: tx - sx, height: Math.max(sy, ty) + half - (Math.min(sy, ty) - half) };
+}
+function SankeyChart(props) {
+    const theme = (0, common_1.useChartTheme)();
+    const { token } = (0, theme_1.useToken)();
+    const { nodes: rawNodes, links: rawLinks, width = 640, height = 360, nodeWidth = 14, nodePadding = 14, label = true, tooltip = true, color, animation = true, animateDuration = 900, valueFormatter = scale_1.compactNumber, style, } = props;
+    const p = (0, common_1.useEnter)(animation, animateDuration);
+    const names = rawNodes.map((n) => (typeof n === 'string' ? n : n.name));
+    const indexOf = (ref) => (typeof ref === 'number' ? ref : names.indexOf(ref));
+    const linkInputs = rawLinks.map((l) => ({ source: indexOf(l.source), target: indexOf(l.target), value: l.value }));
+    const layout = react_1.default.useMemo(() => (0, sankey_1.layoutSankey)(names, linkInputs, { width, height, nodeWidth, nodePadding }), 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(names), JSON.stringify(linkInputs), width, height, nodeWidth, nodePadding]);
+    const colorOf = (i) => (0, theme_2.seriesColor)(i, color, theme);
+    const [hover, setHover] = react_1.default.useState(() => {
+        const env = typeof process !== 'undefined' ? process.env.FLUX_CHART_HOVER : undefined;
+        if (env != null && env !== '' && Number.isFinite(Number(env))) {
+            const k = Number(env);
+            return k >= 0 && k < layout.nodes.length ? { kind: 'node', i: k } : null;
+        }
+        return null;
+    });
+    const linkLit = (i) => hover != null && (hover.kind === 'link' ? hover.i === i : layout.links[i].source === hover.i || layout.links[i].target === hover.i);
+    const anyHi = hover != null;
+    // 节点悬浮时汇总流入/流出
+    const focusNode = hover != null && hover.kind === 'node' ? layout.nodes[hover.i] : null;
+    const inSum = focusNode ? layout.links.filter((l) => l.target === focusNode.index).reduce((a, b) => a + b.value, 0) : 0;
+    const outSum = focusNode ? layout.links.filter((l) => l.source === focusNode.index).reduce((a, b) => a + b.value, 0) : 0;
+    const focusLink = hover != null && hover.kind === 'link' ? layout.links[hover.i] : null;
+    const TIP_W = 170;
+    return (react_1.default.createElement(components_1.View, { style: [{ width, height, position: 'relative', opacity: animation ? p : 1 }, style] },
+        layout.links.map((lk, i) => (react_1.default.createElement(Ribbon, { key: `l${i}`, sx: layout.nodes[lk.source].x1, sy: lk.y0, tx: layout.nodes[lk.target].x0, ty: lk.y1, w: lk.width, color: (0, theme_2.withAlpha)(colorOf(lk.source), linkLit(i) ? '99' : anyHi ? '1E' : '55') }))),
+        layout.nodes.map((n) => (react_1.default.createElement(components_1.View, { key: `n${n.index}`, style: {
+                position: 'absolute',
+                left: n.x0,
+                top: n.y0,
+                width: nodeWidth,
+                height: Math.max(1, n.y1 - n.y0),
+                backgroundColor: colorOf(n.index),
+                borderRadius: 2,
+                opacity: hover != null && hover.kind === 'node' && hover.i === n.index ? 1 : anyHi ? 0.4 : 1,
+            } }))),
+        label
+            ? layout.nodes.map((n) => {
+                const last = n.depth === layout.columns - 1;
+                const lh = n.y1 - n.y0;
+                if (lh < 6)
+                    return null;
+                return (react_1.default.createElement(components_1.Text, { key: `t${n.index}`, numberOfLines: 1, style: {
+                        position: 'absolute',
+                        left: last ? undefined : n.x1 + 6,
+                        right: last ? width - n.x0 + 6 : undefined,
+                        top: n.y0 + lh / 2 - theme.labelSize,
+                        fontSize: theme.labelSize,
+                        color: token.colorText,
+                        maxWidth: 120,
+                    } },
+                    n.name,
+                    " ",
+                    valueFormatter(n.value)));
+            })
+            : null,
+        tooltip
+            ? layout.links.map((lk, i) => {
+                const b = ribbonBox(layout.nodes[lk.source].x1, lk.y0, layout.nodes[lk.target].x0, lk.y1, lk.width);
+                return (react_1.default.createElement(components_1.Pressable, { key: `lh${i}`, onMouseEnter: () => setHover({ kind: 'link', i }), onMouseLeave: () => setHover((h) => (h && h.kind === 'link' && h.i === i ? null : h)), style: { position: 'absolute', left: b.left, top: b.top, width: Math.max(1, b.width), height: Math.max(1, b.height) } }));
+            })
+            : null,
+        tooltip
+            ? layout.nodes.map((n) => (react_1.default.createElement(components_1.Pressable, { key: `nh${n.index}`, onMouseEnter: () => setHover({ kind: 'node', i: n.index }), onMouseLeave: () => setHover((h) => (h && h.kind === 'node' && h.i === n.index ? null : h)), style: { position: 'absolute', left: n.x0 - 2, top: n.y0, width: nodeWidth + 4, height: Math.max(6, n.y1 - n.y0) } })))
+            : null,
+        tooltip && (focusNode || focusLink) ? (react_1.default.createElement(components_1.View, { pointerEvents: "none", style: { position: 'absolute', right: 6, top: 6, width: TIP_W, backgroundColor: theme.tooltipBg, borderRadius: 6, padding: 8, gap: 4 } }, focusNode ? (react_1.default.createElement(react_1.default.Fragment, null,
+            react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', alignItems: 'center', gap: 6 } },
+                react_1.default.createElement(components_1.View, { style: { width: 8, height: 8, borderRadius: 4, backgroundColor: colorOf(focusNode.index) } }),
+                react_1.default.createElement(components_1.Text, { style: { flex: 1, fontSize: theme.labelSize, color: theme.tooltipText, fontWeight: '600' }, numberOfLines: 1 }, focusNode.name)),
+            react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', justifyContent: 'space-between' } },
+                react_1.default.createElement(components_1.Text, { style: { fontSize: theme.labelSize, color: theme.tooltipText, opacity: 0.7 } }, "\u6D41\u5165"),
+                react_1.default.createElement(components_1.Text, { style: { fontSize: theme.labelSize, color: theme.tooltipText, fontWeight: '600' } }, valueFormatter(inSum))),
+            react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', justifyContent: 'space-between' } },
+                react_1.default.createElement(components_1.Text, { style: { fontSize: theme.labelSize, color: theme.tooltipText, opacity: 0.7 } }, "\u6D41\u51FA"),
+                react_1.default.createElement(components_1.Text, { style: { fontSize: theme.labelSize, color: theme.tooltipText, fontWeight: '600' } }, valueFormatter(outSum))))) : focusLink ? (react_1.default.createElement(react_1.default.Fragment, null,
+            react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', alignItems: 'center', gap: 6 } },
+                react_1.default.createElement(components_1.View, { style: { width: 8, height: 8, borderRadius: 4, backgroundColor: colorOf(focusLink.source) } }),
+                react_1.default.createElement(components_1.Text, { style: { flex: 1, fontSize: theme.labelSize, color: theme.tooltipText, fontWeight: '600' }, numberOfLines: 1 },
+                    layout.nodes[focusLink.source].name,
+                    " \u2192 ",
+                    layout.nodes[focusLink.target].name)),
+            react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', justifyContent: 'space-between' } },
+                react_1.default.createElement(components_1.Text, { style: { fontSize: theme.labelSize, color: theme.tooltipText, opacity: 0.7 } }, "\u6D41\u91CF"),
+                react_1.default.createElement(components_1.Text, { style: { fontSize: theme.labelSize, color: theme.tooltipText, fontWeight: '600' } }, valueFormatter(focusLink.value))))) : null)) : null));
+}
+exports.default = SankeyChart;

@@ -1,1 +1,96 @@
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.detectUnit=detectUnit,exports.fromTimestamp=fromTimestamp,exports.parseToMs=parseToMs,exports.tzOffsetLabel=tzOffsetLabel,exports.formatZoned=formatZoned,exports.relativeTime=relativeTime;const timezone_1=require("../../utils/timezone");function detectUnit(e){return Math.abs(e)>=1e11?"ms":"s"}function fromTimestamp(e){if(!Number.isFinite(e))return null;const t=detectUnit(e);return{ms:"ms"===t?e:Math.round(1e3*e),sec:"ms"===t?Math.floor(e/1e3):Math.trunc(e),unit:t}}function parseToMs(e,t){const r=String(e).trim();if(!r)return null;if(/Z$|[+-]\d{2}:?\d{2}$/.test(r)){const e=Date.parse(r);return Number.isFinite(e)?e:null}const n=/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/.exec(r);if(!n)return null;const o=Number(n[1]),a=Number(n[2])-1,s=Number(n[3]),i=n[4]?Number(n[4]):0,u=n[5]?Number(n[5]):0,m=n[6]?Number(n[6]):0;if(a<0||a>11||s<1||s>31||i>23||u>59||m>59)return null;const d=(0,timezone_1.zonedTimeToUtc)(o,a,s,i,u,m,t).getTime();return Number.isFinite(d)?d:null}const pad2=e=>e<10?`0${e}`:`${e}`;function tzOffsetLabel(e,t){const r=(0,timezone_1.getZonedParts)(new Date(e),t),n=Date.UTC(r.year,r.month,r.day,r.hour,r.minute,r.second);let o=Math.round((n-1e3*Math.floor(e/1e3))/6e4);if(0===o)return"+00:00";const a=o<0?"-":"+";return o=Math.abs(o),`${a}${pad2(Math.floor(o/60))}:${pad2(o%60)}`}const WEEKDAY_CN=["周日","周一","周二","周三","周四","周五","周六"];function formatZoned(e,t){const r=(0,timezone_1.getZonedParts)(new Date(e),t);return`${r.year}-${pad2(r.month+1)}-${pad2(r.day)} ${pad2(r.hour)}:${pad2(r.minute)}:${pad2(r.second)} ${WEEKDAY_CN[r.weekday]}`}function relativeTime(e,t){let r=(t-e)/1e3;const n=r<0;let o;return r=Math.abs(r),o=r<3?"刚刚":r<60?`${Math.floor(r)} 秒`:r<3600?`${Math.floor(r/60)} 分钟`:r<86400?`${Math.floor(r/3600)} 小时`:r<2592e3?`${Math.floor(r/86400)} 天`:r<31536e3?`${Math.floor(r/2592e3)} 个月`:`${Math.floor(r/31536e3)} 年`,"刚刚"===o?o:n?`${o}后`:`${o}前`}
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.detectUnit = detectUnit;
+exports.fromTimestamp = fromTimestamp;
+exports.parseToMs = parseToMs;
+exports.tzOffsetLabel = tzOffsetLabel;
+exports.formatZoned = formatZoned;
+exports.relativeTime = relativeTime;
+// 时间戳 / 日期转换核心算法（纯函数，无渲染依赖，便于探针验证）。
+// 复用 src/utils/timezone 的 Intl 时区拆解，做「Unix 时间戳 ↔ 日历时间」双向转换 + 相对时间。
+const timezone_1 = require("../../utils/timezone");
+/** 秒 / 毫秒启发式判定：|n| ≥ 1e11 视为毫秒（当前秒级 ~1.7e9，毫秒级 ~1.7e12）。 */
+function detectUnit(n) {
+    return Math.abs(n) >= 1e11 ? 'ms' : 's';
+}
+/** 由数字时间戳（自动判单位）得标准化信息；非有限值返回 null。 */
+function fromTimestamp(n) {
+    if (!Number.isFinite(n))
+        return null;
+    const unit = detectUnit(n);
+    const ms = unit === 'ms' ? n : Math.round(n * 1000);
+    const sec = unit === 'ms' ? Math.floor(n / 1000) : Math.trunc(n);
+    return { ms, sec, unit };
+}
+/**
+ * 解析日历时间字符串为毫秒时间戳。
+ * 支持 'YYYY-MM-DD'、'YYYY-MM-DD HH:mm:ss'、'YYYY-MM-DDTHH:mm:ss'（按 tz 视为墙上时间），
+ * 以及带 Z / 显式偏移的 ISO（走 Date.parse）。非法返回 null。
+ */
+function parseToMs(input, tz) {
+    const s = String(input).trim();
+    if (!s)
+        return null;
+    // 带时区标记的 ISO：直接 Date.parse
+    if (/Z$|[+-]\d{2}:?\d{2}$/.test(s)) {
+        const t = Date.parse(s);
+        return Number.isFinite(t) ? t : null;
+    }
+    const m = /^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/.exec(s);
+    if (!m)
+        return null;
+    const y = Number(m[1]);
+    const mo = Number(m[2]) - 1;
+    const d = Number(m[3]);
+    const h = m[4] ? Number(m[4]) : 0;
+    const mi = m[5] ? Number(m[5]) : 0;
+    const se = m[6] ? Number(m[6]) : 0;
+    if (mo < 0 || mo > 11 || d < 1 || d > 31 || h > 23 || mi > 59 || se > 59)
+        return null;
+    const date = (0, timezone_1.zonedTimeToUtc)(y, mo, d, h, mi, se, tz);
+    const t = date.getTime();
+    return Number.isFinite(t) ? t : null;
+}
+const pad2 = (n) => (n < 10 ? `0${n}` : `${n}`);
+/** 指定时区在某时刻相对 UTC 的偏移标签，如 '+08:00' / '-05:00' / '+05:30'。 */
+function tzOffsetLabel(ms, tz) {
+    const p = (0, timezone_1.getZonedParts)(new Date(ms), tz);
+    const asUTC = Date.UTC(p.year, p.month, p.day, p.hour, p.minute, p.second);
+    // 秒级偏移（含半小时/刻钟时区）
+    let offMin = Math.round((asUTC - Math.floor(ms / 1000) * 1000) / 60000);
+    if (offMin === 0)
+        return '+00:00';
+    const sign = offMin < 0 ? '-' : '+';
+    offMin = Math.abs(offMin);
+    return `${sign}${pad2(Math.floor(offMin / 60))}:${pad2(offMin % 60)}`;
+}
+const WEEKDAY_CN = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+/** 按指定时区格式化 'YYYY-MM-DD HH:mm:ss 周X'。 */
+function formatZoned(ms, tz) {
+    const p = (0, timezone_1.getZonedParts)(new Date(ms), tz);
+    return `${p.year}-${pad2(p.month + 1)}-${pad2(p.day)} ${pad2(p.hour)}:${pad2(p.minute)}:${pad2(p.second)} ${WEEKDAY_CN[p.weekday]}`;
+}
+/** 相对时间（中文）：now 与目标时刻的差，过去「…前」/ 未来「…后」。 */
+function relativeTime(ms, nowMs) {
+    let diff = (nowMs - ms) / 1000; // 正=过去
+    const future = diff < 0;
+    diff = Math.abs(diff);
+    let text;
+    if (diff < 3)
+        text = '刚刚';
+    else if (diff < 60)
+        text = `${Math.floor(diff)} 秒`;
+    else if (diff < 3600)
+        text = `${Math.floor(diff / 60)} 分钟`;
+    else if (diff < 86400)
+        text = `${Math.floor(diff / 3600)} 小时`;
+    else if (diff < 2592000)
+        text = `${Math.floor(diff / 86400)} 天`;
+    else if (diff < 31536000)
+        text = `${Math.floor(diff / 2592000)} 个月`;
+    else
+        text = `${Math.floor(diff / 31536000)} 年`;
+    if (text === '刚刚')
+        return text;
+    return future ? `${text}后` : `${text}前`;
+}

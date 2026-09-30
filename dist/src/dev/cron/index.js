@@ -1,1 +1,103 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.CronParser=CronParser;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme"),ui_1=require("../../ui"),fonts_1=require("../../paint/fonts"),cron_1=require("./cron"),FIELD_LABELS=[{key:"minute",name:"分钟",hint:"0-59"},{key:"hour",name:"小时",hint:"0-23"},{key:"dom",name:"日",hint:"1-31"},{key:"month",name:"月",hint:"1-12"},{key:"dow",name:"星期",hint:"0-7"}],PRESETS=[{label:"每分钟",expr:"* * * * *"},{label:"每 5 分钟",expr:"*/5 * * * *"},{label:"每小时",expr:"0 * * * *"},{label:"每天零点",expr:"@daily"},{label:"每周一 9 点",expr:"0 9 * * 1"},{label:"每月 1 号",expr:"0 0 1 * *"},{label:"工作日 9-18",expr:"0 9-18 * * 1-5"},{label:"每年 1 月",expr:"0 0 1 1 *"}],pad=e=>String(e).padStart(2,"0"),fmtDate=e=>`${e.getFullYear()}-${pad(e.getMonth()+1)}-${pad(e.getDate())} ${pad(e.getHours())}:${pad(e.getMinutes())}`;function fieldSummary(e,t){const r=e[t],o="minute"===t?60:"hour"===t?24:"dom"===t?31:"month"===t?12:7;return r.length===o?"*  every":r.length<=6?r.join(" "):`${r.length} 项`}function CronParser(e){const{token:t}=(0,theme_1.useToken)(),{defaultValue:r="*/15 9-18 * * 1-5",previewCount:o=5,style:n}=e,[a,l]=react_1.default.useState(r),c=react_1.default.useMemo(()=>{try{return{fields:(0,cron_1.parseCron)(a),error:null}}catch(e){return{fields:null,error:e.message}}},[a]),i=react_1.default.useMemo(()=>{try{return c.fields?(0,cron_1.describeCron)(a):""}catch{return""}},[a,c.fields]),d=react_1.default.useMemo(()=>{try{return c.fields?(0,cron_1.nextRuns)(a,new Date,o):[]}catch{return[]}},[a,c.fields,o]),s=t.colorFillQuaternary,u={fontSize:t.fontSizeSM,color:t.colorTextTertiary,marginBottom:4};return react_1.default.createElement(components_1.View,{style:[{gap:t.marginSM},n]},react_1.default.createElement(components_1.View,null,react_1.default.createElement(components_1.Text,{style:u},"Cron 表达式（分 时 日 月 周）"),react_1.default.createElement(ui_1.Input,{value:a,onChange:l,placeholder:"例如：0 9 * * 1-5",style:{backgroundColor:s}})),react_1.default.createElement(components_1.View,{style:{flexDirection:"row",flexWrap:"wrap",gap:t.marginXS}},PRESETS.map(e=>{const r=a===e.expr;return react_1.default.createElement(components_1.Pressable,{key:e.expr,onPress:()=>l(e.expr),style:{paddingHorizontal:t.paddingSM,paddingVertical:t.paddingXXS??2,borderRadius:t.borderRadiusSM,backgroundColor:r?`${t.colorPrimary}22`:s,borderWidth:1,borderColor:r?t.colorPrimary:"transparent"}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:r?t.colorPrimary:t.colorTextSecondary}},e.label))})),c.error?react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSize,color:t.colorError}},"⚠ ",c.error):react_1.default.createElement(components_1.View,{style:{backgroundColor:s,borderRadius:t.borderRadius,padding:t.paddingSM,gap:2}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:t.colorSuccess}},"✓ 合法表达式"),react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSize,color:t.colorText}},i)),c.fields?react_1.default.createElement(components_1.View,{style:{flexDirection:"row",gap:t.marginXS}},FIELD_LABELS.map(e=>react_1.default.createElement(components_1.View,{key:e.key,style:{flex:1,backgroundColor:s,borderRadius:t.borderRadiusSM,padding:t.paddingXS,alignItems:"center",gap:2}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:t.colorTextSecondary}},e.name),react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:t.colorPrimary,fontFamily:fonts_1.MONO_FAMILY},numberOfLines:1},fieldSummary(c.fields,e.key)),react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:t.colorTextQuaternary}},e.hint)))):null,c.fields&&d.length>0?react_1.default.createElement(components_1.View,{style:{backgroundColor:s,borderRadius:t.borderRadius,padding:t.paddingSM}},react_1.default.createElement(components_1.Text,{style:{...u,marginBottom:t.marginXS}},"未来 ",d.length," 次触发"),d.map((e,r)=>react_1.default.createElement(components_1.Text,{key:r,style:{fontSize:t.fontSizeSM,color:0===r?t.colorPrimary:t.colorTextSecondary,fontFamily:fonts_1.MONO_FAMILY,marginBottom:2}},`${r+1}.  ${fmtDate(e)}`))):null)}exports.default=CronParser;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CronParser = CronParser;
+// CronParser：Cron 表达式解析器（程序员工具）。输入 5 段 cron → 合法性 + 中文描述 + 五字段分解 + 未来 N 次触发时刻。
+// 解析/求值算法在 ./cron（纯函数，已探针验证），本组件只做输入框 + 结果呈现。常用宏一键填充。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+const ui_1 = require("../../ui");
+const fonts_1 = require("../../paint/fonts");
+const cron_1 = require("./cron");
+const FIELD_LABELS = [
+    { key: 'minute', name: '分钟', hint: '0-59' },
+    { key: 'hour', name: '小时', hint: '0-23' },
+    { key: 'dom', name: '日', hint: '1-31' },
+    { key: 'month', name: '月', hint: '1-12' },
+    { key: 'dow', name: '星期', hint: '0-7' },
+];
+const PRESETS = [
+    { label: '每分钟', expr: '* * * * *' },
+    { label: '每 5 分钟', expr: '*/5 * * * *' },
+    { label: '每小时', expr: '0 * * * *' },
+    { label: '每天零点', expr: '@daily' },
+    { label: '每周一 9 点', expr: '0 9 * * 1' },
+    { label: '每月 1 号', expr: '0 0 1 * *' },
+    { label: '工作日 9-18', expr: '0 9-18 * * 1-5' },
+    { label: '每年 1 月', expr: '0 0 1 1 *' },
+];
+const pad = (n) => String(n).padStart(2, '0');
+const fmtDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+function fieldSummary(f, key) {
+    const vals = f[key];
+    const full = key === 'minute' ? 60 : key === 'hour' ? 24 : key === 'dom' ? 31 : key === 'month' ? 12 : 7;
+    if (vals.length === full)
+        return '*  every';
+    return vals.length <= 6 ? vals.join(' ') : `${vals.length} 项`;
+}
+function CronParser(props) {
+    const { token } = (0, theme_1.useToken)();
+    const { defaultValue = '*/15 9-18 * * 1-5', previewCount = 5, style } = props;
+    const [expr, setExpr] = react_1.default.useState(defaultValue);
+    const parsed = react_1.default.useMemo(() => {
+        try {
+            return { fields: (0, cron_1.parseCron)(expr), error: null };
+        }
+        catch (e) {
+            return { fields: null, error: e.message };
+        }
+    }, [expr]);
+    const desc = react_1.default.useMemo(() => {
+        try {
+            return parsed.fields ? (0, cron_1.describeCron)(expr) : '';
+        }
+        catch {
+            return '';
+        }
+    }, [expr, parsed.fields]);
+    const runs = react_1.default.useMemo(() => {
+        try {
+            return parsed.fields ? (0, cron_1.nextRuns)(expr, new Date(), previewCount) : [];
+        }
+        catch {
+            return [];
+        }
+    }, [expr, parsed.fields, previewCount]);
+    const boxBg = token.colorFillQuaternary;
+    const labelStyle = { fontSize: token.fontSizeSM, color: token.colorTextTertiary, marginBottom: 4 };
+    return (react_1.default.createElement(components_1.View, { style: [{ gap: token.marginSM }, style] },
+        react_1.default.createElement(components_1.View, null,
+            react_1.default.createElement(components_1.Text, { style: labelStyle }, "Cron \u8868\u8FBE\u5F0F\uFF08\u5206 \u65F6 \u65E5 \u6708 \u5468\uFF09"),
+            react_1.default.createElement(ui_1.Input, { value: expr, onChange: setExpr, placeholder: "\u4F8B\u5982\uFF1A0 9 * * 1-5", style: { backgroundColor: boxBg } })),
+        react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', flexWrap: 'wrap', gap: token.marginXS } }, PRESETS.map((p) => {
+            const on = expr === p.expr;
+            return (react_1.default.createElement(components_1.Pressable, { key: p.expr, onPress: () => setExpr(p.expr), style: {
+                    paddingHorizontal: token.paddingSM,
+                    paddingVertical: token.paddingXXS ?? 2,
+                    borderRadius: token.borderRadiusSM,
+                    backgroundColor: on ? `${token.colorPrimary}22` : boxBg,
+                    borderWidth: 1,
+                    borderColor: on ? token.colorPrimary : 'transparent',
+                } },
+                react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: on ? token.colorPrimary : token.colorTextSecondary } }, p.label)));
+        })),
+        parsed.error ? (react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSize, color: token.colorError } },
+            "\u26A0 ",
+            parsed.error)) : (react_1.default.createElement(components_1.View, { style: { backgroundColor: boxBg, borderRadius: token.borderRadius, padding: token.paddingSM, gap: 2 } },
+            react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: token.colorSuccess } }, "\u2713 \u5408\u6CD5\u8868\u8FBE\u5F0F"),
+            react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSize, color: token.colorText } }, desc))),
+        parsed.fields ? (react_1.default.createElement(components_1.View, { style: { flexDirection: 'row', gap: token.marginXS } }, FIELD_LABELS.map((fl) => (react_1.default.createElement(components_1.View, { key: fl.key, style: { flex: 1, backgroundColor: boxBg, borderRadius: token.borderRadiusSM, padding: token.paddingXS, alignItems: 'center', gap: 2 } },
+            react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: token.colorTextSecondary } }, fl.name),
+            react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: token.colorPrimary, fontFamily: fonts_1.MONO_FAMILY }, numberOfLines: 1 }, fieldSummary(parsed.fields, fl.key)),
+            react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: token.colorTextQuaternary } }, fl.hint)))))) : null,
+        parsed.fields && runs.length > 0 ? (react_1.default.createElement(components_1.View, { style: { backgroundColor: boxBg, borderRadius: token.borderRadius, padding: token.paddingSM } },
+            react_1.default.createElement(components_1.Text, { style: { ...labelStyle, marginBottom: token.marginXS } },
+                "\u672A\u6765 ",
+                runs.length,
+                " \u6B21\u89E6\u53D1"),
+            runs.map((d, i) => (react_1.default.createElement(components_1.Text, { key: i, style: { fontSize: token.fontSizeSM, color: i === 0 ? token.colorPrimary : token.colorTextSecondary, fontFamily: fonts_1.MONO_FAMILY, marginBottom: 2 } }, `${i + 1}.  ${fmtDate(d)}`))))) : null));
+}
+exports.default = CronParser;

@@ -1,1 +1,147 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.Form=void 0;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme"),button_1=require("../button"),Ctx=react_1.default.createContext(null);function syncRules(e,t){for(const r of t){const t=null==e||""===e||Array.isArray(e)&&0===e.length;if(r.required&&t)return r.message||"该项为必填";if(t)continue;if(r.pattern&&"string"==typeof e&&!r.pattern.test(e))return r.message||"格式不正确";const n="string"==typeof e||Array.isArray(e)?e.length:void 0;if(void 0!==n){if(void 0!==r.min&&n<r.min)return r.message||`长度/个数不能少于 ${r.min}`;if(void 0!==r.max&&n>r.max)return r.message||`长度/个数不能超过 ${r.max}`}}return null}function runAsync(e,t){const r=t.find(e=>e.validator);return r?Promise.resolve(r.validator(e)).then(e=>!1===e?r.message||"校验失败":"string"==typeof e?e:null):Promise.resolve(null)}function FormComp(e){const{token:t}=(0,theme_1.useToken)(),{children:r,layout:n="vertical",labelWidth:o=96,initialValues:l={},onFinish:a,onFinishFailed:u,style:s}=e,[i,c]=react_1.default.useState(l),m=react_1.default.useRef(i);m.current=i;const f=react_1.default.useRef(new Map),d={values:i,set:(e,t)=>{c(r=>({...r,[e]:t}))},register:(e,t)=>{f.current.set(e,t)},unregister:e=>{f.current.delete(e)},submit:()=>{const e=Array.from(f.current.entries());Promise.all(e.map(([,e])=>e())).then(t=>{const r={};t.forEach((t,n)=>{t&&(r[e[n][0]]=t)}),0===Object.keys(r).length?a&&a({...m.current}):u&&u(r)})},layout:n,labelW:o};return react_1.default.createElement(Ctx.Provider,{value:d},react_1.default.createElement(components_1.View,{style:[{gap:t.margin},"inline"===n?{flexDirection:"row",flexWrap:"wrap",alignItems:"flex-start"}:null,s]},r))}function FormItem(e){const{token:t}=(0,theme_1.useToken)(),{label:r,name:n,rules:o=[],required:l,help:a,children:u,style:s}=e,i=react_1.default.useContext(Ctx),c=i&&n?i.values[n]:void 0,[m,f]=react_1.default.useState(null),d=react_1.default.useRef(c);d.current=c;const _=react_1.default.useRef(o);_.current=o;const p=()=>{const e=syncRules(d.current,_.current);return Promise.resolve(null!==e?e:runAsync(d.current,_.current)).then(e=>(f(e),e))};react_1.default.useEffect(()=>{if(n&&i)return i.register(n,p),()=>i.unregister(n)});const y=react_1.default.isValidElement(u)?u:null,g=y&&"boolean"==typeof y.props.checked,h=y?react_1.default.cloneElement(y,{...g?{checked:!!c}:{value:c},onChange:e=>{n&&i&&i.set(n,e),null!==m&&null===syncRules(e,_.current)&&f(null)},status:m?"error":y.props.status}):u,x=null!=r&&react_1.default.createElement(components_1.View,{style:{width:"horizontal"===i?.layout?i.labelW:void 0,marginRight:"horizontal"===i?.layout?t.marginXS:0,marginBottom:"horizontal"===i?.layout?0:t.marginXXS,paddingTop:"horizontal"===i?.layout?t.paddingXXS:0}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSize,color:t.colorText}},(l||o.some(e=>e.required))&&react_1.default.createElement(components_1.Text,{style:{color:t.colorError}},"* "),r));return react_1.default.createElement(components_1.View,{style:s},react_1.default.createElement(components_1.View,{style:{flexDirection:"horizontal"===i?.layout?"row":"column",alignItems:"horizontal"===i?.layout?"flex-start":"stretch"}},x,react_1.default.createElement(components_1.View,{style:{flex:1,minWidth:120}},h)),m?react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:t.colorError,marginTop:t.marginXXS}},m):a?react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:t.colorTextTertiary,marginTop:t.marginXXS}},a):null)}function FormSubmit(e){const t=react_1.default.useContext(Ctx);return react_1.default.createElement(components_1.View,{style:e.style},react_1.default.createElement(button_1.Button,{type:"primary",onPress:()=>t&&t.submit()},e.text??"提交"))}exports.Form=Object.assign(FormComp,{Item:FormItem,Submit:FormSubmit}),exports.default=exports.Form;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Form = void 0;
+// FORM：表单容器 + 条目校验（对齐 antd 常用 API 的自绘降级实现，无 useForm 全局句柄）。
+// 数据流：Form 持 values 与字段注册表（Context 下发）；Form.Item 注册 validate 句柄、
+// 克隆 children 注入 value/onChange（Switch 类注入 checked）；提交时逐字段校验，
+// 全过 onFinish(values)，有错逐项显示红字 + onFinishFailed(errors)。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+const button_1 = require("../button");
+const Ctx = react_1.default.createContext(null);
+/** 同步规则校验；async validator 由 Item 的 validate 单独补跑 */
+function syncRules(v, rules) {
+    for (const r of rules) {
+        const empty = v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0);
+        if (r.required && empty)
+            return r.message || '该项为必填';
+        if (empty)
+            continue;
+        if (r.pattern && typeof v === 'string' && !r.pattern.test(v))
+            return r.message || '格式不正确';
+        const len = typeof v === 'string' || Array.isArray(v) ? v.length : undefined;
+        if (len !== undefined) {
+            if (r.min !== undefined && len < r.min)
+                return r.message || `长度/个数不能少于 ${r.min}`;
+            if (r.max !== undefined && len > r.max)
+                return r.message || `长度/个数不能超过 ${r.max}`;
+        }
+    }
+    return null;
+}
+function runAsync(v, rules) {
+    const r = rules.find((x) => x.validator);
+    if (!r)
+        return Promise.resolve(null);
+    return Promise.resolve(r.validator(v)).then((x) => x === false ? r.message || '校验失败' : typeof x === 'string' ? x : null);
+}
+function FormComp(props) {
+    const { token } = (0, theme_1.useToken)();
+    const { children, layout = 'vertical', labelWidth = 96, initialValues = {}, onFinish, onFinishFailed, style } = props;
+    const [values, setValues] = react_1.default.useState(initialValues);
+    const valuesRef = react_1.default.useRef(values);
+    valuesRef.current = values;
+    const fieldsRef = react_1.default.useRef(new Map());
+    const set = (name, v) => {
+        setValues((prev) => ({ ...prev, [name]: v }));
+    };
+    const register = (name, h) => {
+        fieldsRef.current.set(name, h);
+    };
+    const unregister = (name) => {
+        fieldsRef.current.delete(name);
+    };
+    const submit = () => {
+        const list = Array.from(fieldsRef.current.entries());
+        Promise.all(list.map(([, h]) => h())).then((errs) => {
+            const errors = {};
+            errs.forEach((e, i) => {
+                if (e)
+                    errors[list[i][0]] = e;
+            });
+            if (Object.keys(errors).length === 0)
+                onFinish && onFinish({ ...valuesRef.current });
+            else
+                onFinishFailed && onFinishFailed(errors);
+        });
+    };
+    const ctx = { values, set, register, unregister, submit, layout, labelW: labelWidth };
+    return (react_1.default.createElement(Ctx.Provider, { value: ctx },
+        react_1.default.createElement(components_1.View, { style: [
+                { gap: token.margin },
+                layout === 'inline' ? { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start' } : null,
+                style,
+            ] }, children)));
+}
+function FormItem(props) {
+    const { token } = (0, theme_1.useToken)();
+    const { label, name, rules = [], required, help, children, style } = props;
+    const form = react_1.default.useContext(Ctx);
+    const v = form && name ? form.values[name] : undefined;
+    const [err, setErr] = react_1.default.useState(null);
+    const vRef = react_1.default.useRef(v);
+    vRef.current = v;
+    const rulesRef = react_1.default.useRef(rules);
+    rulesRef.current = rules;
+    const validate = () => {
+        const e = syncRules(vRef.current, rulesRef.current);
+        return Promise.resolve(e !== null ? e : runAsync(vRef.current, rulesRef.current)).then((x) => {
+            setErr(x);
+            return x;
+        });
+    };
+    react_1.default.useEffect(() => {
+        if (!name || !form)
+            return;
+        form.register(name, validate);
+        return () => form.unregister(name);
+    });
+    const setField = (nv) => {
+        if (name && form)
+            form.set(name, nv);
+        // 改值即重校验（已报错的字段实时消错）
+        if (err !== null) {
+            const e = syncRules(nv, rulesRef.current);
+            if (e === null)
+                setErr(null);
+        }
+    };
+    const childEl = react_1.default.isValidElement(children) ? children : null;
+    const isSwitchLike = childEl && typeof childEl.props.checked === 'boolean';
+    const child = childEl
+        ? react_1.default.cloneElement(childEl, {
+            ...(isSwitchLike ? { checked: !!v } : { value: v }),
+            onChange: setField,
+            status: err ? 'error' : childEl.props.status,
+        })
+        : children;
+    const labelEl = label != null && (react_1.default.createElement(components_1.View, { style: {
+            width: form?.layout === 'horizontal' ? form.labelW : undefined,
+            marginRight: form?.layout === 'horizontal' ? token.marginXS : 0,
+            marginBottom: form?.layout === 'horizontal' ? 0 : token.marginXXS,
+            paddingTop: form?.layout === 'horizontal' ? token.paddingXXS : 0,
+        } },
+        react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSize, color: token.colorText } },
+            (required || rules.some((r) => r.required)) && react_1.default.createElement(components_1.Text, { style: { color: token.colorError } }, "* "),
+            label)));
+    return (react_1.default.createElement(components_1.View, { style: style },
+        react_1.default.createElement(components_1.View, { style: {
+                flexDirection: form?.layout === 'horizontal' ? 'row' : 'column',
+                alignItems: form?.layout === 'horizontal' ? 'flex-start' : 'stretch',
+            } },
+            labelEl,
+            react_1.default.createElement(components_1.View, { style: { flex: 1, minWidth: 120 } }, child)),
+        err ? (react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: token.colorError, marginTop: token.marginXXS } }, err)) : help ? (react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: token.colorTextTertiary, marginTop: token.marginXXS } }, help)) : null));
+}
+/** 提交按钮：走所属 Form 的 submit（全量校验） */
+function FormSubmit(props) {
+    const form = react_1.default.useContext(Ctx);
+    return (react_1.default.createElement(components_1.View, { style: props.style },
+        react_1.default.createElement(button_1.Button, { type: "primary", onPress: () => form && form.submit() }, props.text ?? '提交')));
+}
+exports.Form = Object.assign(FormComp, { Item: FormItem, Submit: FormSubmit });
+exports.default = exports.Form;

@@ -1,1 +1,36 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.Masonry=Masonry;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme");function Masonry(e){const{token:t}=(0,theme_1.useToken)(),{data:r,columns:a=4,gutter:n="middle",renderItem:o,style:l}=e,s=e=>"number"==typeof e?e:"large"===e?t.marginLG:"middle"===e?t.margin:t.marginSM,[i,m]=Array.isArray(n)?[s(n[0]),s(n[1])]:[s(n),s(n)],u=Array.from({length:Math.max(1,a)},()=>[]),c=new Array(Math.max(1,a)).fill(0);return r.forEach((e,t)=>{let r=0;for(let e=1;e<a;e++)c[e]<c[r]&&(r=e);u[r].push(react_1.default.createElement(components_1.View,{key:e.key??t,style:{height:e.height}},o(e,t))),c[r]+=e.height+m}),react_1.default.createElement(components_1.View,{style:[{flexDirection:"row",columnGap:i},l]},u.map((e,t)=>react_1.default.createElement(components_1.View,{key:t,style:{flex:1,rowGap:m}},e)))}exports.default=Masonry;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Masonry = Masonry;
+// Masonry：瀑布流。按「最短列优先」把条目分配到 N 列（依赖条目 height，无需运行时测量），
+// 渲染为 N 个纵向列 flex 容器，列间 columnGap、列内 rowGap。纯 flex 布局，无自绘。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+function Masonry(props) {
+    const { token } = (0, theme_1.useToken)();
+    const { data, columns = 4, gutter = 'middle', renderItem, style } = props;
+    const gv = (g) => typeof g === 'number'
+        ? g
+        : g === 'large'
+            ? token.marginLG
+            : g === 'middle'
+                ? token.margin
+                : token.marginSM;
+    const [hGap, vGap] = Array.isArray(gutter) ? [gv(gutter[0]), gv(gutter[1])] : [gv(gutter), gv(gutter)];
+    // 最短列优先：逐条放进当前累计高度最矮的列
+    const cols = Array.from({ length: Math.max(1, columns) }, () => []);
+    const heights = new Array(Math.max(1, columns)).fill(0);
+    data.forEach((item, i) => {
+        let target = 0;
+        for (let c = 1; c < columns; c++)
+            if (heights[c] < heights[target])
+                target = c;
+        cols[target].push(react_1.default.createElement(components_1.View, { key: item.key ?? i, style: { height: item.height } }, renderItem(item, i)));
+        heights[target] += item.height + vGap;
+    });
+    return (react_1.default.createElement(components_1.View, { style: [{ flexDirection: 'row', columnGap: hGap }, style] }, cols.map((col, ci) => (react_1.default.createElement(components_1.View, { key: ci, style: { flex: 1, rowGap: vGap } }, col)))));
+}
+exports.default = Masonry;

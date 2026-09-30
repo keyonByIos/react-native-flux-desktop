@@ -1,1 +1,103 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.Skeleton=void 0,exports.SkeletonBase=SkeletonBase,exports.SkeletonAvatar=SkeletonAvatar,exports.SkeletonButton=SkeletonButton,exports.SkeletonInput=SkeletonInput,exports.SkeletonImage=SkeletonImage;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme"),useAnimation_1=require("../../anim/useAnimation"),easing_1=require("../../anim/easing"),icon_1=require("../icon");function SkeletonBase(e){const{token:t,getComponentToken:o}=(0,theme_1.useToken)(),n=o("Skeleton"),{loading:r=!0,active:a=!1,avatar:i=!0,title:l=!0,paragraph:s=3,children:c,style:u}=e,m="number"==typeof s?s:s?.rows??3,g=(0,useAnimation_1.useAnimation)({duration:1400,loop:!0,easing:easing_1.sinePulse,playing:a&&r});if(!r)return react_1.default.createElement(components_1.View,{style:u},c);const d=a?.55+.45*g:1,p=n.gradientFromColor,k=t.fontSize*t.lineHeight,h=(e,t,o)=>react_1.default.createElement(components_1.View,{key:o,style:{width:e,height:t,borderRadius:n.borderRadius,backgroundColor:p}});return react_1.default.createElement(components_1.View,{style:[{flexDirection:"row",opacity:d},u]},i?react_1.default.createElement(components_1.View,{style:{width:t.controlHeightLG,height:t.controlHeightLG,borderRadius:t.controlHeightLG/2,backgroundColor:p,marginRight:t.margin}}):null,react_1.default.createElement(components_1.View,{style:{flex:1}},l?react_1.default.createElement(components_1.View,{style:{marginBottom:t.marginSM}},h("38%",k,"title")):null,Array.from({length:m}).map((e,o)=>react_1.default.createElement(components_1.View,{key:o,style:{marginBottom:o===m-1?0:t.marginXS}},h(o===m-1?"62%":"100%",k,"p"+o)))))}function usePulse(e){return(0,useAnimation_1.useAnimation)({duration:1400,loop:!0,easing:easing_1.sinePulse,playing:!!e})}function SkeletonAvatar(e){const{token:t,getComponentToken:o}=(0,theme_1.useToken)(),n=o("Skeleton"),{active:r,shape:a="circle",size:i=t.controlHeightLG,style:l}=e,s=usePulse(r);return react_1.default.createElement(components_1.View,{style:[{width:i,height:i,borderRadius:"circle"===a?i/2:n.borderRadius,backgroundColor:n.gradientFromColor,opacity:r?.55+.45*s:1},l]})}function SkeletonButton(e){const{token:t,getComponentToken:o}=(0,theme_1.useToken)(),n=o("Skeleton"),{active:r,size:a="default",style:i}=e,l=usePulse(r),s="large"===a?t.controlHeightLG:"small"===a?t.controlHeightSM:t.controlHeight,c="large"===a?2.4*t.controlHeightLG:"small"===a?1.8*t.controlHeightSM:2*t.controlHeight;return react_1.default.createElement(components_1.View,{style:[{width:c,height:s,borderRadius:t.borderRadius,backgroundColor:n.gradientFromColor,opacity:r?.55+.45*l:1},i]})}function SkeletonInput(e){const{token:t,getComponentToken:o}=(0,theme_1.useToken)(),n=o("Skeleton"),{active:r,size:a="default",style:i}=e,l=usePulse(r),s="large"===a?t.controlHeightLG:"small"===a?t.controlHeightSM:t.controlHeight;return react_1.default.createElement(components_1.View,{style:[{width:3*t.controlHeightLG,height:s,borderRadius:t.borderRadius,backgroundColor:n.gradientFromColor,opacity:r?.55+.45*l:1},i]})}function SkeletonImage(e){const{token:t,getComponentToken:o}=(0,theme_1.useToken)(),n=o("Skeleton"),{active:r,style:a}=e,i=usePulse(r);return react_1.default.createElement(components_1.View,{style:[{width:2*t.controlHeightLG,height:1.5*t.controlHeightLG,borderRadius:n.borderRadius,backgroundColor:n.gradientFromColor,alignItems:"center",justifyContent:"center",opacity:r?.55+.45*i:1},a]},react_1.default.createElement(icon_1.Icon,{name:"picture",size:t.fontSizeLG,color:t.colorTextQuaternary}))}exports.Skeleton=Object.assign(SkeletonBase,{Avatar:SkeletonAvatar,Button:SkeletonButton,Input:SkeletonInput,Image:SkeletonImage}),exports.default=exports.Skeleton;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Skeleton = void 0;
+exports.SkeletonBase = SkeletonBase;
+exports.SkeletonAvatar = SkeletonAvatar;
+exports.SkeletonButton = SkeletonButton;
+exports.SkeletonInput = SkeletonInput;
+exports.SkeletonImage = SkeletonImage;
+// Skeleton：加载占位。用灰度圆角块拼出「头像 + 标题 + 若干正文行」。
+// active 时整块做呼吸脉冲（透明度循环），由 useAnimation 驱动。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+const useAnimation_1 = require("../../anim/useAnimation");
+const easing_1 = require("../../anim/easing");
+const icon_1 = require("../icon");
+function SkeletonBase(props) {
+    const { token, getComponentToken } = (0, theme_1.useToken)();
+    const ct = getComponentToken('Skeleton');
+    const { loading = true, active = false, avatar = true, title = true, paragraph = 3, children, style } = props;
+    const rows = typeof paragraph === 'number' ? paragraph : paragraph?.rows ?? 3;
+    // 呼吸：0.5→1→0.5 循环，映射到不透明度 0.55..1
+    const pulse = (0, useAnimation_1.useAnimation)({ duration: 1400, loop: true, easing: easing_1.sinePulse, playing: active && loading });
+    if (!loading)
+        return react_1.default.createElement(components_1.View, { style: style }, children);
+    const shellOpacity = active ? 0.55 + 0.45 * pulse : 1;
+    const bg = ct.gradientFromColor;
+    const lineH = token.fontSize * token.lineHeight;
+    const block = (w, h, key) => (react_1.default.createElement(components_1.View, { key: key, style: { width: w, height: h, borderRadius: ct.borderRadius, backgroundColor: bg } }));
+    return (react_1.default.createElement(components_1.View, { style: [{ flexDirection: 'row', opacity: shellOpacity }, style] },
+        avatar ? (react_1.default.createElement(components_1.View, { style: {
+                width: token.controlHeightLG,
+                height: token.controlHeightLG,
+                borderRadius: token.controlHeightLG / 2,
+                backgroundColor: bg,
+                marginRight: token.margin,
+            } })) : null,
+        react_1.default.createElement(components_1.View, { style: { flex: 1 } },
+            title ? (react_1.default.createElement(components_1.View, { style: { marginBottom: token.marginSM } }, block('38%', lineH, 'title'))) : null,
+            Array.from({ length: rows }).map((_, i) => (react_1.default.createElement(components_1.View, { key: i, style: { marginBottom: i === rows - 1 ? 0 : token.marginXS } }, block(i === rows - 1 ? '62%' : '100%', lineH, 'p' + i)))))));
+}
+// ---- Skeleton 元素变体：单独占位块（头像 / 按钮 / 输入框），active 时同样呼吸 ----
+function usePulse(active) {
+    return (0, useAnimation_1.useAnimation)({ duration: 1400, loop: true, easing: easing_1.sinePulse, playing: !!active });
+}
+function SkeletonAvatar(props) {
+    const { token, getComponentToken } = (0, theme_1.useToken)();
+    const ct = getComponentToken('Skeleton');
+    const { active, shape = 'circle', size = token.controlHeightLG, style } = props;
+    const pulse = usePulse(active);
+    return (react_1.default.createElement(components_1.View, { style: [
+            { width: size, height: size, borderRadius: shape === 'circle' ? size / 2 : ct.borderRadius, backgroundColor: ct.gradientFromColor, opacity: active ? 0.55 + 0.45 * pulse : 1 },
+            style,
+        ] }));
+}
+function SkeletonButton(props) {
+    const { token, getComponentToken } = (0, theme_1.useToken)();
+    const ct = getComponentToken('Skeleton');
+    const { active, size = 'default', style } = props;
+    const pulse = usePulse(active);
+    const h = size === 'large' ? token.controlHeightLG : size === 'small' ? token.controlHeightSM : token.controlHeight;
+    const w = size === 'large' ? token.controlHeightLG * 2.4 : size === 'small' ? token.controlHeightSM * 1.8 : token.controlHeight * 2;
+    return (react_1.default.createElement(components_1.View, { style: [{ width: w, height: h, borderRadius: token.borderRadius, backgroundColor: ct.gradientFromColor, opacity: active ? 0.55 + 0.45 * pulse : 1 }, style] }));
+}
+function SkeletonInput(props) {
+    const { token, getComponentToken } = (0, theme_1.useToken)();
+    const ct = getComponentToken('Skeleton');
+    const { active, size = 'default', style } = props;
+    const pulse = usePulse(active);
+    const h = size === 'large' ? token.controlHeightLG : size === 'small' ? token.controlHeightSM : token.controlHeight;
+    return (react_1.default.createElement(components_1.View, { style: [{ width: token.controlHeightLG * 3, height: h, borderRadius: token.borderRadius, backgroundColor: ct.gradientFromColor, opacity: active ? 0.55 + 0.45 * pulse : 1 }, style] }));
+}
+/** 图片占位块（带 picture 图标） */
+function SkeletonImage(props) {
+    const { token, getComponentToken } = (0, theme_1.useToken)();
+    const ct = getComponentToken('Skeleton');
+    const { active, style } = props;
+    const pulse = usePulse(active);
+    return (react_1.default.createElement(components_1.View, { style: [
+            {
+                width: token.controlHeightLG * 2,
+                height: token.controlHeightLG * 1.5,
+                borderRadius: ct.borderRadius,
+                backgroundColor: ct.gradientFromColor,
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: active ? 0.55 + 0.45 * pulse : 1,
+            },
+            style,
+        ] },
+        react_1.default.createElement(icon_1.Icon, { name: "picture", size: token.fontSizeLG, color: token.colorTextQuaternary })));
+}
+/** Skeleton + 元素变体复合导出 */
+exports.Skeleton = Object.assign(SkeletonBase, {
+    Avatar: SkeletonAvatar,
+    Button: SkeletonButton,
+    Input: SkeletonInput,
+    Image: SkeletonImage,
+});
+exports.default = exports.Skeleton;

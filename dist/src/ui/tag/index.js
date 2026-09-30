@@ -1,1 +1,89 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.Tag=void 0,exports.TagBase=TagBase,exports.CheckableTag=CheckableTag;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme"),icon_1=require("../icon"),motion_1=require("../../anim/motion");function TagBase(e){const{token:r,getComponentToken:o}=(0,theme_1.useToken)(),t=o("Tag"),{color:n="default",bordered:a=!0,closable:l,icon:s,onClose:c,onClick:i,onPress:d,textColor:u,children:g,style:f}=e,m=i??d,_=(()=>{switch(n){case"success":return{bg:r.colorSuccessBg,bd:r.colorSuccessBorder,fg:r.colorSuccessText};case"processing":return{bg:r.colorInfoBg,bd:r.colorInfoBorder,fg:r.colorInfoText};case"error":return{bg:r.colorErrorBg,bd:r.colorErrorBorder,fg:r.colorErrorText};case"warning":return{bg:r.colorWarningBg,bd:r.colorWarningBorder,fg:r.colorWarningText};case"default":return{bg:t.defaultBg,bd:r.colorBorder,fg:t.defaultColor};default:return{bg:r.colorPrimaryBg,bd:r.colorPrimaryBorder,fg:n}}})(),b=u??r.colorText,p={flexDirection:"row",alignItems:"center",borderRadius:t.borderRadiusSM,paddingHorizontal:r.paddingXS,paddingVertical:Math.max(1,r.paddingXXS-2),borderWidth:a?r.lineWidth:0,borderStyle:"solid"===t.borderStyle?"solid":"dashed",borderColor:_.bd,backgroundColor:_.bg},[S,h]=react_1.default.useState(!1),T=(0,motion_1.useTransformTween)(S?{scale:.75}:{scale:1},{mode:"spring",stiffness:500,damping:30}),y=react_1.default.createElement(components_1.View,{style:[p,f]},null!=s?react_1.default.createElement(components_1.View,{style:{marginRight:null!=g?r.marginXXS:0,alignItems:"center",justifyContent:"center"}},"string"==typeof s?react_1.default.createElement(icon_1.Icon,{name:s,size:r.fontSizeSM,color:b,strokeWidth:2.5}):s):null,null!=g?react_1.default.createElement(components_1.Text,{style:{fontSize:r.fontSizeSM,lineHeight:Math.round(1.4*r.fontSizeSM),color:b}},g):null,l?react_1.default.createElement(components_1.Pressable,{onPress:()=>c&&c(),onPressIn:()=>h(!0),onPressOut:()=>h(!1),style:{marginLeft:r.marginXXS,paddingHorizontal:2,alignItems:"center",justifyContent:"center"}},react_1.default.createElement(components_1.View,{style:{transform:T}},react_1.default.createElement(icon_1.Icon,{name:"close",size:r.fontSizeSM,color:r.colorTextTertiary,strokeWidth:2.5}))):null);return m?react_1.default.createElement(components_1.Pressable,{onPress:m},y):y}function CheckableTag(e){const{token:r}=(0,theme_1.useToken)(),{checked:o=!1,onChange:t,children:n,style:a}=e,[l,s]=react_1.default.useState(!1),[c,i]=react_1.default.useState(!1),d=(0,motion_1.useTransformTween)(c?{scale:.94}:{scale:1},{mode:"spring",stiffness:500,damping:30}),u=o?r.colorPrimary:l?r.colorFillQuaternary:"transparent",g=o?r.colorPrimary:r.colorBorder,f=o?r.colorTextLightSolid:r.colorText;return react_1.default.createElement(components_1.Pressable,{onPress:()=>t&&t(!o),onPressIn:()=>i(!0),onPressOut:()=>i(!1),onMouseEnter:()=>s(!0),onMouseLeave:()=>s(!1),style:[{borderRadius:r.borderRadiusSM,paddingHorizontal:r.paddingXS,paddingVertical:Math.max(1,r.paddingXXS-2),borderWidth:r.lineWidth,borderStyle:"solid",borderColor:g,backgroundColor:u,transform:d},a]},react_1.default.createElement(components_1.Text,{style:{fontSize:r.fontSizeSM,lineHeight:Math.round(1.4*r.fontSizeSM),color:f}},n))}exports.Tag=Object.assign(TagBase,{CheckableTag:CheckableTag}),exports.default=exports.Tag;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Tag = void 0;
+exports.TagBase = TagBase;
+exports.CheckableTag = CheckableTag;
+// Tag：预设色走语义 token，自定义色走 color-*Bg / Border / Text 三件套。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+const icon_1 = require("../icon");
+const motion_1 = require("../../anim/motion");
+function TagBase(props) {
+    const { token, getComponentToken } = (0, theme_1.useToken)();
+    const ct = getComponentToken('Tag');
+    const { color = 'default', bordered = true, closable, icon, onClose, onClick, onPress, textColor, children, style } = props;
+    const fire = onClick ?? onPress;
+    const palette = (() => {
+        switch (color) {
+            case 'success':
+                return { bg: token.colorSuccessBg, bd: token.colorSuccessBorder, fg: token.colorSuccessText };
+            case 'processing':
+                return { bg: token.colorInfoBg, bd: token.colorInfoBorder, fg: token.colorInfoText };
+            case 'error':
+                return { bg: token.colorErrorBg, bd: token.colorErrorBorder, fg: token.colorErrorText };
+            case 'warning':
+                return { bg: token.colorWarningBg, bd: token.colorWarningBorder, fg: token.colorWarningText };
+            case 'default':
+                return { bg: ct.defaultBg, bd: token.colorBorder, fg: ct.defaultColor };
+            default:
+                // 自定义色：当作主色使用，底/边用半透明派生色
+                return { bg: token.colorPrimaryBg, bd: token.colorPrimaryBorder, fg: color };
+        }
+    })();
+    // 文字/图标色统一对齐 Text（token.colorText），除非显式传 textColor；bg/边框仍走语义色，保证对比度
+    const fg = textColor ?? token.colorText;
+    const shell = {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderRadius: ct.borderRadiusSM,
+        paddingHorizontal: token.paddingXS,
+        paddingVertical: Math.max(1, token.paddingXXS - 2),
+        borderWidth: bordered ? token.lineWidth : 0,
+        borderStyle: ct.borderStyle === 'solid' ? 'solid' : 'dashed',
+        borderColor: palette.bd,
+        backgroundColor: palette.bg,
+    };
+    const [closePressed, setClosePressed] = react_1.default.useState(false);
+    const closeTf = (0, motion_1.useTransformTween)(closePressed ? { scale: 0.75 } : { scale: 1 }, { mode: 'spring', stiffness: 500, damping: 30 });
+    const body = (react_1.default.createElement(components_1.View, { style: [shell, style] },
+        icon != null ? (react_1.default.createElement(components_1.View, { style: { marginRight: children != null ? token.marginXXS : 0, alignItems: 'center', justifyContent: 'center' } }, typeof icon === 'string' ? react_1.default.createElement(icon_1.Icon, { name: icon, size: token.fontSizeSM, color: fg, strokeWidth: 2.5 }) : icon)) : null,
+        children != null ? (react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, lineHeight: Math.round(token.fontSizeSM * 1.4), color: fg } }, children)) : null,
+        closable ? (react_1.default.createElement(components_1.Pressable, { onPress: () => onClose && onClose(), onPressIn: () => setClosePressed(true), onPressOut: () => setClosePressed(false), style: { marginLeft: token.marginXXS, paddingHorizontal: 2, alignItems: 'center', justifyContent: 'center' } },
+            react_1.default.createElement(components_1.View, { style: { transform: closeTf } },
+                react_1.default.createElement(icon_1.Icon, { name: "close", size: token.fontSizeSM, color: token.colorTextTertiary, strokeWidth: 2.5 })))) : null));
+    if (!fire)
+        return body;
+    return react_1.default.createElement(components_1.Pressable, { onPress: fire }, body);
+}
+function CheckableTag(props) {
+    const { token } = (0, theme_1.useToken)();
+    const { checked = false, onChange, children, style } = props;
+    const [hover, setHover] = react_1.default.useState(false);
+    const [pressed, setPressed] = react_1.default.useState(false);
+    // 按压回弹：按下缩到 0.94，松手弹簧落回（与 Button 同款），静止即恒等零开销
+    const transform = (0, motion_1.useTransformTween)(pressed ? { scale: 0.94 } : { scale: 1 }, { mode: 'spring', stiffness: 500, damping: 30 });
+    const bg = checked ? token.colorPrimary : hover ? token.colorFillQuaternary : 'transparent';
+    const bd = checked ? token.colorPrimary : token.colorBorder;
+    const fg = checked ? token.colorTextLightSolid : token.colorText;
+    return (react_1.default.createElement(components_1.Pressable, { onPress: () => onChange && onChange(!checked), onPressIn: () => setPressed(true), onPressOut: () => setPressed(false), onMouseEnter: () => setHover(true), onMouseLeave: () => setHover(false), style: [
+            {
+                borderRadius: token.borderRadiusSM,
+                paddingHorizontal: token.paddingXS,
+                paddingVertical: Math.max(1, token.paddingXXS - 2),
+                borderWidth: token.lineWidth,
+                borderStyle: 'solid',
+                borderColor: bd,
+                backgroundColor: bg,
+                transform,
+            },
+            style,
+        ] },
+        react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, lineHeight: Math.round(token.fontSizeSM * 1.4), color: fg } }, children)));
+}
+/** Tag + Tag.CheckableTag 复合导出 */
+exports.Tag = Object.assign(TagBase, { CheckableTag });
+exports.default = exports.Tag;

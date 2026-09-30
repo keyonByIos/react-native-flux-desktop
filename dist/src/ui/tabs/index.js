@@ -1,1 +1,164 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.Tabs=Tabs;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme"),icon_1=require("../icon"),useAnimation_1=require("../../anim/useAnimation"),useTween_1=require("../../anim/useTween"),easing_1=require("../../anim/easing");function FadeIn(e){const t=(0,useAnimation_1.useAnimation)({duration:240,easing:easing_1.easeOutCubic});return react_1.default.createElement(components_1.View,{style:{opacity:t}},e.children)}function Tabs(e){const{token:t,getComponentToken:o}=(0,theme_1.useToken)(),n=o("Tabs"),{items:r,activeKey:a,defaultActiveKey:i,onChange:l,type:d="line",centered:c,tabBarExtraContent:s,size:u="middle",tabPosition:m="top",tabBarGutter:g,onEdit:f,hideAdd:p,style:_}=e,b="card"===d||"editable-card"===d,h="editable-card"===d,y="left"===m||"right"===m,T=g??n.horizontalItemGutter,[w,k]=react_1.default.useState(void 0!==a?a:i??(r[0]?r[0].key:"")),B=void 0!==a?a:w,S=r.find(e=>e.key===B),x="large"===u?t.fontSizeLG:"small"===u?t.fontSizeSM:t.fontSize,E="small"===u?Math.round(.6*n.itemPaddingBlock):n.itemPaddingBlock,C="small"===u?Math.round(.6*n.itemPaddingInline):n.itemPaddingInline,[P,z]=react_1.default.useState({}),W=e=>t=>{const{x:o,y:n,w:r,h:a}=t.nativeEvent.layout;z(t=>{const i=t[e];return i&&i.x===o&&i.y===n&&i.w===r&&i.h===a?t:{...t,[e]:{x:o,y:n,w:r,h:a}}})},L=P[B],v=(0,useTween_1.useTween)(L?L.x:0,260,easing_1.easeOutCubic),R=(0,useTween_1.useTween)(L?L.w:0,260,easing_1.easeOutCubic),I=(0,useTween_1.useTween)(L?L.y:0,260,easing_1.easeOutCubic),V=(0,useTween_1.useTween)(L?L.h:0,260,easing_1.easeOutCubic),D="line"!==d?{}:"top"===m?{borderBottomWidth:t.lineWidth,borderBottomColor:t.colorBorderSecondary}:"bottom"===m?{borderTopWidth:t.lineWidth,borderTopColor:t.colorBorderSecondary}:"left"===m?{borderRightWidth:t.lineWidth,borderRightColor:t.colorBorderSecondary}:{borderLeftWidth:t.lineWidth,borderLeftColor:t.colorBorderSecondary},q={flexDirection:y?"column":"row",alignItems:y?"flex-start":"top"===m?"flex-end":"flex-start",justifyContent:!y&&c?"center":"flex-start",gap:T},G=h&&!p?react_1.default.createElement(components_1.Pressable,{onPress:()=>f&&f(void 0,"add"),style:{flexDirection:"row",alignItems:"center",paddingVertical:E,paddingHorizontal:C,borderTopLeftRadius:n.itemPaddingBlock/2,borderTopRightRadius:n.itemPaddingBlock/2,borderWidth:t.lineWidth,borderColor:t.colorBorderSecondary,backgroundColor:t.colorFillQuaternary}},react_1.default.createElement(icon_1.Icon,{name:"plus",size:x,color:t.colorText})):null,A="line"===d&&L?y?react_1.default.createElement(components_1.View,{style:{position:"absolute",top:I,["left"===m?"right":"left"]:0,height:V,width:n.inkBarSize,borderRadius:n.inkBarSize/2,backgroundColor:t.colorPrimary,opacity:V>0?1:0}}):react_1.default.createElement(components_1.View,{style:{position:"absolute",left:v,["top"===m?"bottom":"top"]:0,width:R,height:n.inkBarSize,borderRadius:n.inkBarSize/2,backgroundColor:t.colorPrimary,opacity:R>0?1:0}}):null,F=react_1.default.createElement(components_1.View,{style:[q,D,y?{}:{position:"relative"}]},r.map(e=>{const o=e.key===B,r=!!e.disabled,i=r?t.colorTextQuaternary:o?t.colorPrimary:t.colorText,d=b?{flexDirection:"row",alignItems:"center",paddingVertical:E,paddingHorizontal:C,borderTopLeftRadius:n.itemPaddingBlock/2,borderTopRightRadius:n.itemPaddingBlock/2,borderWidth:t.lineWidth,borderColor:o?t.colorBorderSecondary:"transparent",backgroundColor:o?t.colorBgContainer:t.colorFillQuaternary}:{flexDirection:y?"column":"row",alignItems:"center",paddingVertical:E,paddingHorizontal:C,..."top"===m?{marginBottom:-t.lineWidth}:{},..."bottom"===m?{marginTop:-t.lineWidth}:{},..."left"===m?{marginRight:-t.lineWidth}:{},..."right"===m?{marginLeft:-t.lineWidth}:{}},c=h&&!1!==e.closable;return react_1.default.createElement(components_1.Pressable,{key:e.key,disabled:r,style:d,onLayout:W(e.key),onPress:()=>!r&&function(e){void 0===a&&k(e),l&&l(e)}(e.key)},null!=e.icon?react_1.default.createElement(components_1.View,{style:{marginRight:y||null==e.label?0:t.marginXXS,marginBottom:y&&null!=e.label?t.marginXXS:0}},((e,t)=>"string"==typeof e?react_1.default.createElement(icon_1.Icon,{name:e,size:x,color:t}):e)(e.icon,i)):null,null!=e.label?react_1.default.createElement(components_1.Text,{style:{fontSize:x,color:i,fontWeight:o?"500":"400"}},e.label):null,c?react_1.default.createElement(components_1.Pressable,{onPress:()=>f&&f(e.key,"remove"),style:{marginLeft:t.marginXS}},react_1.default.createElement(icon_1.Icon,{name:"close",size:t.fontSizeSM,color:i})):null)}),G,null!=s?react_1.default.createElement(components_1.View,{style:y?{marginTop:"auto",alignSelf:"center"}:{marginLeft:"auto",alignSelf:"center"}},s):null,A),M=S&&null!=S.children?react_1.default.createElement(components_1.View,{style:{flex:y?1:void 0,..."top"===m?{paddingTop:t.paddingLG}:"bottom"===m?{paddingBottom:t.paddingLG}:"left"===m?{paddingLeft:t.paddingLG}:{paddingRight:t.paddingLG}}},react_1.default.createElement(FadeIn,{key:B},S.children)):null,O="top"===m||"left"===m;return react_1.default.createElement(components_1.View,{style:[{flexDirection:y?"row":"column"},_]},O?react_1.default.createElement(react_1.default.Fragment,null,F,M):react_1.default.createElement(react_1.default.Fragment,null,M,F))}exports.default=Tabs;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Tabs = Tabs;
+// Tabs：参考 antd v5 items 配置式。line（下划线）/ card（卡片）/ editable-card（可增删）三态，
+// tabPosition 四向（上/下/左/右）、size 三档、tabBarGutter 间距；受控 + 非受控，选中项内容渲染在标签栏对应侧。
+// line 型滑动墨条：onLayout 报几何，useTween 补间跟随 active（横向追 x/w，纵向追 y/h）。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+const icon_1 = require("../icon");
+const useAnimation_1 = require("../../anim/useAnimation");
+const useTween_1 = require("../../anim/useTween");
+const easing_1 = require("../../anim/easing");
+/** 内容淡入：key 随选中项变化重挂载，触发一次 0→1 透明度 */
+function FadeIn(props) {
+    const p = (0, useAnimation_1.useAnimation)({ duration: 240, easing: easing_1.easeOutCubic });
+    return react_1.default.createElement(components_1.View, { style: { opacity: p } }, props.children);
+}
+function Tabs(props) {
+    const { token, getComponentToken } = (0, theme_1.useToken)();
+    const ct = getComponentToken('Tabs');
+    const { items, activeKey, defaultActiveKey, onChange, type = 'line', centered, tabBarExtraContent, size = 'middle', tabPosition = 'top', tabBarGutter, onEdit, hideAdd, style, } = props;
+    const isCard = type === 'card' || type === 'editable-card';
+    const editable = type === 'editable-card';
+    const vertical = tabPosition === 'left' || tabPosition === 'right';
+    const gutter = tabBarGutter ?? ct.horizontalItemGutter;
+    const [inner, setInner] = react_1.default.useState(activeKey !== undefined ? activeKey : defaultActiveKey ?? (items[0] ? items[0].key : ''));
+    const active = activeKey !== undefined ? activeKey : inner;
+    const activeItem = items.find((i) => i.key === active);
+    function select(key) {
+        if (activeKey === undefined)
+            setInner(key);
+        onChange && onChange(key);
+    }
+    const font = size === 'large' ? token.fontSizeLG : size === 'small' ? token.fontSizeSM : token.fontSize;
+    const padBlock = size === 'small' ? Math.round(ct.itemPaddingBlock * 0.6) : ct.itemPaddingBlock;
+    const padInline = size === 'small' ? Math.round(ct.itemPaddingInline * 0.6) : ct.itemPaddingInline;
+    const renderIcon = (icon, fg) => typeof icon === 'string' ? react_1.default.createElement(icon_1.Icon, { name: icon, size: font, color: fg }) : icon;
+    // 滑动墨条：每个 tab 用 onLayout 报几何，墨条绝对定位跟随 active，useTween 补间
+    const [rects, setRects] = react_1.default.useState({});
+    const reportRect = (key) => (e) => {
+        const { x, y, w, h } = e.nativeEvent.layout;
+        setRects((prev) => {
+            const old = prev[key];
+            if (old && old.x === x && old.y === y && old.w === w && old.h === h)
+                return prev;
+            return { ...prev, [key]: { x, y, w, h } };
+        });
+    };
+    const activeRect = rects[active];
+    const inkX = (0, useTween_1.useTween)(activeRect ? activeRect.x : 0, 260, easing_1.easeOutCubic);
+    const inkW = (0, useTween_1.useTween)(activeRect ? activeRect.w : 0, 260, easing_1.easeOutCubic);
+    const inkY = (0, useTween_1.useTween)(activeRect ? activeRect.y : 0, 260, easing_1.easeOutCubic);
+    const inkH = (0, useTween_1.useTween)(activeRect ? activeRect.h : 0, 260, easing_1.easeOutCubic);
+    const renderTab = (tab) => {
+        const isActive = tab.key === active;
+        const disabled = !!tab.disabled;
+        const fg = disabled ? token.colorTextQuaternary : isActive ? token.colorPrimary : token.colorText;
+        const tabStyle = isCard
+            ? {
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingVertical: padBlock,
+                paddingHorizontal: padInline,
+                borderTopLeftRadius: ct.itemPaddingBlock / 2,
+                borderTopRightRadius: ct.itemPaddingBlock / 2,
+                borderWidth: token.lineWidth,
+                borderColor: isActive ? token.colorBorderSecondary : 'transparent',
+                backgroundColor: isActive ? token.colorBgContainer : token.colorFillQuaternary,
+            }
+            : {
+                flexDirection: vertical ? 'column' : 'row',
+                alignItems: 'center',
+                paddingVertical: padBlock,
+                paddingHorizontal: padInline,
+                ...(tabPosition === 'top' ? { marginBottom: -token.lineWidth } : {}),
+                ...(tabPosition === 'bottom' ? { marginTop: -token.lineWidth } : {}),
+                ...(tabPosition === 'left' ? { marginRight: -token.lineWidth } : {}),
+                ...(tabPosition === 'right' ? { marginLeft: -token.lineWidth } : {}),
+            };
+        const closable = editable && tab.closable !== false;
+        return (react_1.default.createElement(components_1.Pressable, { key: tab.key, disabled: disabled, style: tabStyle, onLayout: reportRect(tab.key), onPress: () => !disabled && select(tab.key) },
+            tab.icon != null ? (react_1.default.createElement(components_1.View, { style: {
+                    marginRight: !vertical && tab.label != null ? token.marginXXS : 0,
+                    marginBottom: vertical && tab.label != null ? token.marginXXS : 0,
+                } }, renderIcon(tab.icon, fg))) : null,
+            tab.label != null ? (react_1.default.createElement(components_1.Text, { style: { fontSize: font, color: fg, fontWeight: isActive ? '500' : '400' } }, tab.label)) : null,
+            closable ? (react_1.default.createElement(components_1.Pressable, { onPress: () => onEdit && onEdit(tab.key, 'remove'), style: { marginLeft: token.marginXS } },
+                react_1.default.createElement(icon_1.Icon, { name: "close", size: token.fontSizeSM, color: fg }))) : null));
+    };
+    // 标签栏边框（line 型按位置贴对应边）
+    const lineBorder = type !== 'line'
+        ? {}
+        : tabPosition === 'top'
+            ? { borderBottomWidth: token.lineWidth, borderBottomColor: token.colorBorderSecondary }
+            : tabPosition === 'bottom'
+                ? { borderTopWidth: token.lineWidth, borderTopColor: token.colorBorderSecondary }
+                : tabPosition === 'left'
+                    ? { borderRightWidth: token.lineWidth, borderRightColor: token.colorBorderSecondary }
+                    : { borderLeftWidth: token.lineWidth, borderLeftColor: token.colorBorderSecondary };
+    const barStyle = {
+        flexDirection: vertical ? 'column' : 'row',
+        alignItems: vertical ? 'flex-start' : tabPosition === 'top' ? 'flex-end' : 'flex-start',
+        justifyContent: !vertical && centered ? 'center' : 'flex-start',
+        gap: gutter,
+    };
+    const addBtn = editable && !hideAdd ? (react_1.default.createElement(components_1.Pressable, { onPress: () => onEdit && onEdit(undefined, 'add'), style: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: padBlock,
+            paddingHorizontal: padInline,
+            borderTopLeftRadius: ct.itemPaddingBlock / 2,
+            borderTopRightRadius: ct.itemPaddingBlock / 2,
+            borderWidth: token.lineWidth,
+            borderColor: token.colorBorderSecondary,
+            backgroundColor: token.colorFillQuaternary,
+        } },
+        react_1.default.createElement(icon_1.Icon, { name: "plus", size: font, color: token.colorText }))) : null;
+    const inkBar = type === 'line' && activeRect ? (vertical ? (react_1.default.createElement(components_1.View, { style: {
+            position: 'absolute',
+            top: inkY,
+            [tabPosition === 'left' ? 'right' : 'left']: 0,
+            height: inkH,
+            width: ct.inkBarSize,
+            borderRadius: ct.inkBarSize / 2,
+            backgroundColor: token.colorPrimary,
+            opacity: inkH > 0 ? 1 : 0,
+        } })) : (react_1.default.createElement(components_1.View, { style: {
+            position: 'absolute',
+            left: inkX,
+            [tabPosition === 'top' ? 'bottom' : 'top']: 0,
+            width: inkW,
+            height: ct.inkBarSize,
+            borderRadius: ct.inkBarSize / 2,
+            backgroundColor: token.colorPrimary,
+            opacity: inkW > 0 ? 1 : 0,
+        } }))) : null;
+    const bar = (react_1.default.createElement(components_1.View, { style: [barStyle, lineBorder, vertical ? {} : { position: 'relative' }] },
+        items.map(renderTab),
+        addBtn,
+        tabBarExtraContent != null ? (react_1.default.createElement(components_1.View, { style: vertical ? { marginTop: 'auto', alignSelf: 'center' } : { marginLeft: 'auto', alignSelf: 'center' } }, tabBarExtraContent)) : null,
+        inkBar));
+    const content = activeItem && activeItem.children != null ? (react_1.default.createElement(components_1.View, { style: {
+            flex: vertical ? 1 : undefined,
+            ...(tabPosition === 'top'
+                ? { paddingTop: token.paddingLG }
+                : tabPosition === 'bottom'
+                    ? { paddingBottom: token.paddingLG }
+                    : tabPosition === 'left'
+                        ? { paddingLeft: token.paddingLG }
+                        : { paddingRight: token.paddingLG }),
+        } },
+        react_1.default.createElement(FadeIn, { key: active }, activeItem.children))) : null;
+    const barFirst = tabPosition === 'top' || tabPosition === 'left';
+    return (react_1.default.createElement(components_1.View, { style: [{ flexDirection: vertical ? 'row' : 'column' }, style] }, barFirst ? (react_1.default.createElement(react_1.default.Fragment, null,
+        bar,
+        content)) : (react_1.default.createElement(react_1.default.Fragment, null,
+        content,
+        bar))));
+}
+exports.default = Tabs;

@@ -1,1 +1,137 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.BarChart=BarChart;const react_1=__importDefault(require("react")),components_1=require("../../components"),common_1=require("../core/common"),data_1=require("../core/data"),scale_1=require("../core/scale"),theme_1=require("../core/theme"),grid_1=require("../core/grid"),clamp01=e=>Math.max(0,Math.min(1,e)),PAD_L=76,PAD_R=40,PAD_T=8,PAD_B=24;function BarChart(e){const t=(0,common_1.useChartTheme)(),{data:o,xField:a,yField:l,seriesField:r,color:i,width:n,height:s,stack:c=!1,radius:m=4,label:u=!1,maxBarWidth:_,legend:p=!0,tooltip:d=!0,animation:h=!0,animateDuration:f=900,stagger:g=.4,valueFormatter:b=scale_1.compactNumber,grid:x,style:A}=e,[D,y]=(0,common_1.useMeasuredWidth)(n??520),P=n??D,T=(0,common_1.useEnter)(h,f),w=(0,data_1.prepare)(o,a,l,r),{isHidden:E,toggle:M,active:L}=(0,common_1.useLegendToggle)(w.series.length),S=w.categories.length,z=w.series.map((e,t)=>t).filter(e=>!E(e)),k=Math.max(1,z.length),C=Math.max(s??40*S+PAD_T+PAD_B,PAD_T+PAD_B+22*S),v=s??C,B=Math.max(0,P-PAD_L-PAD_R),R=v-PAD_T-PAD_B,V=c?Math.max(...w.categories.map((e,t)=>z.reduce((e,o)=>e+(w.series[o].points[t]??0),0)),1):Math.max(...z.flatMap(e=>w.series[e].points.map(e=>e??0)),1),{niceMax:$,ticks:q}=(0,scale_1.niceTicks)(V),F=e=>PAD_L+Math.max(0,Math.min($,e))/($||1)*B,O=R/Math.max(S,1),N=w.series.map((e,o)=>({name:e.name,color:(0,theme_1.seriesColor)(o,i,t)})),[W,H]=react_1.default.useState(()=>{const e="undefined"!=typeof process?process.env.FLUX_CHART_HOVER:void 0;if(null!=e&&""!==e&&Number.isFinite(Number(e))){const t=Number(e);return t>=0&&t<S?t:null}return null}),I=d?W:null,j=null!=I?{title:w.categories[I],rows:z.map(e=>{const o=w.series[e];return{name:o.name,color:(0,theme_1.seriesColor)(e,i,t),value:null==o.points[I]?"—":b(o.points[I])}})}:null,G=null!=I?PAD_T+I*O+O/2:0,U=null!=I?c?z.reduce((e,t)=>e+(w.series[t].points[I]??0),0):Math.max(0,...z.map(e=>w.series[e].points[I]??0)):0,X=F(U),J=X+10+150>P?Math.max(4,X-10-150):X+10,K=[];return w.categories.forEach((e,o)=>{let a=0;const l=.64*O,r=PAD_T+o*O+(O-l)/2,n=c?l:l/k;z.forEach((e,s)=>{const p=w.series[e].points[o]??0,d=(0,theme_1.seriesColor)(e,i,t),h=(e=>clamp01((T-(S<=1?0:e/S*g))/(1-g)))(o),f=r+(c?0:s*n),x=c?l:l/k,A=Math.max(2,x-(c?0:1)),D=null!=_?Math.min(A,_):A,y=f+(x-D)/2,P=c?F(a):PAD_L,E=F(c?(a+p)*h:p*h);a+=p;const M=c?s===z.length-1?m:0:m,L=I===o;if(K.push(react_1.default.createElement(components_1.View,{key:`${o}-${e}`,style:{position:"absolute",left:P,top:y,width:Math.max(0,E-P),height:D,borderTopRightRadius:M,borderBottomRightRadius:M,backgroundColor:d,opacity:null==I||L?1:.45}})),u&&h>.85&&p>0){const a=b(p);c?E-P>=34&&K.push(react_1.default.createElement(components_1.Text,{key:`lb${o}-${e}`,numberOfLines:1,style:{position:"absolute",left:(P+E)/2-30,top:y+D/2-t.labelSize,width:60,textAlign:"center",fontSize:t.labelSize,color:"#ffffff",fontWeight:"600"}},a)):K.push(react_1.default.createElement(components_1.Text,{key:`lb${o}-${e}`,numberOfLines:1,style:{position:"absolute",left:E+6,top:y+D/2-t.labelSize,width:60,textAlign:"left",fontSize:t.labelSize,color:t.label}},a))}})}),react_1.default.createElement(components_1.View,{style:[{gap:t.labelSize},A],onLayout:y},react_1.default.createElement(components_1.View,{style:{width:P,height:v,position:"relative"}},react_1.default.createElement(grid_1.GridLines,{area:{left:PAD_L,top:PAD_T,width:B,height:R},vertical:q.map(e=>F(e)),config:x,fallbackColor:t.gridLine}),q.map((e,o)=>react_1.default.createElement(components_1.Text,{key:`xl${o}`,style:{position:"absolute",left:F(e)-20,top:v-PAD_B+4,width:40,textAlign:"center",fontSize:t.labelSize,color:t.label}},b(e))),react_1.default.createElement(components_1.View,{style:{position:"absolute",left:PAD_L,top:PAD_T,width:1,height:R,backgroundColor:t.axisLine}}),w.categories.map((e,o)=>react_1.default.createElement(components_1.Text,{key:`c${o}`,numberOfLines:1,style:{position:"absolute",right:P-PAD_L+8,top:PAD_T+o*O+O/2-t.labelSize,width:PAD_L-12,textAlign:"right",fontSize:t.labelSize,color:t.label}},e)),K,null!=I?react_1.default.createElement(components_1.View,{style:{position:"absolute",left:PAD_L,top:PAD_T+I*O,width:B,height:O,backgroundColor:t.fillTrack,opacity:.5}}):null,j?react_1.default.createElement(components_1.View,{style:{position:"absolute",left:J,top:Math.max(4,G-8-9*j.rows.length),width:150,backgroundColor:t.tooltipBg,borderRadius:6,padding:8,gap:4}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.labelSize,color:t.tooltipText,opacity:.7}},j.title),j.rows.map((e,o)=>react_1.default.createElement(components_1.View,{key:o,style:{flexDirection:"row",alignItems:"center",gap:6}},e.color?react_1.default.createElement(components_1.View,{style:{width:8,height:8,borderRadius:4,backgroundColor:e.color}}):null,react_1.default.createElement(components_1.Text,{style:{flex:1,fontSize:t.labelSize,color:t.tooltipText},numberOfLines:1},e.name),react_1.default.createElement(components_1.Text,{style:{fontSize:t.labelSize,color:t.tooltipText,fontWeight:"600"}},e.value)))):null,d?w.categories.map((e,t)=>react_1.default.createElement(components_1.Pressable,{key:`hit${t}`,onMouseEnter:()=>H(t),onMouseLeave:()=>H(e=>e===t?null:e),style:{position:"absolute",left:PAD_L,top:PAD_T+t*O,width:B,height:O}})):null),p&&w.series.length>1?react_1.default.createElement(common_1.ChartLegend,{items:N,active:L,onToggleIndex:M}):null)}exports.default=BarChart;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.BarChart = BarChart;
+// Bar：横向条形图。自成帧（类目在 y、数值在 x），不复用竖向 Plot。
+// 入场每条约从左侧基线伸出，类目间错峰；grouped / stack 两种多序列布局。
+// 约定与 Column 一致：xField = 类目维、yField = 数值（仅方向转 90°）。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const common_1 = require("../core/common");
+const data_1 = require("../core/data");
+const scale_1 = require("../core/scale");
+const theme_1 = require("../core/theme");
+const grid_1 = require("../core/grid");
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
+const PAD_L = 76;
+const PAD_R = 40;
+const PAD_T = 8;
+const PAD_B = 24;
+function BarChart(props) {
+    const theme = (0, common_1.useChartTheme)();
+    const { data, xField, yField, seriesField, color, width, height, stack = false, radius = 4, label = false, maxBarWidth, legend = true, tooltip = true, animation = true, animateDuration = 900, stagger = 0.4, valueFormatter = scale_1.compactNumber, grid, style, } = props;
+    const [measured, onLayout] = (0, common_1.useMeasuredWidth)(width ?? 520);
+    const w = width ?? measured;
+    const p = (0, common_1.useEnter)(animation, animateDuration);
+    const prep = (0, data_1.prepare)(data, xField, yField, seriesField);
+    const { isHidden, toggle, active: legendActive } = (0, common_1.useLegendToggle)(prep.series.length);
+    const nCat = prep.categories.length;
+    const visIdx = prep.series.map((_, i) => i).filter((i) => !isHidden(i));
+    const visN = Math.max(1, visIdx.length);
+    const rowArea = Math.max(height ?? 40 * nCat + PAD_T + PAD_B, PAD_T + PAD_B + nCat * 22);
+    const H = height ?? rowArea;
+    const plotW = Math.max(0, w - PAD_L - PAD_R);
+    const plotH = H - PAD_T - PAD_B;
+    const yMax = stack
+        ? Math.max(...prep.categories.map((_, i) => visIdx.reduce((a, si) => a + (prep.series[si].points[i] ?? 0), 0)), 1)
+        : Math.max(...visIdx.flatMap((si) => prep.series[si].points.map((v) => v ?? 0)), 1);
+    const { niceMax, ticks } = (0, scale_1.niceTicks)(yMax);
+    const xAt = (v) => PAD_L + (Math.max(0, Math.min(niceMax, v)) / (niceMax || 1)) * plotW;
+    const rowH = plotH / Math.max(nCat, 1);
+    const legendItems = prep.series.map((s, i) => ({ name: s.name, color: (0, theme_1.seriesColor)(i, color, theme) }));
+    const seg = (i) => {
+        const start = nCat <= 1 ? 0 : (i / nCat) * stagger;
+        return clamp01((p - start) / (1 - stagger));
+    };
+    // 悬浮行：抓帧可由 FLUX_CHART_HOVER 预设，否则命中行 hover 驱动。
+    const [hover, setHover] = react_1.default.useState(() => {
+        const env = typeof process !== 'undefined' ? process.env.FLUX_CHART_HOVER : undefined;
+        if (env != null && env !== '' && Number.isFinite(Number(env))) {
+            const k = Number(env);
+            return k >= 0 && k < nCat ? k : null;
+        }
+        return null;
+    });
+    const activeIndex = tooltip ? hover : null;
+    const TIP_W = 150;
+    const tip = activeIndex != null
+        ? {
+            title: prep.categories[activeIndex],
+            rows: visIdx.map((si) => { const s = prep.series[si]; return { name: s.name, color: (0, theme_1.seriesColor)(si, color, theme), value: s.points[activeIndex] == null ? '—' : valueFormatter(s.points[activeIndex]) }; }),
+        }
+        : null;
+    const rowCenterY = activeIndex != null ? PAD_T + activeIndex * rowH + rowH / 2 : 0;
+    const rowVal = activeIndex != null ? (stack ? visIdx.reduce((a, si) => a + (prep.series[si].points[activeIndex] ?? 0), 0) : Math.max(0, ...visIdx.map((si) => prep.series[si].points[activeIndex] ?? 0))) : 0;
+    const barEnd = xAt(rowVal);
+    const tipLeft = barEnd + 10 + TIP_W > w ? Math.max(4, barEnd - 10 - TIP_W) : barEnd + 10;
+    const bars = [];
+    prep.categories.forEach((_c, ci) => {
+        let accLen = 0;
+        const rowTop = PAD_T + ci * rowH;
+        const bandH = rowH * 0.64;
+        const rowY0 = rowTop + (rowH - bandH) / 2;
+        const subH = stack ? bandH : bandH / visN;
+        visIdx.forEach((si, k) => {
+            const s = prep.series[si];
+            const v = s.points[ci] ?? 0;
+            const col = (0, theme_1.seriesColor)(si, color, theme);
+            const t = seg(ci);
+            // 高度上限：限粗后在应得槽位内居中（stack 整行带居中，grouped 各自槽内居中）
+            const slotY = rowY0 + (stack ? 0 : k * subH);
+            const slotH = stack ? bandH : bandH / visN;
+            const rawH = Math.max(2, slotH - (stack ? 0 : 1));
+            const barH = maxBarWidth != null ? Math.min(rawH, maxBarWidth) : rawH;
+            const y0 = slotY + (slotH - barH) / 2;
+            const xStart = stack ? xAt(accLen) : PAD_L;
+            const xEnd = stack ? xAt((accLen + v) * t) : xAt(v * t);
+            accLen += v;
+            // 堆叠时仅最右段（末可见序列）圆右角，内部接缝保持直角 → 平滑无缺口；非堆叠每根独立圆右帽。
+            const rRight = stack ? (k === visIdx.length - 1 ? radius : 0) : radius;
+            const active = activeIndex === ci;
+            bars.push(react_1.default.createElement(components_1.View, { key: `${ci}-${si}`, style: {
+                    position: 'absolute',
+                    left: xStart,
+                    top: y0,
+                    width: Math.max(0, xEnd - xStart),
+                    height: barH,
+                    borderTopRightRadius: rRight,
+                    borderBottomRightRadius: rRight,
+                    backgroundColor: col,
+                    opacity: activeIndex == null || active ? 1 : 0.45,
+                } }));
+            // 数据标签：非堆叠→条末端右侧（主题标签色）；堆叠→段居中（白字，段太窄不画）
+            if (label && t > 0.85 && v > 0) {
+                const txt = valueFormatter(v);
+                if (stack) {
+                    if (xEnd - xStart >= 34) {
+                        bars.push(react_1.default.createElement(components_1.Text, { key: `lb${ci}-${si}`, numberOfLines: 1, style: { position: 'absolute', left: (xStart + xEnd) / 2 - 30, top: y0 + barH / 2 - theme.labelSize, width: 60, textAlign: 'center', fontSize: theme.labelSize, color: '#ffffff', fontWeight: '600' } }, txt));
+                    }
+                }
+                else {
+                    bars.push(react_1.default.createElement(components_1.Text, { key: `lb${ci}-${si}`, numberOfLines: 1, style: { position: 'absolute', left: xEnd + 6, top: y0 + barH / 2 - theme.labelSize, width: 60, textAlign: 'left', fontSize: theme.labelSize, color: theme.label } }, txt));
+                }
+            }
+        });
+    });
+    return (react_1.default.createElement(components_1.View, { style: [{ gap: theme.labelSize }, style], onLayout: onLayout },
+        react_1.default.createElement(components_1.View, { style: { width: w, height: H, position: 'relative' } },
+            react_1.default.createElement(grid_1.GridLines, { area: { left: PAD_L, top: PAD_T, width: plotW, height: plotH }, vertical: ticks.map((t) => xAt(t)), config: grid, fallbackColor: theme.gridLine }),
+            ticks.map((t, i) => (react_1.default.createElement(components_1.Text, { key: `xl${i}`, style: { position: 'absolute', left: xAt(t) - 20, top: H - PAD_B + 4, width: 40, textAlign: 'center', fontSize: theme.labelSize, color: theme.label } }, valueFormatter(t)))),
+            react_1.default.createElement(components_1.View, { style: { position: 'absolute', left: PAD_L, top: PAD_T, width: 1, height: plotH, backgroundColor: theme.axisLine } }),
+            prep.categories.map((c, ci) => (react_1.default.createElement(components_1.Text, { key: `c${ci}`, numberOfLines: 1, style: { position: 'absolute', right: w - PAD_L + 8, top: PAD_T + ci * rowH + rowH / 2 - theme.labelSize, width: PAD_L - 12, textAlign: 'right', fontSize: theme.labelSize, color: theme.label } }, c))),
+            bars,
+            activeIndex != null ? (react_1.default.createElement(components_1.View, { style: { position: 'absolute', left: PAD_L, top: PAD_T + activeIndex * rowH, width: plotW, height: rowH, backgroundColor: theme.fillTrack, opacity: 0.5 } })) : null,
+            tip ? (react_1.default.createElement(components_1.View, { style: { position: 'absolute', left: tipLeft, top: Math.max(4, rowCenterY - 8 - tip.rows.length * 9), width: TIP_W, backgroundColor: theme.tooltipBg, borderRadius: 6, padding: 8, gap: 4 } },
+                react_1.default.createElement(components_1.Text, { style: { fontSize: theme.labelSize, color: theme.tooltipText, opacity: 0.7 } }, tip.title),
+                tip.rows.map((r, i) => (react_1.default.createElement(components_1.View, { key: i, style: { flexDirection: 'row', alignItems: 'center', gap: 6 } },
+                    r.color ? react_1.default.createElement(components_1.View, { style: { width: 8, height: 8, borderRadius: 4, backgroundColor: r.color } }) : null,
+                    react_1.default.createElement(components_1.Text, { style: { flex: 1, fontSize: theme.labelSize, color: theme.tooltipText }, numberOfLines: 1 }, r.name),
+                    react_1.default.createElement(components_1.Text, { style: { fontSize: theme.labelSize, color: theme.tooltipText, fontWeight: '600' } }, r.value)))))) : null,
+            tooltip
+                ? prep.categories.map((_, ci) => (react_1.default.createElement(components_1.Pressable, { key: `hit${ci}`, onMouseEnter: () => setHover(ci), onMouseLeave: () => setHover((h) => (h === ci ? null : h)), style: { position: 'absolute', left: PAD_L, top: PAD_T + ci * rowH, width: plotW, height: rowH } })))
+                : null),
+        legend && prep.series.length > 1 ? react_1.default.createElement(common_1.ChartLegend, { items: legendItems, active: legendActive, onToggleIndex: toggle }) : null));
+}
+exports.default = BarChart;

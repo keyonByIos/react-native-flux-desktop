@@ -1,1 +1,127 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.TerminalView=exports.Screen=void 0,exports.LiveTerminal=LiveTerminal;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme"),scheduler_1=require("../../frame/scheduler"),screen_1=require("./screen");Object.defineProperty(exports,"Screen",{enumerable:!0,get:function(){return screen_1.Screen}});const view_1=require("./view");var view_2=require("./view");function LiveTerminal(e){const{token:r}=(0,theme_1.useToken)(),{title:t="node-pty",shell:n=("win32"===process.platform?"powershell.exe":"bash"),shellArgs:o,cols:c=80,rows:l=16,command:u,autoFocus:i=!0,style:a}=e,s=react_1.default.useRef(null),d=react_1.default.useRef(new screen_1.Screen(c,l)),m=react_1.default.useRef(!1),_=react_1.default.useRef(null),[,f]=react_1.default.useReducer(e=>e+1,0),[p,w]=react_1.default.useState(null);return react_1.default.useEffect(()=>{let e;try{e=require("node-pty")}catch{return void w("未安装 node-pty（可选 devDependency）。生产 --omit=dev 会抛弃它 —— 实时终端不可用。")}const r=o||("powershell.exe"===n?["-NoLogo","-NoExit","-Command","[Console]::OutputEncoding=[Console]::InputEncoding=[Text.Encoding]::UTF8;chcp 65001|Out-Null"]:[]);let t;try{t=e.spawn(n,r,{name:"xterm-256color",cols:c,rows:l,cwd:process.cwd(),env:process.env})}catch(e){return void w("node-pty 启动失败："+(e?.message||String(e)))}return s.current=t,t.onData(e=>{d.current.feed(e),(()=>{m.current=!0,null==_.current&&(_.current=setTimeout(()=>{_.current=null,m.current&&(m.current=!1,f(),(0,scheduler_1.scheduleFrame)())},16))})()}),t.onExit(()=>{s.current=null}),u&&setTimeout(()=>{try{t.write(u+"\r")}catch{}},350),()=>{null!=_.current&&clearTimeout(_.current);try{t.kill()}catch{}s.current=null}},[]),p?react_1.default.createElement(components_1.View,{style:{width:"100%",padding:r.paddingSM,borderRadius:8,borderWidth:1,borderColor:r.colorBorder,backgroundColor:r.colorFillQuaternary}},react_1.default.createElement(components_1.Text,{style:{fontSize:r.fontSize,color:r.colorError}},"实时终端不可用"),react_1.default.createElement(components_1.Text,{style:{fontSize:r.fontSizeSM,color:r.colorTextSecondary,marginTop:4}},p)):react_1.default.createElement(view_1.TerminalView,{screen:d.current,write:e=>{try{s.current?.write(e)}catch{}},cols:c,rows:l,title:t,autoFocus:i,style:a})}Object.defineProperty(exports,"TerminalView",{enumerable:!0,get:function(){return view_2.TerminalView}}),exports.default=LiveTerminal;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TerminalView = exports.Screen = void 0;
+exports.LiveTerminal = LiveTerminal;
+// LiveTerminal：可交互实时终端（本地 shell 版）。
+// 链路：node-pty 起真实 shell（Windows=ConPTY+powershell，unix=bash）→ 字节流经共享 VT 网格屏（Screen）
+//       解析 → 交 TerminalView 渲染；键盘经 TerminalView 的 EditableController 转成字节回写 pty。
+//
+// 引擎与渲染均在 ./screen（VT 网格屏）与 ./view（TerminalView 呈现 + 输入接线），与 SshTerminal 共用。
+// 依赖策略：node-pty 为可选 devDependency，运行时懒 require；缺失（如生产 --omit=dev）即降级为提示，绝不崩。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+const scheduler_1 = require("../../frame/scheduler");
+const screen_1 = require("./screen");
+Object.defineProperty(exports, "Screen", { enumerable: true, get: function () { return screen_1.Screen; } });
+const view_1 = require("./view");
+var view_2 = require("./view");
+Object.defineProperty(exports, "TerminalView", { enumerable: true, get: function () { return view_2.TerminalView; } });
+function LiveTerminal(props) {
+    const { token } = (0, theme_1.useToken)();
+    const { title = 'node-pty', shell = process.platform === 'win32' ? 'powershell.exe' : 'bash', shellArgs, cols = 80, rows = 16, command, autoFocus = true, style, } = props;
+    const procRef = react_1.default.useRef(null);
+    const screenRef = react_1.default.useRef(new screen_1.Screen(cols, rows));
+    const dirtyRef = react_1.default.useRef(false);
+    const flushRef = react_1.default.useRef(null);
+    const [, force] = react_1.default.useReducer((x) => x + 1, 0);
+    const [err, setErr] = react_1.default.useState(null);
+    // 合并重绘：pty 高频 onData 时，每帧最多触发一次 React 重渲染
+    const markDirty = () => {
+        dirtyRef.current = true;
+        if (flushRef.current != null)
+            return;
+        flushRef.current = setTimeout(() => {
+            flushRef.current = null;
+            if (dirtyRef.current) {
+                dirtyRef.current = false;
+                force();
+                (0, scheduler_1.scheduleFrame)();
+            }
+        }, 16);
+    };
+    react_1.default.useEffect(() => {
+        let pty;
+        try {
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            pty = require('node-pty');
+        }
+        catch {
+            setErr('未安装 node-pty（可选 devDependency）。生产 --omit=dev 会抛弃它 —— 实时终端不可用。');
+            return;
+        }
+        const args = shellArgs ||
+            (shell === 'powershell.exe'
+                ? ['-NoLogo', '-NoExit', '-Command', '[Console]::OutputEncoding=[Console]::InputEncoding=[Text.Encoding]::UTF8;chcp 65001|Out-Null']
+                : []);
+        let proc;
+        try {
+            proc = pty.spawn(shell, args, {
+                name: 'xterm-256color',
+                cols,
+                rows,
+                cwd: process.cwd(),
+                env: process.env,
+            });
+        }
+        catch (e) {
+            setErr('node-pty 启动失败：' + (e?.message || String(e)));
+            return;
+        }
+        procRef.current = proc;
+        proc.onData((d) => {
+            screenRef.current.feed(d);
+            markDirty();
+        });
+        proc.onExit(() => {
+            procRef.current = null;
+        });
+        if (command) {
+            setTimeout(() => {
+                try {
+                    proc.write(command + '\r');
+                }
+                catch {
+                    /* 已退出 */
+                }
+            }, 350);
+        }
+        return () => {
+            if (flushRef.current != null)
+                clearTimeout(flushRef.current);
+            try {
+                proc.kill();
+            }
+            catch {
+                /* noop */
+            }
+            procRef.current = null;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+    const write = (s) => {
+        try {
+            procRef.current?.write(s);
+        }
+        catch {
+            /* ignore */
+        }
+    };
+    if (err) {
+        return (react_1.default.createElement(components_1.View, { style: {
+                width: '100%',
+                padding: token.paddingSM,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: token.colorBorder,
+                backgroundColor: token.colorFillQuaternary,
+            } },
+            react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSize, color: token.colorError } }, "\u5B9E\u65F6\u7EC8\u7AEF\u4E0D\u53EF\u7528"),
+            react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: token.colorTextSecondary, marginTop: 4 } }, err)));
+    }
+    return (react_1.default.createElement(view_1.TerminalView, { screen: screenRef.current, write: write, cols: cols, rows: rows, title: title, autoFocus: autoFocus, style: style }));
+}
+exports.default = LiveTerminal;

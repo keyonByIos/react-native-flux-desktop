@@ -1,1 +1,53 @@
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.ThemeContext=exports.defaultTheme=void 0,exports.hashStr=hashStr,exports.mergeThemeConfig=mergeThemeConfig,exports.createTheme=createTheme;const react_1=require("react"),themes_1=require("./themes"),componentTokens_1=require("./componentTokens");function hashStr(e){let t=5381;for(let o=0;o<e.length;o++)t=33*t^e.charCodeAt(o);return(t>>>0).toString(36)}function mergeThemeConfig(e,t){return t?{algorithm:t.algorithm??e.algorithm,token:{...e.token,...t.token},components:mergeComponents(e.components,t.components)}:e}function mergeComponents(e,t){const o=e,n=t;if(!o)return t;if(!n)return e;const r={...o};return Object.keys(n).forEach(e=>{r[e]={token:{...o[e]?.token??{},...n[e]?.token??{}}}}),r}function createTheme(e){const t=(0,themes_1.buildAliasToken)(e.token,e.algorithm??"default");return{token:t,components:(0,componentTokens_1.buildComponentTokens)(t,e.components),hashId:hashStr(JSON.stringify(e)),config:e}}exports.defaultTheme=createTheme({}),exports.ThemeContext=(0,react_1.createContext)(exports.defaultTheme),exports.ThemeContext.displayName="FluxThemeContext";
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ThemeContext = exports.defaultTheme = void 0;
+exports.hashStr = hashStr;
+exports.mergeThemeConfig = mergeThemeConfig;
+exports.createTheme = createTheme;
+const react_1 = require("react");
+const themes_1 = require("./themes");
+const componentTokens_1 = require("./componentTokens");
+/** Cheap djb2 string hash. */
+function hashStr(input) {
+    let h = 5381;
+    for (let i = 0; i < input.length; i++) {
+        h = (h * 33) ^ input.charCodeAt(i);
+    }
+    // keep it positive + base36 for a compact id
+    return (h >>> 0).toString(36);
+}
+/** Shallow/deep merge a child theme config over a parent one. */
+function mergeThemeConfig(parent, child) {
+    if (!child)
+        return parent;
+    return {
+        algorithm: child.algorithm ?? parent.algorithm,
+        token: { ...parent.token, ...child.token },
+        components: mergeComponents(parent.components, child.components),
+    };
+}
+function mergeComponents(parent, child) {
+    const p = parent;
+    const c = child;
+    if (!p)
+        return child;
+    if (!c)
+        return parent;
+    const out = { ...p };
+    Object.keys(c).forEach((key) => {
+        out[key] = {
+            token: { ...(p[key]?.token ?? {}), ...(c[key]?.token ?? {}) },
+        };
+    });
+    return out;
+}
+/** Build a full FluxTheme from a (already merged) config. */
+function createTheme(config) {
+    const token = (0, themes_1.buildAliasToken)(config.token, config.algorithm ?? 'default');
+    const components = (0, componentTokens_1.buildComponentTokens)(token, config.components);
+    const hashId = hashStr(JSON.stringify(config));
+    return { token, components, hashId, config };
+}
+exports.defaultTheme = createTheme({});
+exports.ThemeContext = (0, react_1.createContext)(exports.defaultTheme);
+exports.ThemeContext.displayName = 'FluxThemeContext';

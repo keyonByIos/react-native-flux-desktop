@@ -1,1 +1,127 @@
-"use strict";var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.FloatButton=void 0,exports.FloatButtonBase=FloatButtonBase,exports.Group=Group;const react_1=__importDefault(require("react")),components_1=require("../../components"),theme_1=require("../../theme"),icon_1=require("../icon"),FadeIn_1=require("../../anim/FadeIn");function FloatButtonBase(e){const{token:t}=(0,theme_1.useToken)(),{icon:o,description:r,text:n,badge:i,type:a="default",shape:l="circle",size:c,onClick:s,onPress:d,tooltip:u,title:m,style:p}=e,[g,_]=react_1.default.useState(!1),f=r??n,h=u??m,S=c??t.controlHeightLG+8,b="primary"===a,y=b?g?t.colorPrimaryHover:t.colorPrimary:g?t.colorFillQuaternary:t.colorBgContainer,B=b?t.colorTextLightSolid:t.colorText,E="circle"===l?S/2:t.borderRadiusLG;return react_1.default.createElement(components_1.Pressable,{onPress:()=>{s?s():d&&d()},onMouseEnter:()=>_(!0),onMouseLeave:()=>_(!1),style:[{position:"absolute",right:t.marginLG,bottom:t.marginLG,width:S,minHeight:null!=f?S+t.marginMD:S,borderRadius:E,backgroundColor:y,borderWidth:b?0:t.lineWidth,borderColor:t.colorBorderSecondary,alignItems:"center",justifyContent:"center",paddingVertical:t.paddingXXS},p]},null!=o?react_1.default.createElement(components_1.View,null,"string"==typeof o?react_1.default.createElement(icon_1.Icon,{name:o,size:t.fontSizeLG,color:B}):o):null,null!=f?react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:B,marginTop:t.marginXXS}},f):null,null!=i?react_1.default.createElement(components_1.View,{style:{position:"absolute",top:2,right:2,minWidth:t.fontSizeSM+6,height:t.fontSizeSM+6,paddingHorizontal:t.paddingXXS/2,borderRadius:(t.fontSizeSM+6)/2,backgroundColor:t.colorError,alignItems:"center",justifyContent:"center"}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM-3,color:t.colorTextLightSolid}},i)):null,h&&g?react_1.default.createElement(components_1.View,{style:{position:"absolute",right:S+t.marginXS,top:S/2-t.controlHeightSM/2,paddingHorizontal:t.paddingXS,paddingVertical:t.paddingXXS,borderRadius:t.borderRadius,backgroundColor:t.colorText}},react_1.default.createElement(components_1.Text,{style:{fontSize:t.fontSizeSM,color:t.colorBgContainer}},h)):null)}function Group(e){const{token:t}=(0,theme_1.useToken)(),{children:o,trigger:r,open:n,defaultOpen:i=!1,onOpenChange:a,icon:l,closeIcon:c,style:s}=e,[d,u]=react_1.default.useState(i),m=void 0!==n?n:d,p=e=>{void 0===n&&u(e),a&&a(e)},g=[{position:"absolute",right:t.marginLG,bottom:t.marginLG,alignItems:"center",backgroundColor:t.colorBgContainer,borderRadius:t.borderRadiusLG+t.paddingXXS,borderWidth:r?0:t.lineWidth,borderColor:t.colorBorderSecondary,padding:r?0:t.paddingXXS},s];if(!r)return react_1.default.createElement(components_1.View,{style:g},o);const _=(0,FadeIn_1.useEnter)(m?200:0);return react_1.default.createElement(components_1.View,{style:g},m?react_1.default.createElement(components_1.View,{style:{alignItems:"center",opacity:_,marginBottom:t.marginXS}},o):null,react_1.default.createElement(components_1.Pressable,{onPress:()=>"click"===r&&p(!m),onMouseEnter:()=>"hover"===r&&p(!0),onMouseLeave:()=>"hover"===r&&p(!1),style:{width:t.controlHeightLG+8,height:t.controlHeightLG+8,borderRadius:(t.controlHeightLG+8)/2,backgroundColor:t.colorPrimary,alignItems:"center",justifyContent:"center"}},(()=>{const e=m?c??"close":l??"menu";return"string"==typeof e?react_1.default.createElement(icon_1.Icon,{name:e,size:t.fontSizeLG,color:t.colorTextLightSolid}):e})()))}exports.FloatButton=Object.assign(FloatButtonBase,{Group:Group}),exports.default=exports.FloatButton;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.FloatButton = void 0;
+exports.FloatButtonBase = FloatButtonBase;
+exports.Group = Group;
+// FloatButton：悬浮按钮。圆形/方形浮动按钮，position:absolute 锚定到最近的定位父级。
+// 根节点即按钮本体（不再套一层 absolute View，否则 right/bottom 会相对 0×0 包裹层失效）。
+const react_1 = __importDefault(require("react"));
+const components_1 = require("../../components");
+const theme_1 = require("../../theme");
+const icon_1 = require("../icon");
+const FadeIn_1 = require("../../anim/FadeIn");
+function FloatButtonBase(props) {
+    const { token } = (0, theme_1.useToken)();
+    const { icon, description, text, badge, type = 'default', shape = 'circle', size, onClick, onPress, tooltip, title, style, } = props;
+    const [hover, setHover] = react_1.default.useState(false);
+    const desc = description ?? text;
+    const tip = tooltip ?? title;
+    const fire = () => {
+        if (onClick)
+            onClick();
+        else if (onPress)
+            onPress();
+    };
+    const box = size ?? token.controlHeightLG + 8;
+    const primary = type === 'primary';
+    const bg = primary
+        ? hover
+            ? token.colorPrimaryHover
+            : token.colorPrimary
+        : hover
+            ? token.colorFillQuaternary
+            : token.colorBgContainer;
+    const fg = primary ? token.colorTextLightSolid : token.colorText;
+    const radius = shape === 'circle' ? box / 2 : token.borderRadiusLG;
+    return (react_1.default.createElement(components_1.Pressable, { onPress: fire, onMouseEnter: () => setHover(true), onMouseLeave: () => setHover(false), style: [
+            {
+                position: 'absolute',
+                right: token.marginLG,
+                bottom: token.marginLG,
+                width: box,
+                minHeight: desc != null ? box + token.marginMD : box,
+                borderRadius: radius,
+                backgroundColor: bg,
+                borderWidth: primary ? 0 : token.lineWidth,
+                borderColor: token.colorBorderSecondary,
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingVertical: token.paddingXXS,
+            },
+            style,
+        ] },
+        icon != null ? (react_1.default.createElement(components_1.View, null, typeof icon === 'string' ? react_1.default.createElement(icon_1.Icon, { name: icon, size: token.fontSizeLG, color: fg }) : icon)) : null,
+        desc != null ? (react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: fg, marginTop: token.marginXXS } }, desc)) : null,
+        badge != null ? (react_1.default.createElement(components_1.View, { style: {
+                position: 'absolute',
+                top: 2,
+                right: 2,
+                minWidth: token.fontSizeSM + 6,
+                height: token.fontSizeSM + 6,
+                paddingHorizontal: token.paddingXXS / 2,
+                borderRadius: (token.fontSizeSM + 6) / 2,
+                backgroundColor: token.colorError,
+                alignItems: 'center',
+                justifyContent: 'center',
+            } },
+            react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM - 3, color: token.colorTextLightSolid } }, badge))) : null,
+        tip && hover ? (react_1.default.createElement(components_1.View, { style: {
+                position: 'absolute',
+                right: box + token.marginXS,
+                top: box / 2 - token.controlHeightSM / 2,
+                paddingHorizontal: token.paddingXS,
+                paddingVertical: token.paddingXXS,
+                borderRadius: token.borderRadius,
+                backgroundColor: token.colorText,
+            } },
+            react_1.default.createElement(components_1.Text, { style: { fontSize: token.fontSizeSM, color: token.colorBgContainer } }, tip))) : null));
+}
+function Group(props) {
+    const { token } = (0, theme_1.useToken)();
+    const { children, trigger, open, defaultOpen = false, onOpenChange, icon, closeIcon, style } = props;
+    const [inner, setInner] = react_1.default.useState(defaultOpen);
+    const isExpanded = open !== undefined ? open : inner;
+    const setExpanded = (v) => {
+        if (open === undefined)
+            setInner(v);
+        onOpenChange && onOpenChange(v);
+    };
+    const shellStyle = [
+        {
+            position: 'absolute',
+            right: token.marginLG,
+            bottom: token.marginLG,
+            alignItems: 'center',
+            backgroundColor: token.colorBgContainer,
+            borderRadius: token.borderRadiusLG + token.paddingXXS,
+            borderWidth: trigger ? 0 : token.lineWidth,
+            borderColor: token.colorBorderSecondary,
+            padding: trigger ? 0 : token.paddingXXS,
+        },
+        style,
+    ];
+    // 无 trigger：保持旧行为，子项常驻堆叠
+    if (!trigger) {
+        return react_1.default.createElement(components_1.View, { style: shellStyle }, children);
+    }
+    const enter = (0, FadeIn_1.useEnter)(isExpanded ? 200 : 0);
+    return (react_1.default.createElement(components_1.View, { style: shellStyle },
+        isExpanded ? (react_1.default.createElement(components_1.View, { style: { alignItems: 'center', opacity: enter, marginBottom: token.marginXS } }, children)) : null,
+        react_1.default.createElement(components_1.Pressable, { onPress: () => trigger === 'click' && setExpanded(!isExpanded), onMouseEnter: () => trigger === 'hover' && setExpanded(true), onMouseLeave: () => trigger === 'hover' && setExpanded(false), style: {
+                width: token.controlHeightLG + 8,
+                height: token.controlHeightLG + 8,
+                borderRadius: (token.controlHeightLG + 8) / 2,
+                backgroundColor: token.colorPrimary,
+                alignItems: 'center',
+                justifyContent: 'center',
+            } }, (() => {
+            const trig = isExpanded ? closeIcon ?? 'close' : icon ?? 'menu';
+            return typeof trig === 'string' ? (react_1.default.createElement(icon_1.Icon, { name: trig, size: token.fontSizeLG, color: token.colorTextLightSolid })) : (trig);
+        })())));
+}
+/** FloatButton + FloatButton.Group 复合导出 */
+exports.FloatButton = Object.assign(FloatButtonBase, { Group });
+exports.default = exports.FloatButton;

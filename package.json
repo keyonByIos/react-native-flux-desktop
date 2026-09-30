@@ -1,7 +1,25 @@
 {
   "name": "react-native-flux-desktop",
   "version": "0.1.0",
-  "description": "Self-contained desktop render stack (winit + softbuffer + napi, Skia via @napi-rs/canvas). Compiled distribution.",
+  "description": "Self-contained desktop render stack for React (winit + softbuffer + napi-rs, Skia via @napi-rs/canvas) with an antd-style component & chart library. Compiled distribution.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keyonByIos/react-native-flux-desktop.git"
+  },
+  "author": "keyon",
+  "keywords": [
+    "react",
+    "desktop",
+    "renderer",
+    "reconciler",
+    "yoga",
+    "skia",
+    "winit",
+    "napi-rs",
+    "charts",
+    "ui-kit"
+  ],
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "dependencies": {
