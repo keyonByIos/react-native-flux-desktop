@@ -1,5 +1,7 @@
 # react-native-flux-desktop
 
+[**English**](./README.md) | [简体中文](./README.zh-CN.md)
+
 A self-contained **desktop rendering stack for React** — no Electron, no WebView, no Qt.
 
 React elements are rendered by a custom reconciler into a scene tree, laid out with **Yoga**, painted with **Skia** (via `@napi-rs/canvas`), and presented onto native OS windows created with **winit** through a Rust **napi-rs** addon. The result is a small standalone `.exe`-friendly runtime that draws real pixels with either a CPU blit pipeline (softbuffer) or a GPU canvas2d path (Ganesh), and is fully DPI-aware.
@@ -35,8 +37,11 @@ React elements are rendered by a custom reconciler into a scene tree, laid out w
 ## Install
 
 ```sh
-# from GitHub
+# from the npm registry (recommended)
 npm install react-native-flux-desktop
+
+# or straight from GitHub (requires git on the machine)
+npm install github:keyonByIos/react-native-flux-desktop
 
 # or as a local file dependency
 npm install file:../react-native-flux-desktop-pkg --install-links
