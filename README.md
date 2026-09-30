@@ -36,7 +36,7 @@ React elements are rendered by a custom reconciler into a scene tree, laid out w
 
 ```sh
 # from GitHub
-npm install github:keyonByIos/react-native-flux-desktop
+npm install react-native-flux-desktop
 
 # or as a local file dependency
 npm install file:../react-native-flux-desktop-pkg --install-links

@@ -3,3 +3,6 @@ node_modules/
 .DS_Store
 Thumbs.db
 desktop.ini
+# 本地发版脚本（含本机路径，不随包分发）
+release.ps1
+.npmrc
