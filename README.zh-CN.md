@@ -2,11 +2,35 @@
 
 [English](./README.md) | **简体中文**
 
+<p align="center">
+  <a href="https://www.npmjs.com/package/react-native-flux-desktop"><img src="https://img.shields.io/npm/v/react-native-flux-desktop?style=flat-square&color=cb3837" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/react-native-flux-desktop"><img src="https://img.shields.io/npm/dm/react-native-flux-desktop?style=flat-square" alt="npm downloads"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="MIT license"></a>
+  <img src="https://img.shields.io/badge/no%20Electron%20·%20no%20WebView%20·%20native%20pixels-brightgreen?style=flat-square" alt="no Electron">
+</p>
+
+<p align="center">
+  <img src="./assets/welcome-dark.png" width="92%" alt="Gallery 欢迎页——每一个像素都由 Flux 自绘，标题栏是真正的原生窗口">
+</p>
+
 一个为 React 打造的自包含**桌面渲染栈** —— 不用 Electron、不用 WebView、不用 Qt。
 
 React 元素经由自定义 Reconciler 渲染为场景树，用 **Yoga** 布局，用 **Skia** 绘制，再经 Rust 原生插件呈现到**自研桌面底座**创建的系统原生窗口上。最终产物是一个小巧的、便于打包成独立 `.exe` 的运行时：直接绘制真实像素，可选 CPU 位图管线或 GPU canvas2d 管线，完整支持 DPI 缩放。
 
 > 本仓库是该库的**编译分发包**：预构建的原生插件（`*.node`）、转译后的 JavaScript 与 TypeScript 类型声明。不包含构建工具链，也不包含 Rust/C++ 源码。
+
+## 掠影
+
+<table>
+<tr>
+<td width="50%"><img src="./assets/crypto-live.png" alt="crypto live"/><br/><sub><b>实时币价看板</b> —— 币安 WS 行情：K线 + MACD + 成交量、盘口深度与梯度，全部在一个原生窗口里。</sub></td>
+<td width="50%"><img src="./assets/candlestick.png" alt="candlestick"/><br/><sub><b>实时 K 线</b> —— 十字准星 tooltip、均线叠加，每秒新增一根不丢帧。</sub></td>
+</tr>
+<tr>
+<td><img src="./assets/wallet.png" alt="wallet"/><br/><sub><b>EVM 钱包案例</b> —— 多链资产、扫码收款，以独立子窗口形态运行。</sub></td>
+<td><img src="./assets/multiwin-theme.png" alt="multi-window"/><br/><sub><b>真正的多窗口</b> —— 主题设置是带自己标题栏的原生子窗，悬浮在主窗之上。</sub></td>
+</tr>
+</table>
 
 ## 功能特性
 

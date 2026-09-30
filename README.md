@@ -2,11 +2,35 @@
 
 [**English**](./README.md) | [简体中文](./README.zh-CN.md)
 
+<p align="center">
+  <a href="https://www.npmjs.com/package/react-native-flux-desktop"><img src="https://img.shields.io/npm/v/react-native-flux-desktop?style=flat-square&color=cb3837" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/react-native-flux-desktop"><img src="https://img.shields.io/npm/dm/react-native-flux-desktop?style=flat-square" alt="npm downloads"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="MIT license"></a>
+  <img src="https://img.shields.io/badge/no%20Electron%20·%20no%20WebView%20·%20native%20pixels-brightgreen?style=flat-square" alt="no Electron">
+</p>
+
+<p align="center">
+  <img src="./assets/welcome-dark.png" width="92%" alt="Gallery welcome page — every pixel drawn by Flux, title bar is a real native window">
+</p>
+
 A self-contained **desktop rendering stack for React** — no Electron, no WebView, no Qt.
 
 React elements are rendered by a custom reconciler into a scene tree, laid out with **Yoga**, painted with **Skia**, and presented onto native OS windows through an **in-house desktop base** and a Rust native addon. The result is a small standalone `.exe`-friendly runtime that draws real pixels with either a CPU pixel-blit pipeline or an optional GPU canvas2d path, and is fully DPI-aware.
 
 > This repository is the **compiled distribution** of the library: the prebuilt native addon (`*.node`), transpiled JavaScript and TypeScript declarations. It contains no build toolchain and no Rust/C++ source.
+
+## Showcase
+
+<table>
+<tr>
+<td width="50%"><img src="./assets/crypto-live.png" alt="crypto live"/><br/><sub><b>Real-time crypto dashboard</b> — Binance WS feed: candlestick + MACD + volume, order-book depth and ladder, all in one native window.</sub></td>
+<td width="50%"><img src="./assets/candlestick.png" alt="candlestick"/><br/><sub><b>Live candlestick</b> — crosshair tooltip, MA overlays, one new bar per second without dropping frames.</sub></td>
+</tr>
+<tr>
+<td><img src="./assets/wallet.png" alt="wallet"/><br/><sub><b>EVM wallet case</b> — multi-chain assets, QR deposit, running as its own child window.</sub></td>
+<td><img src="./assets/multiwin-theme.png" alt="multi-window"/><br/><sub><b>True multi-window</b> — a native theme-settings child window with its own title bar, floating over the main window.</sub></td>
+</tr>
+</table>
 
 ## Features
 
