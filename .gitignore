@@ -6,3 +6,6 @@ desktop.ini
 # 本地发版脚本（含本机路径，不随包分发）
 release.ps1
 .npmrc
+# example 工程的构建/运行产物（example/dist 由 tsc 生成，勿提交）
+example/dist/
+example/output/

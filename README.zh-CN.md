@@ -79,6 +79,24 @@ render(
 *（`Application` 单例在裸管线之上补充了持久化配置、窗口台账、托盘与日志——
 完整 API 以 `dist/src/` 下的类型声明为准。）*
 
+## 示例：Gallery 演示应用
+
+[`example/`](./example) 目录是一个完整的演示应用——120+ 个演示页，覆盖 UI 组件、
+图表、动画、多窗口、系统托盘、开发工具与 Web3 组件。它和普通使用者一样
+通过安装包消费本库（`import { Button } from 'react-native-flux-desktop'`），
+因此也可当作集成冒烟测试。
+
+```sh
+cd example
+npm install
+npm start          # 先 tsc 编译再运行，CPU 位图管线
+npm run gpu        # 同一个 Gallery，走 GPU canvas2d 管线
+```
+
+运行要求与上文相同（Node.js ≥ 18，Windows x64）。首次启动会打开一个
+汇总所有 demo 的窗口；数据与日志写入 `ReactNativeFluxDesktopGallery`
+应用目录（`FLUX_APP_DIR`）。
+
 ## 仓库结构
 
 ```
@@ -88,6 +106,7 @@ react-native-flux-desktop*.node            # 预构建原生插件（win32-x64-m
 package.json
 dist/src/index.js|d.ts                     # 库入口（package 的 "main" / "types"）
 dist/src/{ui,chart,pro,web3,io,dev,...}/   # 编译产物模块，附 .d.ts
+example/                                   # Gallery 演示应用源码（依赖已发布包）
 ```
 
 `dist/src/**` 刻意保留源码目录层级：部分模块以固定相对深度（`../../../index.js`）

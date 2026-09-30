@@ -1,0 +1,22 @@
+{
+  "name": "react-native-flux-desktop-gallery",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Gallery demo app for react-native-flux-desktop — consumes it as an installed package (import { Button } from 'react-native-flux-desktop').",
+  "main": "dist/App.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc && set FLUX_PACKAGED=1&& set FLUX_APP_DIR=ReactNativeFluxDesktopGallery&& node dist/App.js",
+    "start:gpu": "tsc && set FLUX_GPU=1&& set FLUX_PACKAGED=1&& set FLUX_APP_DIR=ReactNativeFluxDesktopGallery&& node dist/App.js"
+  },
+  "dependencies": {
+    "ethers": "^5.8.0",
+    "react": "18.3.1",
+    "react-native-flux-desktop": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/react": "^18.3.12",
+    "typescript": "^5.4.5"
+  }
+}

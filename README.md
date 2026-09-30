@@ -82,6 +82,25 @@ render(
 and logging on top of the raw pipeline — see the type declarations under
 `dist/src/` for the full API surface.)*
 
+## Example: the Gallery app
+
+A complete demo application — 120+ demo pages covering UI components, charts,
+animation, multi-window, system tray, dev tools and Web3 widgets — lives in
+[`example/`](./example). It consumes this package exactly like any end user
+would (`import { Button } from 'react-native-flux-desktop'`), so it doubles as
+an integration smoke test.
+
+```sh
+cd example
+npm install
+npm start          # compile (tsc) + run, CPU pixel-blit pipeline
+npm run gpu        # same gallery on the GPU canvas2d pipeline
+```
+
+Requirements are the same as above (Node.js ≥ 18, Windows x64). The first
+launch opens a window listing every demo; data/logs go to the
+`ReactNativeFluxDesktopGallery` app directory (`FLUX_APP_DIR`).
+
 ## Repository layout
 
 ```
@@ -91,6 +110,7 @@ react-native-flux-desktop*.node            # prebuilt native addon (win32-x64-ms
 package.json
 dist/src/index.js|d.ts                     # library entry (package "main" / "types")
 dist/src/{ui,chart,pro,web3,io,dev,...}/   # compiled modules with .d.ts files
+example/                                   # Gallery demo app (source, consumes the published package)
 ```
 
 The `dist/src/**` tree preserves the original source layout on purpose: some
