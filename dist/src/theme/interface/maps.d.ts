@@ -1,10 +1,7 @@
 import type { SeedToken } from './seed';
-/** A 10-step color ramp: [1..10] from lightest tint to darkest shade. */
+
 export type ColorPalettes = string[];
-/**
- * Map Token — the first derivation layer. Contains color palettes,
- * font/size/border scales computed from the Seed Token.
- */
+
 export interface MapToken extends SeedToken {
     colorText: string;
     colorTextSecondary: string;
@@ -15,7 +12,7 @@ export interface MapToken extends SeedToken {
     colorBgLayout: string;
     colorBgSpotlight: string;
     colorBgMask: string;
-    /** 实色背景（primary/error 等）上的文字色，对齐 antd 同名 token */
+
     colorTextLightSolid: string;
     colorBorder: string;
     colorBorderSecondary: string;

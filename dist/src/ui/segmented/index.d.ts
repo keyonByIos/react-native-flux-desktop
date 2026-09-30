@@ -13,9 +13,9 @@ export interface SegmentedProps {
     onChange?: (v: string | number) => void;
     size?: 'small' | 'middle' | 'large';
     block?: boolean;
-    /** 整体禁用 */
+
     disabled?: boolean;
-    /** 形状：default 圆角 / round 胶囊 */
+
     shape?: 'default' | 'round';
     style?: StyleProp<ViewStyle>;
 }

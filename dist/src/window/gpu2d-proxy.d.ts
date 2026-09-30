@@ -1,9 +1,6 @@
-/**
- * Gpu2DProxy：与 CanvasRenderingContext2D 接口对齐，内部转发 GpuCtx2D。
- * 用法：const ctx = new Gpu2DProxy(winId); paintTree(ctx, root, dpr); ctx.flush();
- */
+
 export declare class Gpu2DProxy {
-    /** painter 据此判断走 GPU 分支（图标层直传 SVG path data 字符串，不建 Path2D）。 */
+
     readonly __gpu = true;
     private _gpu;
     private _dpr;
@@ -56,14 +53,14 @@ export declare class Gpu2DProxy {
     measureText(text: string): {
         width: number;
     };
-    /** drawImage 兼容 Canvas2D 签名：接受 @napi-rs/canvas Image/Canvas 对象。 */
+
     drawImage(img: any, dx: number, dy: number, dw?: number, dh?: number): void;
-    /** GPU flush：提交绘制命令 + swap_buffers 直呈。 */
+
     flush(): void;
-    /** 清屏（背景色 RGBA 0-255）。 */
+
     clearAll(r: number, g: number, b: number, a: number): void;
-    /** 设置 dpr 缩放（paintTree 入口通常用 setTransform(dpr,0,0,dpr,0,0)）。 */
+
     setDpr(dpr: number): void;
 }
-/** 检测 GPU 模式是否可用 */
+
 export declare function gpuAvailable(): boolean;

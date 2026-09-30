@@ -5,7 +5,7 @@ export interface SkeletonProps {
     active?: boolean;
     avatar?: boolean;
     title?: boolean;
-    /** 正文行数（或 { rows } 对象） */
+
     paragraph?: number | {
         rows: number;
     };
@@ -31,9 +31,9 @@ export interface SkeletonImageProps {
     active?: boolean;
     style?: StyleProp<ViewStyle>;
 }
-/** 图片占位块（带 picture 图标） */
+
 export declare function SkeletonImage(props: SkeletonImageProps): React.ReactElement;
-/** Skeleton + 元素变体复合导出 */
+
 export declare const Skeleton: typeof SkeletonBase & {
     Avatar: typeof SkeletonAvatar;
     Button: typeof SkeletonButton;

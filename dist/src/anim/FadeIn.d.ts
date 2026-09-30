@@ -5,7 +5,7 @@ export interface FadeInProps {
     children: React.ReactNode;
     duration?: number;
     style?: StyleProp<ViewStyle>;
-    /** 透传给内部容器：供浮层实测自身尺寸（如 Tooltip 居中对齐触发器） */
+
     onLayout?: (e: {
         nativeEvent: {
             layout: {

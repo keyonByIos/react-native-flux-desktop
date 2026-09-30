@@ -12,11 +12,11 @@ export interface DendrogramChartProps {
     edgeWidth?: number;
     labelColor?: string;
     fontSize?: number;
-    /** 主轴（depth 方向）两端留白 */
+
     paddingMain?: number;
-    /** 副轴（cross 方向）两端留白 */
+
     paddingCross?: number;
-    /** 径向内半径 */
+
     innerRadius?: number;
     animation?: boolean;
     animateDuration?: number;

@@ -10,15 +10,15 @@ export interface TreeSelectProps {
     placeholder?: string;
     disabled?: boolean;
     allowClear?: boolean;
-    /** 多选：树切换为 checkable，触发器以标签展示 */
+
     multiple?: boolean;
-    /** 高度三档 */
+
     size?: TSize;
-    /** 校验状态 */
+
     status?: 'error' | 'warning';
-    /** 弹出方向 */
+
     placement?: TPlacement;
-    /** 面板内联常驻展开（demo 用） */
+
     open?: boolean;
     style?: StyleProp<ViewStyle>;
     onChange?: (value: string | string[] | undefined) => void;

@@ -6,9 +6,9 @@ export interface CheckboxProps {
     defaultChecked?: boolean;
     disabled?: boolean;
     label?: React.ReactNode;
-    /** 半选状态：未选中时框内显示横杠（多用于全选） */
+
     indeterminate?: boolean;
-    /** 在 Checkbox.Group 内使用时的值 */
+
     value?: CheckValue;
     onChange?: (checked: boolean) => void;
     style?: StyleProp<ViewStyle>;
@@ -22,7 +22,7 @@ export interface CheckboxGroupOption {
 export interface CheckboxGroupProps {
     value?: CheckValue[];
     defaultValue?: CheckValue[];
-    /** 选项简写：字符串/数字或 {label,value,disabled} */
+
     options?: (CheckValue | CheckboxGroupOption)[];
     disabled?: boolean;
     onChange?: (checkedValue: CheckValue[]) => void;

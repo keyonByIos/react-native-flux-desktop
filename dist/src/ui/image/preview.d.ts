@@ -6,9 +6,9 @@ export interface PreviewImage {
 }
 export interface ImagePreviewProps {
     visible?: boolean;
-    /** 图片列表（支持多图切换） */
+
     images?: PreviewImage[];
-    /** 当前索引（受控） */
+
     current?: number;
     onCurrentChange?: (index: number) => void;
     onClose?: () => void;
