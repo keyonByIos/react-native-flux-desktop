@@ -4,7 +4,7 @@
 
 一个为 React 打造的自包含**桌面渲染栈** —— 不用 Electron、不用 WebView、不用 Qt。
 
-React 元素经由自定义 Reconciler 渲染为场景树，用 **Yoga** 布局，用 **Skia**（通过 `@napi-rs/canvas`）绘制，再通过 Rust **napi-rs** 原生插件呈现到 **winit** 创建的系统原生窗口上。最终产物是一个小巧的、便于打包成独立 `.exe` 的运行时：直接绘制真实像素，可选 CPU 位图管线（softbuffer）或 GPU canvas2d 路径（Ganesh），完整支持 DPI 缩放。
+React 元素经由自定义 Reconciler 渲染为场景树，用 **Yoga** 布局，用 **Skia** 绘制，再经 Rust 原生插件呈现到**自研桌面底座**创建的系统原生窗口上。最终产物是一个小巧的、便于打包成独立 `.exe` 的运行时：直接绘制真实像素，可选 CPU 位图管线或 GPU canvas2d 管线，完整支持 DPI 缩放。
 
 > 本仓库是该库的**编译分发包**：预构建的原生插件（`*.node`）、转译后的 JavaScript 与 TypeScript 类型声明。不包含构建工具链，也不包含 Rust/C++ 源码。
 
@@ -47,7 +47,7 @@ npm install github:keyonByIos/react-native-flux-desktop
 npm install file:../react-native-flux-desktop-pkg --install-links
 ```
 
-> 使用 `file:` 依赖时务必加 `--install-links`，让 npm 落真实副本而非 junction/符号链接——否则 `react` / `@napi-rs/canvas` 等对等依赖的解析会在运行时失败。
+> 使用 `file:` 依赖时务必加 `--install-links`，让 npm 落真实副本而非 junction/符号链接——否则 `react` / Skia 画布等对等依赖的解析会在运行时失败。
 
 运行要求：
 - Node.js ≥ 18（N-API ≥ 6）
@@ -82,7 +82,7 @@ render(
 ## 仓库结构
 
 ```
-index.js                                   # napi-rs 加载器：createWindow / present / kv* / tray / clipboard
+index.js                                   # 原生插件加载器：createWindow / present / kv* / tray / clipboard
 index.d.ts                                 # 原生插件的类型声明
 react-native-flux-desktop*.node            # 预构建原生插件（win32-x64-msvc）
 package.json

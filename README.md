@@ -4,7 +4,7 @@
 
 A self-contained **desktop rendering stack for React** — no Electron, no WebView, no Qt.
 
-React elements are rendered by a custom reconciler into a scene tree, laid out with **Yoga**, painted with **Skia** (via `@napi-rs/canvas`), and presented onto native OS windows created with **winit** through a Rust **napi-rs** addon. The result is a small standalone `.exe`-friendly runtime that draws real pixels with either a CPU blit pipeline (softbuffer) or a GPU canvas2d path (Ganesh), and is fully DPI-aware.
+React elements are rendered by a custom reconciler into a scene tree, laid out with **Yoga**, painted with **Skia**, and presented onto native OS windows through an **in-house desktop base** and a Rust native addon. The result is a small standalone `.exe`-friendly runtime that draws real pixels with either a CPU pixel-blit pipeline or an optional GPU canvas2d path, and is fully DPI-aware.
 
 > This repository is the **compiled distribution** of the library: the prebuilt native addon (`*.node`), transpiled JavaScript and TypeScript declarations. It contains no build toolchain and no Rust/C++ source.
 
@@ -49,7 +49,7 @@ npm install file:../react-native-flux-desktop-pkg --install-links
 
 > When using a `file:` dependency, pass `--install-links` so npm creates a real
 > copy instead of a junction/symlink — otherwise peer resolution of
-> `react` / `@napi-rs/canvas` can fail at runtime.
+> `react` / the Skia canvas dependency can fail at runtime.
 
 Requirements:
 - Node.js ≥ 18 (N-API ≥ 6)
@@ -85,7 +85,7 @@ and logging on top of the raw pipeline — see the type declarations under
 ## Repository layout
 
 ```
-index.js                                   # napi-rs loader: createWindow / present / kv* / tray / clipboard
+index.js                                   # native addon loader: createWindow / present / kv* / tray / clipboard
 index.d.ts                                 # typings for the native addon
 react-native-flux-desktop*.node            # prebuilt native addon (win32-x64-msvc)
 package.json
