@@ -97,6 +97,26 @@ npm run gpu        # 同一个 Gallery，走 GPU canvas2d 管线
 汇总所有 demo 的窗口；数据与日志写入 `ReactNativeFluxDesktopGallery`
 应用目录（`FLUX_APP_DIR`）。
 
+## `app.json` 应用清单
+
+每个 Flux 桌面应用都在**项目根目录**放一份 `app.json`（参考
+[`example/app.json`](./example/app.json)）。它是运行时与打包器共享的
+唯一事实来源：
+
+| 字段 | 必填 | 用途 |
+|---|---|---|
+| `name` | ✅ | 应用名——窗口标题、`.exe` 文件名、数据/缓存目录名 |
+| `description` | — | 写入 exe 版本资源的 FileDescription |
+| `version` | — | 写入 exe 版本资源（自动补齐为 `a.b.c.d` 四段） |
+| `icon` | — | 相对项目根的 PNG 图标路径，打包时嵌入 exe（缺省用默认图标） |
+| `main` | — | 编译后的入口 JS；缺省回落到 `package.json` 的 `main` |
+| `output` | — | 打包产物目录（默认 `build`） |
+| `logger` | — | `{ path, level }`——日志根目录（留空→默认数据目录）与最低捕获级别 |
+| `allowMultiOpen` | — | 是否允许多实例（否则受单实例锁约束） |
+
+打包器会做硬校验、快速失败：缺 `name`、入口文件不存在、或入口产物比任何
+源文件都旧（忘了重新编译）——都会中断打包，并在报错里直接给出修复动作。
+
 ## 仓库结构
 
 ```

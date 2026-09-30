@@ -101,6 +101,27 @@ Requirements are the same as above (Node.js ≥ 18, Windows x64). The first
 launch opens a window listing every demo; data/logs go to the
 `ReactNativeFluxDesktopGallery` app directory (`FLUX_APP_DIR`).
 
+## The `app.json` manifest
+
+Every Flux desktop app carries an **`app.json` at its project root** (see
+[`example/app.json`](./example/app.json)). It is the single source of truth
+shared by the runtime and the packer:
+
+| Field | Required | Purpose |
+|---|---|---|
+| `name` | ✅ | App name — window title, `.exe` file name, data/cache directory name |
+| `description` | — | Written into the exe `FileDescription` version resource |
+| `version` | — | Written into the exe version resource (auto-padded to `a.b.c.d`) |
+| `icon` | — | PNG icon path relative to the project root, embedded into the exe (default icon otherwise) |
+| `main` | — | Compiled entry JS; falls back to `package.json`'s `main` when omitted |
+| `output` | — | Packaged output directory (default `build`) |
+| `logger` | — | `{ path, level }` — log root directory (empty → default data dir) and minimum capture level |
+| `allowMultiOpen` | — | Allow launching more than one instance (otherwise the single-instance lock applies) |
+
+The packer validates hard and fails fast: a missing `name`, an entry file that
+does not exist, or an entry **older than any source file** (you forgot to
+rebuild) all abort packaging, with the exact fix spelled out in the error.
+
 ## Repository layout
 
 ```
