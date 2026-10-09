@@ -1,0 +1,1 @@
+"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.systemStats=exports.SystemStats=void 0;var stats_1=require("./stats");Object.defineProperty(exports,"SystemStats",{enumerable:!0,get:function(){return stats_1.SystemStats}}),Object.defineProperty(exports,"systemStats",{enumerable:!0,get:function(){return stats_1.systemStats}});

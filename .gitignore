@@ -1,0 +1,15 @@
+node_modules/
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini
+# 本地发版脚本（含本机路径，不随包分发）
+release.ps1
+.npmrc
+# example 工程的构建/运行产物（example/dist 由 tsc 生成，勿提交）
+example/dist/
+example/output/
+# 本仓库为「编译分发 / GitHub 发布仓库」：dist/ 与 *.node 正是要提交的发布产物，故不忽略。
+# 若某日改回「只存源码、不存产物」，再取消下面两行注释即可。
+# dist/
+# *.node
