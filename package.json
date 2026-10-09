@@ -1,7 +1,17 @@
 {
   "name": "react-native-flux-desktop",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "Self-contained desktop render stack Compiled distribution.",
+  "license": "MIT",
+  "author": "keyon",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keyonByIos/react-native-flux-desktop.git"
+  },
+  "homepage": "https://github.com/keyonByIos/react-native-flux-desktop#readme",
+  "bugs": {
+    "url": "https://github.com/keyonByIos/react-native-flux-desktop/issues"
+  },
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "dependencies": {

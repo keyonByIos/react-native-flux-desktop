@@ -2,7 +2,7 @@
 
 > 🖥️ A self-drawn desktop render stack — build desktop apps in React (JSX); every pixel is painted by Skia onto a window from our self-developed native base. No Electron, no Qt, no native controls.
 
-![version](https://img.shields.io/badge/version-0.1.0-blue) ![license](https://img.shields.io/badge/license-MIT-green) ![runtime](https://img.shields.io/badge/pure%20React%C2%B7native%20pixels%C2%B7no%20Electron-ff69b4)
+![version](https://img.shields.io/badge/version-0.1.3-blue) ![license](https://img.shields.io/badge/license-MIT-green) ![runtime](https://img.shields.io/badge/pure%20React%C2%B7native%20pixels%C2%B7no%20Electron-ff69b4)
 
 **Depends on:** `@napi-rs/canvas` (Skia raster) · `react-reconciler` · `yoga-layout` · `react` (peer)
 **This is the UI core** — the `-chart` / `-pro` / `-dev` / `-web3` / `-webview` packages all take it as a peer dependency to pull core symbols back.
