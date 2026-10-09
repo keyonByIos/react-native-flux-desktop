@@ -1,6 +1,6 @@
 # react-native-flux-desktop
 
-> 🖥️ A self-drawn desktop render stack — build desktop apps in React (JSX); every pixel is painted by Skia onto a winit window. No Electron, no Qt, no native controls.
+> 🖥️ A self-drawn desktop render stack — build desktop apps in React (JSX); every pixel is painted by Skia onto a window from our self-developed native base. No Electron, no Qt, no native controls.
 
 ![version](https://img.shields.io/badge/version-0.1.0-blue) ![license](https://img.shields.io/badge/license-MIT-green) ![runtime](https://img.shields.io/badge/pure%20React%C2%B7native%20pixels%C2%B7no%20Electron-ff69b4)
 
@@ -36,7 +36,7 @@
 
 ## What it is
 
-`react-native-flux-desktop` is a **custom React Renderer**: it implements the `react-reconciler` host interface, maps the element tree into a self-managed **scene graph**, lays it out with **Yoga**, rasterizes every pixel with **Skia**, and blits the result onto a **winit** window driven by a native `napi-rs` layer. It ships with 80+ self-drawn components aligned with Ant Design v5's API & token model, a full theme system, and an animation library.
+`react-native-flux-desktop` is a **custom React Renderer**: it implements the `react-reconciler` host interface, maps the element tree into a self-managed **scene graph**, lays it out with **Yoga**, rasterizes every pixel with **Skia**, and blits the result onto a window driven by our **self-developed native base** (`napi-rs` layer). It ships with 80+ self-drawn components aligned with Ant Design v5's API & token model, a full theme system, and an animation library.
 
 ## Highlights
 

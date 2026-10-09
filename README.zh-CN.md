@@ -1,6 +1,6 @@
 # react-native-flux-desktop（中文文档）
 
-> 🖥️ 纯自绘的桌面渲染栈 —— 用 React（JSX）写桌面应用，每一个像素都由 Skia 直接绘制在 winit 窗口上。不依赖 Electron / Qt / 任何系统原生控件。
+> 🖥️ 纯自绘的桌面渲染栈 —— 用 React（JSX）写桌面应用，每一个像素都由 Skia 直接绘制在自研底座的窗口上。不依赖 Electron / Qt / 任何系统原生控件。
 
 ![版本](https://img.shields.io/badge/version-0.1.0-blue) ![许可证](https://img.shields.io/badge/license-MIT-green) ![运行时](https://img.shields.io/badge/%E7%BA%AFReact%C2%B7%E5%8E%9F%E7%94%9F%E5%83%8F%E7%B4%A0%C2%B7%E9%9D%9EElectron-ff69b4)
 
@@ -36,7 +36,7 @@
 
 ## 它是什么
 
-`react-native-flux-desktop` 是一个**自绘的 React Renderer**：它实现 `react-reconciler` 的宿主接口，把元素树映射成自定义**场景树**，经 **Yoga** 布局、由 **Skia** 逐像素光栅化，最后 blit 到 `napi-rs` 原生层驱动的 **winit** 窗口上屏。内置 80+ 自绘组件（对齐 Ant Design v5 的 API 与 token）、完整的主题系统与动画库。
+`react-native-flux-desktop` 是一个**自绘的 React Renderer**：它实现 `react-reconciler` 的宿主接口，把元素树映射成自定义**场景树**，经 **Yoga** 布局、由 **Skia** 逐像素光栅化，最后 blit 到**自研底座**（`napi-rs` 原生层）驱动的窗口上屏。内置 80+ 自绘组件（对齐 Ant Design v5 的 API 与 token）、完整的主题系统与动画库。
 
 ## 特性亮点
 
