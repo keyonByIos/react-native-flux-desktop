@@ -1,6 +1,6 @@
 {
   "name": "react-native-flux-desktop",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Self-contained desktop render stack Compiled distribution.",
   "license": "MIT",
   "author": "keyon",
