@@ -143,6 +143,7 @@ DPR（分辨率倍数）可封顶以控成本；GPU 模式下窗口尺寸恒绑�
 | **react-native-flux-desktop-dev** | 开发者 / 诊断组件（CodeBlock / Markdown / JsonViewer / DiffViewer / Terminal / MemMonitor …） | core + chart |
 | **react-native-flux-desktop-web3** | Web3 / 加密 UI（CoinIcon / Address / TokenPrice / NFTCard …） | core |
 | **react-native-flux-desktop-webview** | 可选 WebView（Chromium / WebView2，view-only + JS 双向桥；自带 `.node`） | core |
+| **react-native-flux-desktop-ffi** | 可选原生库调用（`libloading` + `libffi`：声明式签名 → 调用任意 C ABI 的 DLL/dylib/so 导出；自带 `.node`） | core（可选） |
 | **react-native-flux-desktop-packer** | 打包 CLI（`flux-pack`：Go launcher + `go:embed` → 自包含 `.exe`） | devDependency |
 | **react-native-flux-desktop-gallery** | 可运行的 demo 展示应用（100+ 个）消费以上全部包 —— [在此查看示例](https://github.com/keyonByIos/react-native-flux-desktop-gallery) | 全部包 |
 

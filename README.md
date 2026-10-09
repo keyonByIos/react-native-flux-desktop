@@ -143,6 +143,7 @@ Component families are split into independently published packages, all taking t
 | **react-native-flux-desktop-dev** | Developer / diagnostic components (CodeBlock / Markdown / JsonViewer / DiffViewer / Terminal / MemMonitor …) | core + chart |
 | **react-native-flux-desktop-web3** | Web3 / crypto UI (CoinIcon / Address / TokenPrice / NFTCard …) | core |
 | **react-native-flux-desktop-webview** | Optional WebView (Chromium / WebView2, view-only + JS bridge; ships its own `.node`) | core |
+| **react-native-flux-desktop-ffi** | Optional native-library calls (`libloading` + `libffi`: declarative signatures → call any C-ABI DLL/dylib/.so export; ships its own `.node`) | core (optional) |
 | **react-native-flux-desktop-packer** | Packaging CLI (`flux-pack`: Go launcher + `go:embed` → self-contained `.exe`) | devDependency |
 | **react-native-flux-desktop-gallery** | Runnable demo showcase app (100+ demos) consuming all of the above — [view demos here](https://github.com/keyonByIos/react-native-flux-desktop-gallery) | all packages |
 
